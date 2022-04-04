@@ -63,3 +63,28 @@ javascript를 이용하여 프론트와 함께 백엔드를 구축하여 서버-
 
 9. client 폴더가아닌 밖에있는 package.json에 scripts 부분을 추가해준다.
     - yarn start 명령어를 실행한 후 3000번과 5000번으로 접속하여 이상이 없는지 확인한다.
+
+
+10. 리액트와 노드서버간의 데이터를 주고 받기 위해서는 프록시 모듈을 설치해야한다.
+    - 또 데이터 통신을 위한 방법중 Fecth API대신 Axios 라이브러리를 사용하기위해 설치를 해야한다.
+
+    - 먼저 프록시 설정을 위해 client의 src에 setupProxy.js를 생성한다. 😔 ( client폴더의 src경로에 생성 )
+
+    - 모듈 설치를 위해 yarn add http-proxy-middleware 명령어를 실행한다. 😔 ( client 경로에서 실행 )
+
+    - 설치완료 후 setupProxy.js에 설정을 해준다.
+
+    - target의 내용은 통신할 서버의 도메인주소를 기입하고 해당 도메인을 /api로 호출을 한다.
+
+
+11. setupProxy.js에 위의 사용할 프록시 설정을 해준다.
+    - 통신을 위한 Axios 라이브러리 설치를 위한 명령어를 실행해준다. ( yarn add axios ) ( client 경로에서 실행 )
+
+    - 테스트를 위해 server/Router/test.js와 client/src/App.js의 내용을 수정한다.
+
+    - Router 내의 test.js의 내용을 수정해준다. 
+
+12. client 내의 App.js를 수정해준다. 
+
+13. 설정 완료 후 실행시켜 본다. (yarn start)
+
