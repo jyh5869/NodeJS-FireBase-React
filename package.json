@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "server": "cd server && nodemon server",
+    "client": "cd client && yarn start",
+    "start": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+  },
+  "dependencies": {
+    "axios": "^0.26.1",
+    "concurrently": "^7.0.0",
+    "dateformat": "^3.0.3",
+    "express": "^4.17.3",
+    "firebase": "^8.10.1",
+    "git": "^0.1.5",
+    "yarn": "^1.22.18"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
