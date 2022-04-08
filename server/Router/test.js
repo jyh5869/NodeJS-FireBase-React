@@ -18,7 +18,6 @@ firebase.initializeApp(config);
 var db = firebase.firestore();
 
 router.get("/", (req, res) => {
-    console.log("☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆");
     
     db.collection('board').orderBy("brddate","desc").get()
     .then((snapshot) => {

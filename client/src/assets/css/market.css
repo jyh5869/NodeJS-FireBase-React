@@ -4,7 +4,7 @@
   
   body {
     margin: 0;
-    min-width: 992px;
+    /*min-width: 992px;*/
     font-family: "Helvetica";
   }
   
@@ -54,17 +54,18 @@
   }
   
   .products {
-    margin-left: auto;
-    margin-right: auto;
+    margin-left: 10%;
+    margin-right: 10%;
     padding: 0;
-    width: 740px;
+    /*width: 740px;*/
     text-align: center;
   }
   
   .products img{
     width: 225px;
     height: 225px;
-    margin-right: 20px;
+    margin-right: 10px;
+    margin-left: 10px;
     margin-bottom: 20px;
   }
   
