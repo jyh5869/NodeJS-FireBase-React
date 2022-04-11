@@ -31,13 +31,14 @@ function List() {
     )
 
     function Cards(props){
-        console.log(props);
+
         let id = props.shoes.id;
         const url = '/view/detail/'+id
-        return (
-            <Link className="col-md-4" to={url} >
-                <CardGroup>
-                    <Card className="text-center">
+        
+        return (    
+            <CardGroup className="col-md-4">
+                <Card className="text-center">
+                    <Link  to={url} >
                         <Card.Img variant="top" src={props.shoes.img} />
                         <Card.Body>
                             <Card.Title>{ props.shoes.title }</Card.Title>
@@ -46,12 +47,12 @@ function List() {
                                 <p>{ props.shoes.price }</p>
                             </Card.Text>
                         </Card.Body>
-                        <Card.Footer>
-                            <small className="text-muted">Last updated 3 mins ago</small>
-                        </Card.Footer>
-                    </Card>
-                </CardGroup>
-            </Link>
+                    </Link>
+                    <Card.Footer>
+                        <small className="text-muted">Last updated 3 mins ago</small>
+                    </Card.Footer>
+                </Card>
+            </CardGroup>
         )
     }
 }

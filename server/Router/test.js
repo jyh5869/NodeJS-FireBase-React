@@ -36,7 +36,7 @@ router.get("/", (req, res) => {
 });
 
 router.get("/api", (req, res) => {
-    console.log("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★");
+
     res.send({test : "hi"});
 });
 
