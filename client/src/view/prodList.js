@@ -3,13 +3,12 @@
 import axios from 'axios';
 import React, { useEffect, useState } from "react";
 
-import $ from "jquery";
-
 function ProdList() {
 
     const [list, setList] = useState([]);
     var color = [ "danger", "warning", "info", "primary", "secondary", "success" ];
 
+    //리스트 가져오기
     const getHeroes = async () => {
 
         let response = await axios.get('/api');
@@ -17,8 +16,15 @@ function ProdList() {
         setList(response.data.rows);
     }
 
+    //추천 상품 리스트 호출 머신러닝
+    const getNdcg = async () => {
+
+        let response = await axios.get('/api/nodemlMovie2');
+    }
+
     useEffect(() => {
         getHeroes();
+        getNdcg();
     },  []);
 
     
