@@ -5,16 +5,25 @@
     "start": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
   },
   "dependencies": {
+    "@tensorflow/tfjs": "^3.16.0",
+    "@tensorflow/tfjs-node": "^2.1.0",
     "axios": "^0.26.1",
     "concurrently": "^7.1.0",
     "csv-parser": "^3.0.0",
+    "danfojs": "^1.1.1",
     "dateformat": "^3.0.3",
+    "eval-literals": "^0.0.2",
     "express": "^4.17.3",
     "firebase": "^8.10.1",
     "git": "^0.1.5",
     "http-proxy-middleware": "^2.0.4",
+    "ignore": "^5.2.0",
     "jquery": "^3.6.0",
+    "node-pandas": "^1.0.5",
+    "node-pandas-js": "^1.0.7",
     "nodeml": "^0.4.0",
+    "python-shell": "^3.0.1",
+    "uuid": "7.0",
     "yarn": "^1.22.18"
   },
   "devDependencies": {
