@@ -13,26 +13,17 @@ var evaluate = require('eval-literals');//문자열을 리스트 객체로 변�
 
 
 const dfd = require("danfojs");
+const pd = require("pandas");
+
+const JSONStream = require("JSONStream");
+
+
 const tf = require("@tensorflow/tfjs");//느리다... @tensorflow/tfjs_node로 업데이트 필요
 //const tf = dfd.tensorflow;
 
 
 
 const PythonShell = require("python-shell");
-var options = {
-
-    mode: 'text',
-  
-    pythonPath: '',
-  
-    pythonOptions: ['-u'],
-  
-    scriptPath: '',
-  
-    args: ['value1', 'value2', 'value3']
-  
-  };
-
 
 
 
@@ -89,6 +80,7 @@ router.get("/", (req, res) => {
 
             ★★ 그외 스크립트에서 cvs를 실행하여 통계, 차트 등의 관측이 가능 하다. ★★
         */
+        /*
         df.print();//테이블 형식으로 출력
         df.iloc({ rows: [":"], columns: ["1:2"]}).print();//모든열 두번쩨 컬럼 반환
         df.iloc({ rows: ["0:2"], columns: [":"]}).print();//2열까지 모든 컬럼 반환
@@ -96,14 +88,23 @@ router.get("/", (req, res) => {
         df.iloc({ rows: df["vote_average"].gt(7).and(df["title"].eq("Avatar")), columns: [0]}).print();//해당컬럼이 10보다 크고 이름이 사과인것 1열 반환
         df.isNa().print();//열에서 NaN 는 true 나머지 false 반환
         console.log(df.tensor);//전체 데이터 프레임 출력
-
+        */
 
         
-          // 1. 데이터를 준비
-          var movieDf = df.loc({ columns: ['id','title','genres','vote_average', 'vote_count', 'popularity', 'keywords', 'overview']} )
+        // 1. 데이터를 준비
+        var movieDf = df.loc({ columns: ['id','title','genres','vote_average', 'vote_count', 'popularity', 'keywords', 'overview']} )
         
-          PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/test1.py', options, function (err, results) {
-            
+        var options = {
+            mode: 'text',
+            pythonPath: '',
+            pythonOptions: ['-u'],
+            scriptPath: '',
+            args: ['value1', 'value2', 'value3'],
+            encoding : 'utf8'
+        };
+
+        PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/test1.py', options, function (err, results) {
+
             if (err) {
                 console.log("통신실패");
                 console.log(err);
@@ -111,14 +112,17 @@ router.get("/", (req, res) => {
             }   
             else{
                 console.log("통신성공");
-                console.log(results);
-            } 
-
+                
+                console.log(results[1][3]);
+                
+            }
+            
             //console.log('results: %j', results);
-            console.log("★★★★★★★");
+            res.send( {rows: results});
         });
-    });
 
+    });
+    
 
 
 

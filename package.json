@@ -19,9 +19,11 @@
     "http-proxy-middleware": "^2.0.4",
     "ignore": "^5.2.0",
     "jquery": "^3.6.0",
+    "JSONStream": "^1.3.5",
     "node-pandas": "^1.0.5",
     "node-pandas-js": "^1.0.7",
     "nodeml": "^0.4.0",
+    "pandas": "^0.0.3",
     "python-shell": "^3.0.1",
     "uuid": "7.0",
     "yarn": "^1.22.18"

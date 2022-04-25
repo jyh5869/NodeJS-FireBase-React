@@ -1,0 +1,8 @@
+1. python 설치 및 정상 설치 확인
+2. vsCode에서 python 인식할 수있도록 플러그인 설치  = python
+3. nodejs에서 pythonShell 세팅
+4. pip list
+5. 데이터 가공 및 관리 모듈:pip install pandas
+   문자열 협업 필터링 모듈 : pip install igonre
+   pip install literal_eval
+   문자열 백터화 관련 모듈 : pip3 install -U scikit-learn 
