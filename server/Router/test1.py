@@ -1,9 +1,10 @@
 import sys
 
 import pandas as pd
+import numpy  as np
 import warnings; warnings.filterwarnings('ignore')
 
-#print(sys.argv[1]) #변수출력
+
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_colwidth', None)
 
@@ -77,11 +78,14 @@ similar_movies = find_sim_movie(movies_df, genre_sim_sorted_ind, 'The Godfather'
 #print(similar_movies[['title', 'vote_count', 'vote_average']])
 #print("★★★★★★★★★★★★★★★★★333333333333")
 
-print(movies_df[['title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10])
+##print(movies_df[['title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10])
+print(movies_df[['id', 'title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10].to_json())
+#print(movies_df[['title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10].to_numpy())
 
 
 
 
+print(" ★★★★★★★★★★★★★★★★★★ "+sys.argv[1]) #변수출력
 
 
 

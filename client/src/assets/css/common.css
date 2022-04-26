@@ -25,9 +25,9 @@ a:hover { color: darkslategray;}
 }
 .card-header {
     --bs-bg-opacity: 0.4;
+    height: 60px;
 }
-
-.card{display: inline-block;}
+.card{display: inline-block; width: 46%;}
 .form1 {
     display: inherit;
     float: right;
@@ -41,5 +41,12 @@ a:hover { color: darkslategray;}
         display: grid;
         float: none;
         padding-left: inherit;
+    }
+}
+
+@media screen and (max-width: 450px) {
+
+    .card{
+        width: 100%;
     }
 }

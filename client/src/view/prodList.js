@@ -27,7 +27,7 @@ function ProdList() {
         getNdcg();
     },  []);
 
-    
+    const url = '/view/movieDetail/'
     //JSX 식으로 리스트 파싱
     return (
         <React.Fragment>
@@ -35,8 +35,8 @@ function ProdList() {
             <div>
                 {list.map((list, index) => ( 
 
-                <a href="#" key={list.brdno} className="text-center" >    
-                <div className={"card border-"+ color[Number(index%6)] +" col-md-5 m-4"} >
+                <a href={url + list.movie_id} key={list.brdno} className="text-center" >    
+                <div className={"card border-"+ color[Number(index%6)] +" col-md-5 m-2"} >
                     <div className={"card-header bg-"+ color[Number(index%6)]}>{list.original_title}</div>
                     <div className={"card-body text-" + color[Number(index%6)]} >
                         <img src={"https://source.unsplash.com/random/200x200?sig="+index} alt ="not exist" />
@@ -45,7 +45,7 @@ function ProdList() {
                             <img src={"https://picsum.photos/200/300?random="+index} alt ="not exist" /> 
                         */}
                         <h5 className="card-title">{list.release_date}</h5>
-                        <p className="card-text">{list.overview}</p>
+                        <p className="card-text">{list.tagline}</p>
                     </div>
                 </div>
                 </a>    

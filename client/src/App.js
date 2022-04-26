@@ -6,6 +6,7 @@ import { Navbar, Nav, Container, NavDropdown, Form, Button, FormControl } from '
 import ProdList from './view/prodList';
 import Detail   from './view/detail';
 import List     from './view/list';
+import MovieDetail     from './view/movieDetail';
 
 import './assets/css/common.css';
 
@@ -39,11 +40,12 @@ function App() {
                     </Form>
                 </Navbar>
             </header>
-            <div className="container p-5">
+            <div className="container pt-3">
                 <Routes>
                     <Route path="/" element={ <List /> }></Route>
                     <Route path="/view/detail/:id" element={ <Detail/> }></Route>
                     <Route path="/view/prodList" element={ <ProdList/> } ></Route>
+                    <Route path="/view/movieDetail/:id" element={ <MovieDetail/> } ></Route>
                 </Routes>
             </div>
         </div>

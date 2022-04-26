@@ -27,7 +27,7 @@ const PythonShell = require("python-shell");
 
 
 
-/* 영화 */
+/* 영화 DB */
 const config = {
     apiKey: "AIzaSyCzWDbX5Qad0iyaxAeam45rUJxkV41yFPs",
     authDomain: "movie-f362d.firebaseapp.com",
@@ -42,94 +42,11 @@ firebase.initializeApp(config);
 var db = firebase.firestore();
 
 
+/*  영화 데이터 리스트 세팅  */
 router.get("/", (req, res) => {
     
-    /*
-    const {ig} = require('ignore');
-    const pd = require("node-pandas-js")
-
-    var moviesResult = [];
-    
-    fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_movies copy.csv')
-    .pipe(csv())
-    .on('data', (data) =>{ moviesResult.push(data) })
-    .on('end', () => {
-        var df = pd.DataFrame(moviesResult);
-        console.log(df);
-    });
-    */
-
-
-    var moviesResult = [];
-    fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_movies copy.csv')
-    .pipe(csv())
-    .on('data', (data) =>{ moviesResult.push(data) })
-    .on('end', () => {
-        
-        //let tensor_arr = tf.tensor(moviesResult);
-        var df = new  dfd.DataFrame(moviesResult);
-        
-
-
-        /*
-            ※ 참조 링크 :  https://danfo.jsdata.org/getting-started
-            concat : 데이터 프레임들을 연결
-            mean   : 숫자를 소수점 까지 표현
-            merge  : 데이터 프레임 합치기
-            monthName : 날자 폼에서 월 명을 반환 1 -> January
-
-            ★★ 그외 스크립트에서 cvs를 실행하여 통계, 차트 등의 관측이 가능 하다. ★★
-        */
-        /*
-        df.print();//테이블 형식으로 출력
-        df.iloc({ rows: [":"], columns: ["1:2"]}).print();//모든열 두번쩨 컬럼 반환
-        df.iloc({ rows: ["0:2"], columns: [":"]}).print();//2열까지 모든 컬럼 반환
-        df.iloc({ rows: df["vote_average"].gt(7) }).print();//해당 컬럼이 7보다 큰 열 반환
-        df.iloc({ rows: df["vote_average"].gt(7).and(df["title"].eq("Avatar")), columns: [0]}).print();//해당컬럼이 10보다 크고 이름이 사과인것 1열 반환
-        df.isNa().print();//열에서 NaN 는 true 나머지 false 반환
-        console.log(df.tensor);//전체 데이터 프레임 출력
-        */
-
-        
-        // 1. 데이터를 준비
-        var movieDf = df.loc({ columns: ['id','title','genres','vote_average', 'vote_count', 'popularity', 'keywords', 'overview']} )
-        
-        var options = {
-            mode: 'text',
-            pythonPath: '',
-            pythonOptions: ['-u'],
-            scriptPath: '',
-            args: ['value1', 'value2', 'value3'],
-            encoding : 'utf8'
-        };
-
-        PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/test1.py', options, function (err, results) {
-
-            if (err) {
-                console.log("통신실패");
-                console.log(err);
-            
-            }   
-            else{
-                console.log("통신성공");
-                
-                console.log(results[1][3]);
-                
-            }
-            
-            //console.log('results: %j', results);
-            res.send( {rows: results});
-        });
-
-    });
-    
-
-
-
-    
-    /*
     var moviesResult2 = [];
-    db.collection('movies').orderBy("release_date","desc").get()
+    db.collection('movies').orderBy("release_date","desc").limit(100).get()
     .then((snapshot) => {
         var rows = [];
 
@@ -142,38 +59,124 @@ router.get("/", (req, res) => {
              
         });
 
-        const pd2 = require("node-pandas-js")
-        var df = pd2.DataFrame(moviesResult2);
-        var movies_df = df['id','title','genres','vote_average', 'vote_count', 'popularity', 'keywords', 'overview']
-        console.log(movies_df);
-
-        //evaluate
-        
-        //movies_df['genres'] = eval(movies_df['genres'])
-        //movies_df['keywords'] = movies_df['keywords'].apply(evaluate)
-        console.log(movies_df['genres']);
-        
-        movies_df['genres'] = movies_df['genres'].apply(lambda x : [y['name'] for y in x])
-        movies_df['keywords'] = movies_df['keywords'].apply(lambda x : [y['name'] for y in x])
-        print(movies_df['genres'].head(1))
-        print(movies_df['keywords'].head(1))
-        
-       
         res.send( {rows: rows});
         
     })
     .catch((err) => {
         console.log('Error getting documents', err);
     });
+    
+});
+
+/*  영화 상세보기  */
+router.get("/movieDetail", (req, res) => {
+
+    var id = req.query.id
+
+    //db.collection('movies').doc(req.query.id).get()
+    db.collection('movies').where('movie_id', '==', id).get()
+    .then((doc) => {
+        doc.forEach(element => {
+            //console.log(element);
+            res.send( {rows: element.data()});
+        })
+    })
+    .catch((err) => {
+        console.log('Error getting documents', err);
+    });
+    
+});
+
+/*
+    PythonShell을 이용한 ignore 협업 필터링 사용
+    콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환
+*/
+router.get("/movieRecommended", (req, res) => {
+    var id = req.query.id
+    console.log("비슷한거 찾을 아이디    " + id);
+    var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: [id, 'value2', 'value3'],
+        encoding : 'utf8'
+    };
+
+    let top10Arr  ;//배열 상태의 결과값
+    let top10Json ;//제이슨 상태의 결과값
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/test1.py', options, function (err, results) {
+
+        if (err) {
+            console.log(err);           
+        }   
+        else{
+
+            var rows = [];
+            //성공시 TOP10 결과값 세팅
+            //top10Arr = results;
+            console.log(results);
+            top10Json = JSON.parse(results[0].replace("'",""))
+            //json2 = {data:[results[0].replace("'","")]};
+            var titleArr = Object.values(top10Json.title)
+            var idArr =  Object.values(top10Json.id)
+            
+            //console.log(Object.values(top10Json.title));
+            //console.log(Object.values(top10Json.id));
+            
+            
+            for(var i = 0 ; i <titleArr.length; i ++){
+                //console.log(titleArr[i]+ "   "+ idArr[i]);
+                var chileData = {
+                    id : idArr[i],
+                    title : titleArr[i]
+                }
+                rows.push(chileData);
+                
+            }
+            
+            res.send( {rows: rows} );
+        }
+        
+        //console.log('results: %j', results);
+        
+    });
+
+    /*  ○○ danfojs를 사용한 csv 추출미 데이터 가공 예제 ○○
+        ※ 참조 링크 :  https://danfo.jsdata.org/getting-started
+        concat : 데이터 프레임들을 연결
+        mean   : 숫자를 소수점 까지 표현
+        merge  : 데이터 프레임 합치기
+        monthName : 날자 폼에서 월 명을 반환 1 -> January
+
+        ★★ 그외 스크립트에서 cvs를 실행하여 통계, 차트 등의 관측이 가능 하다. ★★
+    */
+    /*
+    var moviesResult = [];
+    fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_movies copy.csv')
+    .pipe(csv())
+    .on('data', (data) =>{ moviesResult.push(data) })
+    .on('end', () => {
+        
+        var df = new  dfd.DataFrame(moviesResult);
+
+        df.print();//테이블 형식으로 출력
+        df.iloc({ rows: [":"], columns: ["1:2"]}).print();//모든열 두번쩨 컬럼 반환
+        df.iloc({ rows: ["0:2"], columns: [":"]}).print();//2열까지 모든 컬럼 반환
+        df.iloc({ rows: df["vote_average"].gt(7) }).print();//해당 컬럼이 7보다 큰 열 반환
+        df.iloc({ rows: df["vote_average"].gt(7).and(df["title"].eq("Avatar")), columns: [0]}).print();//해당컬럼이 10보다 크고 이름이 사과인것 1열 반환
+        df.isNa().print();//열에서 NaN 는 true 나머지 false 반환
+        console.log(df.tensor);//전체 데이터 프레임 출력
+        
+    });
     */
 });
 
-
 /*
-    추천 상품 머신러닝 (참조링크  : https://proinlab.com/archives/2103 , https://www.npmjs.com/package/nodeml)
+    추천 영화 머신러닝 예제 (참조링크  : https://proinlab.com/archives/2103 , https://www.npmjs.com/package/nodeml)
     1. User-based CF (ex > 넷플릭스 : 사용자의 시청 영화에 따라 영화 추천 )
 */
-router.get("/nodemlMovie", (req, res) => {
+router.get("/nodemlSample", (req, res) => {
 
     const {Bayes} = require('nodeml');
     let bayes = new Bayes();
@@ -225,6 +228,7 @@ router.get("/nodemlMovie", (req, res) => {
 
 /*
     영화 추천 시스템 구축을 위한 데이터 초기화 컨트롤러 ( 원천 데이터 : https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata?resource=download )
+    ※호출 시 데이터가 중첩해 쌓이므로 FIREBASE STOREGE는 초기화 필요. (추후 데이터 초기화 소스 추가 예정)
 */
 router.get("/moviesDataInit", (req, res) => {
     
@@ -238,7 +242,7 @@ router.get("/moviesDataInit", (req, res) => {
         count = 0 
         moviesResult.forEach((doc) => {
 
-            if(count > 20) return false
+            //if(count > 20) return false
             count++
 
             var movieDoc = db.collection("movies").doc();
@@ -279,7 +283,7 @@ router.get("/moviesDataInit", (req, res) => {
 
         creditsRsult.forEach((doc) => {
 
-            if(count > 20) return false
+            //if(count > 20) return false
             count++
 
             var creditsDoc = db.collection("credits").doc();
