@@ -120,6 +120,8 @@ router.get("/movieRecommended", (req, res) => {
             //json2 = {data:[results[0].replace("'","")]};
             var titleArr = Object.values(top10Json.title)
             var idArr =  Object.values(top10Json.id)
+            var averageArr =  Object.values(top10Json.vote_average)
+            var weightedArr =  Object.values(top10Json.weighted_vote)
             
             //console.log(Object.values(top10Json.title));
             //console.log(Object.values(top10Json.id));
@@ -129,7 +131,9 @@ router.get("/movieRecommended", (req, res) => {
                 //console.log(titleArr[i]+ "   "+ idArr[i]);
                 var chileData = {
                     id : idArr[i],
-                    title : titleArr[i]
+                    title : titleArr[i],
+                    vote_average : averageArr[i],
+                    weighted_vote : weightedArr[i]
                 }
                 rows.push(chileData);
                 

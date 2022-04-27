@@ -30,9 +30,9 @@ function ProdList() {
     const url = '/view/movieDetail/'
     //JSX 식으로 리스트 파싱
     return (
-        <React.Fragment>
+        <React.Fragment  >
             {/* <h1>Our new Products</h1> */}        
-            <div>
+            <div className="my-5 mx-1">
                 {list.map((list, index) => ( 
 
                 <a href={url + list.movie_id} key={list.brdno} className="text-center" >    

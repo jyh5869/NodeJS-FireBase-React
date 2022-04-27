@@ -66,26 +66,28 @@ def find_sim_movie(df, sorted_ind, title_name, top_n=10):
     similar_indexes = similar_indexes.reshape(-1)
 
     return df.iloc[similar_indexes]
-    
 
-similar_movies = find_sim_movie(movies_df, genre_sim_sorted_ind, 'The Godfather', 10)
+
+
+selectMovie = movies_df[movies_df['id'] == int(sys.argv[1])]
+title = selectMovie.iloc[0]['title']
+
+
+
+
+similar_movies = find_sim_movie(movies_df, genre_sim_sorted_ind, title , 10)
 
 
 #print(similar_movies.info())
 #print("★★★★★★★★★★★★★★★★★11111111111")
 #print(similar_movies)
 #print("★★★★★★★★★★★★★★★★★222222222222")
-#print(similar_movies[['title', 'vote_count', 'vote_average']])
+#print(similar_movies[['id', 'title', 'vote_count', 'vote_average']].to_json())
 #print("★★★★★★★★★★★★★★★★★333333333333")
 
 ##print(movies_df[['title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10])
-print(movies_df[['id', 'title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10].to_json())
+#print(movies_df[['id', 'title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10].to_json())
 #print(movies_df[['title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10].to_numpy())
-
-
-
-
-print(" ★★★★★★★★★★★★★★★★★★ "+sys.argv[1]) #변수출력
 
 
 
@@ -136,6 +138,6 @@ def find_sim_movie_weight(df, sorted_ind, title_name, top_n=10):
     #top_n의 2배에 해당하는 후보군에서 weight_vote가 노은 순으로 top_n만큼 추출
     return df.iloc[similar_indexes].sort_values('weighted_vote', ascending=False)[:top_n]
 
-similar_movies = find_sim_movie_weight(movies_df, genre_sim_sorted_ind, 'Inception', 10)
-#print(similar_movies[['title', 'vote_average', 'weighted_vote']])
+similar_movies = find_sim_movie_weight(movies_df, genre_sim_sorted_ind, title, 10)
+print(similar_movies[['id', 'title', 'vote_average', 'weighted_vote']].to_json())
 

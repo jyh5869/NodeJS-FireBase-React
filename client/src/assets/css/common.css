@@ -23,11 +23,23 @@ a:hover { color: darkslategray;}
     width: 100%;
     padding-bottom: 10px;
 }
+
+.card img.movie.detail{ 
+    width: 50%;
+    padding-bottom: 10px;
+}
+
 .card-header {
-    --bs-bg-opacity: 0.4;
+    --bs-bg-opacity: 0.3;
     height: 60px;
 }
-.card{display: inline-block; width: 46%;}
+
+.card-footer {
+    --bs-bg-opacity: 0.3;
+}
+
+.card[class*='border']{display: inline-block; width: 46%;}
+
 .form1 {
     display: inherit;
     float: right;
@@ -49,4 +61,6 @@ a:hover { color: darkslategray;}
     .card{
         width: 100%;
     }
+
+    .card[class*='border']{width: 100%;}
 }

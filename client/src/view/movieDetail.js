@@ -2,7 +2,7 @@
 import React,  {useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-import { Card, Button  } from 'react-bootstrap';
+import { Card, Button,Table  } from 'react-bootstrap';
 
 import axios from 'axios';
 import Data from '../data';
@@ -47,33 +47,59 @@ function MovieDetail(props) {
     //console.log(props);
     return (
 <React.Fragment> 
-     <Card className="text-center">
-            <Card.Header as="h5">MOVIE DETAIL</Card.Header>
-            <Card.Body>
+     <Card className="text-center  mx-5 my-5" >
+            <Card.Header className="bg-info" as="h5">MOVIE DETAIL</Card.Header>
+            <Card.Body className="warning">
                 {/*<Card.Img variant="top" className='m-4' src={list[id].img} /> */}
-                <Card.Title>
-                    <p> {obj.title}</p>
+                <Card.Title as="h3">
+                    {obj.title}
                 </Card.Title>
-                <Card.Text >
-                    <p>{obj.title}</p>
-                    <p>{obj.title}</p>
+                <img  className="movie detail" src={"https://source.unsplash.com/random/200x200?sig=1"} alt ="not exist" />
+                <Card.Text as="h5" >
+                    {obj.title}
                 </Card.Text>
-                <Button variant="primary">Buy Now</Button>
+                <Card.Text as="h5" >
+                    {obj.overview}
+                </Card.Text>
+                <Button variant="primary m-5">Watch Now</Button>
             </Card.Body>
-            <Card.Footer className="text-muted">2 days ago</Card.Footer>
+            <Card.Footer className="text-muted bg-info">{obj.release_date}</Card.Footer>
         </Card>
-
+        
 
 {/* <h1>Our new Products</h1> */}        
             <div >
-                {list.map((list, index) => ( 
-                    <a href={url + list.id} key={list.id} className="text-center" >
-                    <div>
-                        {list.title}{list.id}
-                    </div>
-                    </a>
-                ))}
-            </div>                  
+                
+            </div>  
+
+
+
+            <Table striped bordered hover size="sm">
+  <thead>
+    <tr>
+      <th className="text-center">순번</th>
+      <th className="text-center">영화제목</th>
+      <th className="text-center">수치</th>
+      <th className="text-center">유사도</th>
+    </tr>
+  </thead>
+  <tbody>
+    {list.map((list, index) => ( 
+        
+        <tr key={list.id}>
+            
+            <td className="text-center">{index+1}</td>
+            <td className="text-center"><a href={url + list.id} key={list.id} className="text-center" >{list.title}</a></td>
+            <td className="text-center">{list.vote_average}</td>
+            <td className="text-center">{list.weighted_vote}</td>
+            
+        </tr>
+        
+    ))}
+    
+
+  </tbody>
+</Table>                
 </React.Fragment>
     )
 }
