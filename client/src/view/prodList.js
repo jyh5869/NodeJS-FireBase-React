@@ -1,7 +1,8 @@
 
 
-import axios from 'axios';
 import React, { useEffect, useState } from "react";
+
+import axios from 'axios';
 
 function ProdList() {
 
@@ -16,25 +17,19 @@ function ProdList() {
         setList(response.data.rows);
     }
 
-    //추천 상품 리스트 호출 머신러닝
-    const getNdcg = async () => {
-
-        //let response = await axios.get('/api/moviesDataInit');
-    }
-
     useEffect(() => {
         getHeroes();
-        getNdcg();
     },  []);
 
     const url = '/view/movieDetail/'
+    
     //JSX 식으로 리스트 파싱
     return (
         <React.Fragment  >
             {/* <h1>Our new Products</h1> */}        
             <div className="my-5 mx-1">
-                {list.map((list, index) => ( 
 
+                {list.map((list, index) => ( 
                 <a href={url + list.movie_id} key={list.brdno} className="text-center" >    
                 <div className={"card border-"+ color[Number(index%6)] +" col-md-5 m-2"} >
                     <div className={"card-header bg-"+ color[Number(index%6)]}>{list.original_title}</div>
@@ -50,6 +45,7 @@ function ProdList() {
                 </div>
                 </a>    
                 ))}
+
             </div>                
         </React.Fragment>
     )

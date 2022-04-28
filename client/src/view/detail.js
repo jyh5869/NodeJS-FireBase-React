@@ -1,8 +1,7 @@
 
 import React,  { useState } from 'react';
-import { useParams } from 'react-router-dom';
-
-import { Card, Button  } from 'react-bootstrap';
+import { useParams }        from 'react-router-dom';
+import { Card, Button }     from 'react-bootstrap';
 
 import Data from '../data';
 
@@ -11,9 +10,8 @@ function Detail(props) {
     let [shoes, shoeState] = useState(Data);
 
     let {id} = useParams();
-    console.log(props);
-    return (
 
+    return (
         <Card className="text-center">
             <Card.Header as="h5">Featured</Card.Header>
             <Card.Body>

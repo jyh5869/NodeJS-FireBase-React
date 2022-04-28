@@ -1,8 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-
-import { Card, CardGroup  } from 'react-bootstrap';
+import { Card, CardGroup } from 'react-bootstrap';
 
 //import { name1, name2 } from './data';
 import Data from '../data';

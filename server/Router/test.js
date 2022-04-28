@@ -1,30 +1,18 @@
 const express = require("express");
-const router = express.Router();
+const router  = express.Router();
 
-var firebase = require("firebase");
-
+var firebase   = require("firebase"  );
 var dateFormat = require('dateformat');
+
 const csv = require('csv-parser');
-const fs = require('fs');
+const fs  = require('fs'        );
 
-var evaluate = require('eval-literals');//문자열을 리스트 객체로 변환
-
-
-
-
-const dfd = require("danfojs");
-const pd = require("pandas");
-
-const JSONStream = require("JSONStream");
-
-
-const tf = require("@tensorflow/tfjs");//느리다... @tensorflow/tfjs_node로 업데이트 필요
-//const tf = dfd.tensorflow;
-
-
+//유사 콘텐츠 추출을 위한 머신러닝 라이브러리
+const dfd = require("danfojs"         );
+const pd  = require("pandas"          );
+const tf  = require("@tensorflow/tfjs");//느리다... @tensorflow/tfjs_node로 업데이트 필요
 
 const PythonShell = require("python-shell");
-
 
 
 /* 영화 DB */
@@ -59,13 +47,11 @@ router.get("/", (req, res) => {
              
         });
 
-        res.send( {rows: rows});
-        
+        res.send( {rows: rows}); 
     })
     .catch((err) => {
         console.log('Error getting documents', err);
     });
-    
 });
 
 /*  영화 상세보기  */
@@ -73,7 +59,6 @@ router.get("/movieDetail", (req, res) => {
 
     var id = req.query.id
 
-    //db.collection('movies').doc(req.query.id).get()
     db.collection('movies').where('movie_id', '==', id).get()
     .then((doc) => {
         doc.forEach(element => {
@@ -87,13 +72,16 @@ router.get("/movieDetail", (req, res) => {
     
 });
 
+
 /*
     PythonShell을 이용한 ignore 협업 필터링 사용
     콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환
+    참고 사이트 : https://big-dream-world.tistory.com/66
 */
 router.get("/movieRecommended", (req, res) => {
-    var id = req.query.id
-    console.log("비슷한거 찾을 아이디    " + id);
+
+    var id = req.query.id//유사 콘텐츠를 찾을 대상 ID
+    
     var options = {
         mode: 'text',
         pythonPath: '',
@@ -111,39 +99,30 @@ router.get("/movieRecommended", (req, res) => {
             console.log(err);           
         }   
         else{
-
-            var rows = [];
             //성공시 TOP10 결과값 세팅
-            //top10Arr = results;
-            console.log(results);
-            top10Json = JSON.parse(results[0].replace("'",""))
-            //json2 = {data:[results[0].replace("'","")]};
-            var titleArr = Object.values(top10Json.title)
-            var idArr =  Object.values(top10Json.id)
-            var averageArr =  Object.values(top10Json.vote_average)
-            var weightedArr =  Object.values(top10Json.weighted_vote)
+            var rows = [];
             
-            //console.log(Object.values(top10Json.title));
-            //console.log(Object.values(top10Json.id));
-            
+            top10Json = JSON.parse(results[0].replace("'",""))//앞뒤 공백 제거
+
+            /* 배열로 전환 */
+            var titleArr    = Object.values(top10Json.title)
+            var idArr       = Object.values(top10Json.id)
+            var averageArr  = Object.values(top10Json.vote_average)
+            var weightedArr = Object.values(top10Json.weighted_vote)
             
             for(var i = 0 ; i <titleArr.length; i ++){
-                //console.log(titleArr[i]+ "   "+ idArr[i]);
+
                 var chileData = {
                     id : idArr[i],
                     title : titleArr[i],
                     vote_average : averageArr[i],
                     weighted_vote : weightedArr[i]
                 }
-                rows.push(chileData);
-                
-            }
-            
+                rows.push(chileData);    
+            } 
             res.send( {rows: rows} );
         }
-        
         //console.log('results: %j', results);
-        
     });
 
     /*  ○○ danfojs를 사용한 csv 추출미 데이터 가공 예제 ○○
@@ -238,7 +217,7 @@ router.get("/moviesDataInit", (req, res) => {
     
     const moviesResult = [];
     const creditsRsult = [];
-    /* 영화 정보 */
+    /* 영화 정보 
     fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_movies.csv')
     .pipe(csv())
     .on('data', (data) => moviesResult.push(data))
@@ -275,9 +254,9 @@ router.get("/moviesDataInit", (req, res) => {
             };
             movieDoc.set(postData);
         });
-        res.json({data : moviesResult});
+        
     });
-    
+    */
     /*  출연진 정보 */
     fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_credits.csv')
     .pipe(csv())
@@ -301,8 +280,8 @@ router.get("/moviesDataInit", (req, res) => {
                 };
                 creditsDoc.set(postData);
         });
+        res.json({data : creditsRsult});
     });
-    
 });
 
 

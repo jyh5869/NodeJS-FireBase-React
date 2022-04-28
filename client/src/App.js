@@ -3,10 +3,10 @@ import React from "react";
 import {BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown, Form, Button, FormControl } from 'react-bootstrap';
 
-import ProdList from './view/prodList';
-import Detail   from './view/detail';
-import List     from './view/list';
-import MovieDetail     from './view/movieDetail';
+import ProdList     from './view/prodList';
+import Detail       from './view/detail';
+import List         from './view/list';
+import MovieDetail  from './view/movieDetail';
 
 import './assets/css/common.css';
 
