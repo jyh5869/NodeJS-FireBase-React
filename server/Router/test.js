@@ -104,7 +104,7 @@ router.get("/movieRecommended", (req, res) => {
             
             top10Json = JSON.parse(results[0].replace("'",""))//앞뒤 공백 제거
 
-            /* 배열로 전환 */
+            //배열로 전환
             var titleArr    = Object.values(top10Json.title)
             var idArr       = Object.values(top10Json.id)
             var averageArr  = Object.values(top10Json.vote_average)
