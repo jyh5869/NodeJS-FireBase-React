@@ -10,7 +10,8 @@ function MovieDetail(props) {
     let {id} = useParams();
     var color = [ "danger", "warning", "info", "primary", "secondary", "success" ];
 
-    const [list, setMovieReco] = useState([]);
+    const [list1, setMovieReco1] = useState([]);
+    const [list2, setMovieReco2] = useState([]);
     const [obj, setMovieInfo] = useState([]);
 
     const getMovieInfo = async () => {
@@ -31,7 +32,27 @@ function MovieDetail(props) {
                 id: id
             }
         });
-        setMovieReco(response.data.rows);
+        
+        for(var i = 0 ; i < response.data.recommArr1.length; i++){
+            var genres = ""
+            
+            for(var j = 0 ; j < response.data.recommArr1[i].genres.length; j++){
+                genres = genres + response.data.recommArr1[i].genres[j]+ " "
+            }
+            response.data.recommArr1[i].genres = genres
+        }
+
+        for(var i = 0 ; i < response.data.recommArr2.length; i++){
+            var genres = ""
+            
+            for(var j = 0 ; j < response.data.recommArr2[i].genres.length; j++){
+                genres = genres + response.data.recommArr2[i].genres[j]+ " "
+            }
+            response.data.recommArr2[i].genres = genres
+        }
+
+        setMovieReco1(response.data.recommArr1)
+        setMovieReco2(response.data.recommArr2)
     }
 
     useEffect(() => {
@@ -68,17 +89,17 @@ function MovieDetail(props) {
                     <tr>
                     <th className="text-center">순번</th>
                     <th className="text-center">영화제목</th>
-                    <th className="text-center">수치</th>
-                    <th className="text-center">유사도</th>
+                    <th className="text-center">장르</th>
+                    <th className="text-center">평점</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {list.map((list, index) => (   
+                    {list1.map((list, index) => (   
                         <tr key={list.id}> 
                             <td className="text-center">{index+1}</td>
                             <td className="text-center"><a href={url + list.id} key={list.id} className="text-center" >{list.title}</a></td>
+                            <td className="text-center">{list.genres}</td>
                             <td className="text-center">{list.vote_average}</td>
-                            <td className="text-center">{list.weighted_vote}</td>
                         </tr>                   
                     ))}
                 </tbody>
@@ -90,17 +111,17 @@ function MovieDetail(props) {
                     <tr>
                     <th className="text-center">순번</th>
                     <th className="text-center">영화제목</th>
-                    <th className="text-center">수치</th>
-                    <th className="text-center">유사도</th>
+                    <th className="text-center">장르</th>
+                    <th className="text-center">평점</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {list.map((list, index) => (   
+                    {list2.map((list, index) => (   
                         <tr key={list.id}> 
                             <td className="text-center">{index+1}</td>
                             <td className="text-center"><a href={url + list.id} key={list.id} className="text-center" >{list.title}</a></td>
+                            <td className="text-center">{list.genres}</td>
                             <td className="text-center">{list.vote_average}</td>
-                            <td className="text-center">{list.weighted_vote}</td>
                         </tr>                   
                     ))}
                 </tbody>

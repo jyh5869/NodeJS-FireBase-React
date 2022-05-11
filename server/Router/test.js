@@ -81,7 +81,7 @@ router.get("/movieDetail", (req, res) => {
 router.get("/movieRecommended", (req, res) => {
 
     var id = req.query.id//유사 콘텐츠를 찾을 대상 ID
-    
+
     var options = {
         mode: 'text',
         pythonPath: '',
@@ -93,35 +93,61 @@ router.get("/movieRecommended", (req, res) => {
 
     let top10Arr  ;//배열 상태의 결과값
     let top10Json ;//제이슨 상태의 결과값
-    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/test1.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/test2.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
         }   
         else{
             //성공시 TOP10 결과값 세팅
-            var rows = [];
             
-            top10Json = JSON.parse(results[0].replace("'",""))//앞뒤 공백 제거
+            var recommArr1 = [];
+            var recommArr2 = [];
+            
+            top10Json1 = JSON.parse(results[0].replace("'",""))//앞뒤 공백 제거
 
             //배열로 전환
-            var titleArr    = Object.values(top10Json.title)
-            var idArr       = Object.values(top10Json.id)
-            var averageArr  = Object.values(top10Json.vote_average)
-            var weightedArr = Object.values(top10Json.weighted_vote)
+            var titleArr    = Object.values(top10Json1.title)
+            var idArr       = Object.values(top10Json1.id)
+            var genresArr   = Object.values(top10Json1.genres)
+            var averageArr  = Object.values(top10Json1.vote_average)
             
             for(var i = 0 ; i <titleArr.length; i ++){
 
                 var chileData = {
                     id : idArr[i],
                     title : titleArr[i],
-                    vote_average : averageArr[i],
-                    weighted_vote : weightedArr[i]
+                    genres : genresArr[i],
+                    vote_average : averageArr[i]
+                    
                 }
-                rows.push(chileData);    
-            } 
-            res.send( {rows: rows} );
+                recommArr1.push(chileData);    
+            }
+
+            top10Json2 = JSON.parse(results[1].replace("'",""))//앞뒤 공백 제거
+
+            //배열로 전환
+            var titleArr    = Object.values(top10Json2.title)
+            var idArr       = Object.values(top10Json2.id)
+            var genresArr   = Object.values(top10Json2.genres)
+            var averageArr  = Object.values(top10Json2.vote_average)
+            
+            for(var i = 0 ; i <titleArr.length; i ++){
+
+                var chileData = {
+                    id : idArr[i],
+                    title : titleArr[i],
+                    genres : genresArr[i],
+                    vote_average : averageArr[i]
+                    
+                }
+                recommArr2.push(chileData);    
+            }
+            
+            res.send( {recommArr1: recommArr1, recommArr2, recommArr2});     
+            //res.send( {results: results});
         }
+        
         //console.log('results: %j', results);
     });
 

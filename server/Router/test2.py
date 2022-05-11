@@ -14,9 +14,7 @@ from nltk.stem.snowball              import SnowballStemmer
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_colwidth', None)
 
-#유사 콘텐츠를 뽑을 타겟 추출
-selectMovie = movies_df[movies_df['id'] == int(sys.argv[1])]
-targetTitle = selectMovie.iloc[0]['title']
+
 
 #########################################################
 ############### ↓ 줄거리 유사 콘텐츠 추출 ↓ ###############
@@ -26,10 +24,18 @@ md = pd.read_csv('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/dat
 md['id'] = md['id'].astype('int')# id 값을 int로 형변환
 smd = md
 
+
+
+#유사 콘텐츠를 뽑을 타겟 추출
+selectMovie = smd[smd['id'] == int(sys.argv[1])]
+targetTitle = selectMovie.iloc[0]['title']
+
 #description 데이터를 만들고 결측값을 ''로 채움(fillna(''))
 smd['tagline']     = smd['tagline'].fillna('')
-smd['description'] = smd['overview'] + smd['tagline'] 
+smd['description'] = smd['overview'] + smd['tagline']
 smd['description'].fillna('')
+    
+
 
 # 데이터 백터화
 tf = TfidfVectorizer(analyzer='word', ngram_range=(1, 2), min_df=0, stop_words='english')
@@ -40,6 +46,10 @@ cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
 
 # smd에 index를 포함하고 title을 인덱스로 만든다.
 smd = smd.reset_index()
+
+smd['genres'] = smd['genres'].apply(literal_eval)
+smd['genres'] = smd['genres'].apply(lambda x : [i['name'] for i in x] if isinstance(x, list) else [])
+
 titles = smd['title']
 indces = pd.Series(smd.index, index=titles)
 
@@ -48,12 +58,12 @@ def getrecommandations1(title):
     index = indces[title]
     sim_scores = list(enumerate(cosine_sim[index]))
     sim_scores = sorted(sim_scores, key=lambda x:x[1], reverse=True)
-    sim_scores = sim_scores[1:31]
+    sim_scores = sim_scores[1:11]#가져올 상위 랭크 갯수 1:11 => 10개
     movie_indices = [i[0] for i in sim_scores] 
-    return titles.iloc[movie_indices]
+    return smd.iloc[movie_indices]
 
 # 유사 콘텐츠 추출
-print(getrecommandations1('The Dark Knight'))
+print(getrecommandations1(targetTitle)[['id','title', 'genres', 'vote_average']].to_json())
 
 
 
@@ -129,20 +139,21 @@ cosine_sim = cosine_similarity(count_matrix, count_matrix)
 
 # titleㅌ로 인덱스 생성
 smd = smd.reset_index()
-titles = smd['title_x']
-indces = pd.Series(smd.index, index=smd['title_x'])
+smd['title'] = smd['title_x']
+titles = smd['title']
+indces = pd.Series(smd.index, index=smd['title'])
 
 # 종합 유사 콘텐츠 추출 함수
 def getrecommandations2(title):
     index = indces[title]
     sim_scores = list(enumerate(cosine_sim[index]))
     sim_scores = sorted(sim_scores, key=lambda x:x[1], reverse=True)
-    sim_scores = sim_scores[1:31]
+    sim_scores = sim_scores[1:11]
     movie_indices = [i[0] for i in sim_scores] 
-    return titles.iloc[movie_indices] 
+    return smd.iloc[movie_indices] 
 
 # 유사 컨텐츠 추출
-print(getrecommandations2('The Dark Knight'))
+print(getrecommandations2(targetTitle)[['id','title', 'genres', 'vote_average']].to_json())
 
 
 
