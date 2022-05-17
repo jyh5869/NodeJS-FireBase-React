@@ -12,7 +12,7 @@ function MovieDetail(props) {
 
     const [list1, setMovieReco1] = useState([]);
     const [list2, setMovieReco2] = useState([]);
-    const [obj, setMovieInfo] = useState([]);
+    const [obj  , setMovieInfo ] = useState([]);
 
     const getMovieInfo = async () => {
 
@@ -21,6 +21,11 @@ function MovieDetail(props) {
                 id: id
             }
         });
+        
+        //JSON형태의 문자열의 Value를 추출하여 특정 문자열로 연결 
+        response.data.rows.genres = jsonToString(JSON.parse(response.data.rows.genres), " ")
+        response.data.rows.production_companies = jsonToString(JSON.parse(response.data.rows.production_companies), ", " )
+
         setMovieInfo(response.data.rows);
     }
 
@@ -33,22 +38,12 @@ function MovieDetail(props) {
             }
         });
         
+        //배열을 특정 문자로 나눈 문자열로 반환 ( 문자 : ㄴ/ )
         for(var i = 0 ; i < response.data.recommArr1.length; i++){
-            var genres = ""
-            
-            for(var j = 0 ; j < response.data.recommArr1[i].genres.length; j++){
-                genres = genres + response.data.recommArr1[i].genres[j]+ " "
-            }
-            response.data.recommArr1[i].genres = genres
+            response.data.recommArr1[i].genres = arrToString(response.data.recommArr1[i].genres, " / ")
         }
-
         for(var i = 0 ; i < response.data.recommArr2.length; i++){
-            var genres = ""
-            
-            for(var j = 0 ; j < response.data.recommArr2[i].genres.length; j++){
-                genres = genres + response.data.recommArr2[i].genres[j]+ " "
-            }
-            response.data.recommArr2[i].genres = genres
+            response.data.recommArr2[i].genres = arrToString(response.data.recommArr2[i].genres, " / ")
         }
 
         setMovieReco1(response.data.recommArr1)
@@ -69,22 +64,42 @@ function MovieDetail(props) {
                 <Card.Body className="warning">
                     {/*<Card.Img variant="top" className='m-4' src={list[id].img} /> */}
                     <Card.Title as="h3">
-                        {obj.title}
+                        {obj.title} 
                     </Card.Title>
-                        <img  className="movie detail my-3" src={"https://source.unsplash.com/random/200x200?sig=1"} alt ="not exist" />
+                    {/* <img  className="movie detail my-3" src={"https://source.unsplash.com/random/200x200?sig=1"} alt ="not exist" /> */}
                     <Card.Text as="h5" >
-                        {obj.title}
+                        {obj.title} ({obj.original_language})
                     </Card.Text>
                     <Card.Text as="h5" >
-                        {obj.overview}
+                        {obj.overview} 
                     </Card.Text>
-                    <Button variant="primary m-5">Watch Now</Button>
+                    <Table responsive="sm">
+                        <thead>
+                            <tr>
+                                <th className="text-center">태그라인</th>
+                                <th className="text-center">장르</th>
+                                <th className="text-center">개봉일/상영시간</th>
+                                <th className="text-center">언어</th>
+                                <th className="text-center">평점</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr> 
+                                <td className="text-center">{obj.tagline}</td>
+                                <td className="text-center">{obj.genres}</td>
+                                <td className="text-center">{obj.release_date} ({obj.runtime}분)</td>
+                                <td className="text-center">{obj.production_companies}</td>
+                                <td className="text-center">{obj.vote_average}</td>
+                            </tr>                   
+                        </tbody>
+                    </Table>
+                    {/* <Button variant="primary m-5">Watch Now</Button> */}
                 </Card.Body>
-                <Card.Footer className="text-muted bg-info">{obj.release_date}</Card.Footer>
+                {/* <Card.Footer className="text-muted bg-info"></Card.Footer> */}
             </Card>
             
             <h1 className="text-center p-3">유사 내용 영화 추천</h1>      
-            <Table striped bordered hover size="sm">
+            <Table  responsive="sm">
                 <thead>
                     <tr>
                     <th className="text-center">순번</th>
@@ -128,6 +143,36 @@ function MovieDetail(props) {
             </Table>              
         </React.Fragment>
     )
+}
+
+function jsonToString(chgArr, splitChar){
+
+    var chgStr = "";
+    for(var i = 0 ; i < chgArr.length; i++){
+
+        if(i == 0){
+            chgStr = chgStr + chgArr[i].name
+        }
+        else{
+            chgStr = chgStr + splitChar + chgArr[i].name
+        }
+    }
+    return chgStr;
+}
+
+function arrToString(chgArr, splitChar){
+
+    var chgStr = "";
+    for(var i = 0 ; i < chgArr.length; i++){
+
+        if(i == 0){
+            chgStr = chgStr + chgArr[i]
+        }
+        else{
+            chgStr = chgStr + splitChar + chgArr[i]
+        }
+    }
+    return chgStr;
 }
 
 export default MovieDetail 

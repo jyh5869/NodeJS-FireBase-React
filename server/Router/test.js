@@ -33,8 +33,7 @@ var db = firebase.firestore();
 /*  영화 데이터 리스트 세팅  */
 router.get("/", (req, res) => {
     
-    var moviesResult2 = [];
-    db.collection('movies').orderBy("release_date","desc").limit(100).get()
+    db.collection('movies').orderBy("release_date", "desc").limit(100).get()
     .then((snapshot) => {
         var rows = [];
 
@@ -43,7 +42,6 @@ router.get("/", (req, res) => {
             childData.release_date = dateFormat(childData.release_date,"yyyy-mm-dd");
 
             rows.push(childData);
-            moviesResult2.push(childData);
              
         });
 
@@ -59,10 +57,9 @@ router.get("/movieDetail", (req, res) => {
 
     var id = req.query.id
 
-    db.collection('movies').where('movie_id', '==', id).get()
+    db.collection('movies').where('id', '==', id).get()
     .then((doc) => {
         doc.forEach(element => {
-            //console.log(element);
             res.send( {rows: element.data()});
         })
     })
@@ -72,22 +69,52 @@ router.get("/movieDetail", (req, res) => {
     
 });
 
-
-/*
-    PythonShell을 이용한 ignore 협업 필터링 사용
-    콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환
-    참고 사이트 : https://big-dream-world.tistory.com/66
-*/
-router.get("/movieRecommended", (req, res) => {
-
-    var id = req.query.id//유사 콘텐츠를 찾을 대상 ID
+/*  영화 상세보기  */
+router.get("/reviewDeepLeaning", (req, res) => {
 
     var options = {
         mode: 'text',
         pythonPath: '',
         pythonOptions: ['-u'],
         scriptPath: '',
-        args: [id, 'value2', 'value3'],
+        args: ["vlaue1", 'value2'],
+        encoding : 'utf8'
+    };
+
+
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/reviewDeepLearning.py', options, function (err, results) {
+
+        if (err) {
+            console.log(err);           
+        }   
+        else{
+
+
+        
+            res.send( {results: results});     
+        }
+        //console.log('results: %j', results);
+    });
+    
+});
+
+
+/*
+    PythonShell을 이용한 ignore 협업 필터링 사용
+    콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환
+    참고 사이트 : https://big-dream-world.tistory.com/66
+    direct 호출 rul 셈플 : http://localhost:5000/movieRecommended?id=315011
+*/
+router.get("/movieRecommended", (req, res) => {
+
+    var id = req.query.id;//유사 콘텐츠를 찾을 대상 ID
+
+    var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: [id, 'value3'],
         encoding : 'utf8'
     };
 
@@ -100,7 +127,6 @@ router.get("/movieRecommended", (req, res) => {
         }   
         else{
             //성공시 TOP10 결과값 세팅
-            
             var recommArr1 = [];
             var recommArr2 = [];
             
@@ -144,41 +170,11 @@ router.get("/movieRecommended", (req, res) => {
                 recommArr2.push(chileData);    
             }
             
-            res.send( {recommArr1: recommArr1, recommArr2, recommArr2});     
-            //res.send( {results: results});
+            res.send( {recommArr1: recommArr1, recommArr2, recommArr2});    
+            //res.send( {results: results});     
         }
-        
         //console.log('results: %j', results);
     });
-
-    /*  ○○ danfojs를 사용한 csv 추출미 데이터 가공 예제 ○○
-        ※ 참조 링크 :  https://danfo.jsdata.org/getting-started
-        concat : 데이터 프레임들을 연결
-        mean   : 숫자를 소수점 까지 표현
-        merge  : 데이터 프레임 합치기
-        monthName : 날자 폼에서 월 명을 반환 1 -> January
-
-        ★★ 그외 스크립트에서 cvs를 실행하여 통계, 차트 등의 관측이 가능 하다. ★★
-    */
-    /*
-    var moviesResult = [];
-    fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_movies copy.csv')
-    .pipe(csv())
-    .on('data', (data) =>{ moviesResult.push(data) })
-    .on('end', () => {
-        
-        var df = new  dfd.DataFrame(moviesResult);
-
-        df.print();//테이블 형식으로 출력
-        df.iloc({ rows: [":"], columns: ["1:2"]}).print();//모든열 두번쩨 컬럼 반환
-        df.iloc({ rows: ["0:2"], columns: [":"]}).print();//2열까지 모든 컬럼 반환
-        df.iloc({ rows: df["vote_average"].gt(7) }).print();//해당 컬럼이 7보다 큰 열 반환
-        df.iloc({ rows: df["vote_average"].gt(7).and(df["title"].eq("Avatar")), columns: [0]}).print();//해당컬럼이 10보다 크고 이름이 사과인것 1열 반환
-        df.isNa().print();//열에서 NaN 는 true 나머지 false 반환
-        console.log(df.tensor);//전체 데이터 프레임 출력
-        
-    });
-    */
 });
 
 /*
@@ -243,7 +239,7 @@ router.get("/moviesDataInit", (req, res) => {
     
     const moviesResult = [];
     const creditsRsult = [];
-    /* 영화 정보 
+    /* 영화 정보 */
     fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_movies.csv')
     .pipe(csv())
     .on('data', (data) => moviesResult.push(data))
@@ -257,11 +253,11 @@ router.get("/moviesDataInit", (req, res) => {
             var movieDoc = db.collection("movies").doc();
 
             var postData = {
-                id                   : movieDoc.id,
-                movie_id             : doc.id,
+                id                   : doc.id,
                 title                : doc.title,
                 budget               : doc.budget,
                 genres               : doc.genres,
+                keywords             : doc.keywords,
                 homepage             : doc.homepage,
                 original_language    : doc.original_language,
                 original_title       : doc.original_title,
@@ -282,8 +278,9 @@ router.get("/moviesDataInit", (req, res) => {
         });
         
     });
-    */
-    /*  출연진 정보 */
+    
+    
+    /*  출연진 정보 
     fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_credits.csv')
     .pipe(csv())
     .on('data', (data) => creditsRsult.push(data))
@@ -308,6 +305,7 @@ router.get("/moviesDataInit", (req, res) => {
         });
         res.json({data : creditsRsult});
     });
+    */
 });
 
 

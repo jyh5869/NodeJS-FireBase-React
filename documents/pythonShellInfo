@@ -1,8 +1,19 @@
 1. python 설치 및 정상 설치 확인
 2. vsCode에서 python 인식할 수있도록 플러그인 설치  = python
 3. nodejs에서 pythonShell 세팅
-4. pip list
-5. 데이터 가공 및 관리 모듈:pip install pandas
+4. 모듈 리스트 : pip list
+5. firebase 모듈 설치     : pip install firebase-admin
+6. 데이터 가공 및 관리 모듈: pip install pandas
    문자열 협업 필터링 모듈 : pip install igonre
-   pip install literal_eval
-   문자열 백터화 관련 모듈 : pip3 install -U scikit-learn 
+   특정 데이터 문자열 전환 : pip install literal_eval
+   문자열 백터화 관련 모듈 : pip3 install -U scikit-learn
+
+
+
+7. 머신러닝 라이브러리     : pip install --upgrade tensorflow
+   
+   - 파이썬 버전 이 높으면 텐서플로 실행 중 오류가 발생할수 있는데 이때 해당경로의 파일을 다운받아 설치해 준다.
+    -> X64 https://aka.ms/vs/17/release/vc_redist.x64.exe	지원되는 최신 x64 버전에 대한 Permalink입니다. X64 재배포 가능 패키지에는 ARM64 및 X64 이진 파일이 모두 포함되어 있습니다. 이 패키지를 사용하면 X64 재배포 가능 패키지가 ARM64 디바이스에 설치될 때 필요한 Visual C++ ARM64 이진 파일을 쉽게 설치할 수 있습니다.
+   
+   ※ 참고 URL : https://docs.microsoft.com/ko-KR/cpp/windows/latest-supported-vc-redist?view=msvc-170
+   
