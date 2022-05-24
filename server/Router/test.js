@@ -275,165 +275,195 @@ router.get("/moviesDataInit", (req, res) => {
                 vote_count           : doc.vote_count
             };
             movieDoc.set(postData);
-        });
-        
+        }); 
     });
-    
-    
-    /*  출연진 정보 
-    fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_credits.csv')
-    .pipe(csv())
-    .on('data', (data) => creditsRsult.push(data))
-    .on('end', () => {
-        count = 0 
-
-        creditsRsult.forEach((doc) => {
-
-            //if(count > 20) return false
-            count++
-
-            var creditsDoc = db.collection("credits").doc();
-
-                var postData = {
-                    id       : creditsDoc.id,
-                    movie_id : doc.movie_id,
-                    title    : doc.title,
-                    cast     : doc.cast,
-                    crew     : doc.crew,
-                };
-                creditsDoc.set(postData);
-        });
-        res.json({data : creditsRsult});
-    });
-    */
 });
 
 
 
-let iconv = require('iconv-lite'); //데이터의 인코딩을 위한 라이브러리
-const xlsx = require('xlsx'); //데이터를 엑셀파일로 저장하기 위한 라이브러리
-const request = require('request')
-router.get("/minwonDataInit", (req, res) => {
-    
-    const minwonResult = [];
-    
-    
+const iconv   = require('iconv-lite');     //데이터의 인코딩을 위한 라이브러리
+const xlsx    = require('xlsx');           //데이터를 엑셀파일로 저장하기 위한 라이브러리
+const request = require('request-promise');//API요청을 위한 라이브러리
+const JSONP   = require('node-jsonp');
+const convert = require('xml-js');
+const axios = require('axios');
 
-    fs.createReadStream('C:/Users/all4land/Desktop/민원행정기관utf8CSV.csv', {encoding:'utf8'})
+router.get("/minwonDataInit", async (req, res) => {
+    
+    const minwonResult = [];//엑셀에서 추출된 데이터
+    
+    fs.createReadStream('C:/Users/all4land/Desktop/민원행정기관utf8CSV.csv', {encoding: 'utf8'})
     .pipe(csv())
     .on('data', (data) => minwonResult.push(data))
     .on('end', () => {
-        count = 0 ;
-        const row = [];
-        minwonResult.forEach((doc1) => {
+    
+        const row = [];//엑셀로 추출될 데이터 배열
+        var count = minwonResult.length
+        var totalCount = 0
+        for(var i = 0 ; i < count ; i ++) {
+            (async function(i) {
+                //await delay(10*i)//반복문 마다 0.1초씩 지연
 
+                var doc1 = minwonResult[i]
 
-            if(count > 10) {return false}
+                var fclts_lclas_cd = String(doc1.FCLTS_LCLAS_CD); //기관코드1
+                var fclts_mlsfc_cd = String(doc1.FCLTS_MLSFC_CD); //기관코드2
+                var fclts_sclas_cd = String(doc1.FCLTS_SCLAS_CD); //기관코드3
+                var bd_mgt_sn      = "";                          //건물번호
+                var sig_cd         = "";                          //시군구코드
+                var emd_cd         = "";                          //읍면동코드
+                var rn_cd          = "";                          //도로명코드
+                var rn_addr        = String(doc1.rn_addr);        //풀주소
+                var pos_bul_nm     = String(doc1.pos_bul_nm);     //기관명
+                var lc_x           = "";                          //좌표x
+                var lx_y           = "";                          //좌표y
+                var tel_cn         = String(doc1.TEL_CN);         //전화번호
+                var fax            = "";                          //팩스
+                var hmpg_url       = "";                          //링크
+                var use_yn         = String(doc1.use_yn);         //사용여부
+                var reg_dt         = String(doc1.reg_dt);         //등록일자
             
-            console.log(doc1.rn_addr);
-            var copyDoc = "";
-            const url = 'http://www.juso.go.kr/addrlink/addrLinkApi.do?keyword='+encodeURI(doc1.rn_addr)+'&confmKey=U01TX0FVVEgyMDE3MDIxNzA5MjEwODE5MDg2&resultType=json';
-            request({
-                uri: url,
-                method: 'GET',
-                maxRedirects:3
-            }, 
-            function(error, response, body) {
-                if (!error) {
-                    //console.log(response.statusCode)
-                    jusoResult = JSON.parse(body)
-                    
-                    var status = jusoResult.results.common.errorMessage
-                    var totCnt = jusoResult.results.common.totalCount
-                    //console.log(body);
-                    
-                    
+                /* 좌표API호출을 위한 코드 */
+                var admCd                //행정동 코드
+                var udrtYn               //지하여부
+                var rnMgtSn              //도로명코드
+                var buldMnnm             //건물 본번
+                var buldSlno             //건물 부번
+                
+                
+                axios
+                .get('http://www.juso.go.kr/addrlink/addrLinkApi.do?keyword='+encodeURI(doc1.rn_addr)+'&confmKey=U01TX0FVVEgyMDE3MDIxNzA5MjEwODE5MDg2&resultType=json')
+                .then(response => {
+                    (async function(i) {
 
-                    jusoResult.results.juso.forEach((doc2) => {
+                            jusoResult = response.data;
 
-                        var fclts_lclas_cd = doc1.FCLTS_LCLAS_CD; //기관코드1
-                        var fclts_mlsfc_cd = doc1.FCLTS_MLSFC_CD; //기관코드2
-                        var fclts_sclas_cd = doc1.FCLTS_SCLAS_CD; //기관코드3
-                        var bd_mgt_sn      = doc2.bdMgtSn;                  //건물번호
-                        var sig_cd         = doc2.rnMgtSn.substr(0,3);                  //시군구코드
-                        var emd_cd         = doc2.rnMgtSn.substr(4,2);                  //읍면동코드
-                        var rn_cd          = doc2.rnMgtSn.substr(5,7);                  //도로명코드
-                        var rn_addr        = doc1.rn_addr;        //풀주소
-                        var pos_bul_nm     = doc1.pos_bul_nm;     //기관명
-                        var lc_x           = "";                  //좌표x
-                        var lx_y           = "";                  //좌표y
-                        var tel_cn         = doc1.tel_cn          //전화번호
-                        var fax            = "";                  //팩스
-                        var hmpg_url       = "";                  //링크
-                        var use_yn         = doc1.use_yn;         //사용여부
-                        var reg_dt         = doc1.reg_dt;         //등록일자
-                    
-                        /* 좌표API호출을 위한 코드 */
-                        var admCd                //행정동 코드
-                        var udrtYn               //지하여부
-                        var rnMgtSn              //도로명코드
-                        var buldMnnm             //건물 본번
-                        var buldSlno             //건물 부번
-                        /*
-                        bd_mgt_sn = doc2.bdMgtSn//건물번호
-                        sig_cd    = doc2.rnMgtSn.substr(0,3)//시도
-                        emd_cd    = doc2.rnMgtSn.substr(4,2)//읍면동
-                        rn_cd     = doc2.rnMgtSn.substr(5,7)//도로명
-        
-                        admCd     = doc2.admCd//행정동 코드
-                        udrtYn    = doc2.udrtYn//지하여부
-                        rnMgtSn   = doc2.rnMgtSn//도로명코드
-                        buldMnnm  = doc2.buldMnnm//건물 본번
-                        buldSlno  = doc2.buldSlno//건물 부번
-                        */
+                            var status = jusoResult.results.common.errorMessage
+                            var totCnt = jusoResult.results.common.totalCount
+                            //console.log(totCnt)
 
-                        var postData = {
-                            fclts_lclas_cd : fclts_lclas_cd,      //기관코드1
-                            fclts_mlsfc_cd : fclts_mlsfc_cd,      //기관코드2
-                            fclts_sclas_cd : fclts_sclas_cd,      //기관코드3
-                            bd_mgt_sn      : bd_mgt_sn,           //건물번호
-                            sig_cd         : sig_cd,              //시군구코드
-                            emd_cd         : emd_cd,              //읍면동코드
-                            rn_cd          : rn_cd,               //도로명코드
-                            rn_addr        : rn_addr,             //풀주소
-                            pos_bul_nm     : pos_bul_nm,          //기관명
-                            lc_x           : lc_x,                //좌표x
-                            lx_y           : lx_y,                //좌표y
-                            tel_cn         : tel_cn,              //전화번호
-                            fax            : fax,                 //팩스
-                            hmpg_url       : hmpg_url,            //링크
-                            use_yn         : use_yn,              //사용여부
-                            reg_dt         : reg_dt               //등록일자
-                        };
-                        row.push(postData);
-                        //console.log(postData)
+
+                            if(jusoResult.results.juso[0] != null && totCnt != "0" ){
+                                var doc2 = jusoResult.results.juso[0];
+
+                                bd_mgt_sn   = doc2.bdMgtSn;             //건물번호
+                                sig_cd      = doc2.rnMgtSn.substr(0,3); //시군구코드
+                                emd_cd      = doc2.rnMgtSn.substr(3,2); //읍면동코드
+                                rn_cd       = doc2.rnMgtSn.substr(5,7); //도로명코드
+
+                                admCd       = doc2.admCd         //행정동 코드
+                                udrtYn      = doc2.udrtYn         //지하여부
+                                rnMgtSn     = doc2.rnMgtSn         //도로명코드
+                                buldMnnm    = doc2.buldMnnm         //건물 본번
+                                buldSlno    = doc2.buldSlno         //건물 부번
+                            }
                         
-                        console.log(row.length +     "                   "+minwonResult.length);
-                        if(row.length === 10) {
-                            makeExcel(row)
-                            res.json({data : row});
-                        }
-                    });
-                    if(totCnt != 1) return false;
-                } 
-                else {
-                    console.log(response)
-                }
-            });
-            count ++
-        });    
-        
+                        
+                        
+                        let lc_x = "";
+                        let lx_y = "";
+                        
+                        JSONP ( 'http://www.juso.go.kr/addrlink/addrCoordApiJsonp.do?admCd='+admCd+'&rnMgtSn='+rnMgtSn+'&udrtYn='+udrtYn+'&buldMnnm='+buldMnnm+'&buldSlno='+buldSlno+'&confmKey=U01TX0FVVEgyMDIxMTAyNjE3MzMzOTExMTgwNjY=' , function ( json ) {
+
+                            var xmlToJson = convert.xml2json(json.returnXml, {compact: true, spaces: 4});
+                            //console.log(rn_addr)
+                            //console.log('http://www.juso.go.kr/addrlink/addrCoordApiJsonp.do?admCd='+admCd+'&rnMgtSn='+rnMgtSn+'&udrtYn='+udrtYn+'&buldMnnm='+buldMnnm+'&buldSlno='+buldSlno+'&confmKey=U01TX0FVVEgyMDIxMTAyNjE3MzMzOTExMTgwNjY=');
+                            var jsonData  = JSON.parse(xmlToJson).results
+                            var totalCnt =  jsonData.common.totalCount._text
+                            var jusoData ; //여러건일 경우 
+                            if(totalCnt == 1){
+                                jusoData = jsonData.juso
+
+                                lc_x = jusoData.entX._text;
+                                lx_y = jusoData.entY._text;
+                            }
+                            else if (totalCnt != 0){
+                                jusoData = jsonData.juso[0]
+
+                                lc_x = jusoData.entX._text;
+                                lx_y = jusoData.entY._text;
+                            }
+                            else {
+                                lc_x = "이력주소";
+                                lx_y = "이력주소";
+                            }
+
+                            
+                            
+                            var postData = {
+                                fclts_lclas_cd : fclts_lclas_cd,        //기관코드1
+                                fclts_mlsfc_cd : fclts_mlsfc_cd,        //기관코드2
+                                fclts_sclas_cd : fclts_sclas_cd,        //기관코드3
+                                bd_mgt_sn      : "'"+String(bd_mgt_sn), //건물번호
+                                sig_cd         : "'"+String(sig_cd),    //시군구코드
+                                emd_cd         : "'"+String(emd_cd),    //읍면동코드
+                                rn_cd          : "'"+String(rn_cd),     //도로명코드
+                                rn_addr        : rn_addr,               //풀주소
+                                pos_bul_nm     : pos_bul_nm,            //기관명
+                                lc_x           : lc_x,                  //좌표x
+                                lx_y           : lx_y,                  //좌표y
+                                tel_cn         : tel_cn,                //전화번호
+                                fax            : fax,                   //팩스
+                                hmpg_url       : hmpg_url,              //링크
+                                use_yn         : use_yn,                //사용여부
+                                reg_dt         : reg_dt                 //등록일자
+                            };
+                            
+                            
+                            row.push(postData);
+
+                            console.log(row.length +    "                 "+ count + "                "+minwonResult.length);
+                            if(row.length === count) {
+                                makeExcel(row)
+                                res.json({data : row});
+                            }
+                        
+                            })
+                        
+                    })(i);
+                })
+                .catch(error => { 
+                    console.error(error);
+                });
+
+/*
+                //도로명주소 API를 호출하여 주소데이터 추출
+                request({
+                    uri: 'http://www.juso.go.kr/addrlink/addrLinkApi.do?keyword='+encodeURI(doc1.rn_addr)+'&confmKey=U01TX0FVVEgyMDE3MDIxNzA5MjEwODE5MDg2&resultType=json',
+                    method: 'GET',
+                    headers: {
+                        'Connection': 'keep-alive',
+                        'Accept-Encoding': '',
+                        'Accept-Language': 'en-US,en;q=0.8'
+                    },
+                    agent: false,
+                    requestTimeout: 16000,
+                    timeout : 16000
+                }, 
+                function ( error, response, body)  {
+                    
+                });
+*/
+            })(i);
+        }
     });
 });
 
+//시간 지연 (반복문의 경우 시간 * 반복문의 인덱스 i 를 곱하여 호출) 참고 : https://stackoverflow.com/questions/30676849/delay-between-api-calls-nodejs
+function delay(n){
+    return new Promise(function(resolve){
+        setTimeout(resolve,n*1);
+    });
+}
+
 function makeExcel(rows){
-    console.log("복사가즈암★★★★★★★");
+    console.log("<COPY START>");
     const workSheet = xlsx.utils.json_to_sheet(rows);
     
     // csv로 저장하는 경우
     const stream = xlsx.stream.to_csv(workSheet);
-    stream.pipe(fs.createWriteStream('C:/Users/all4land/Desktop/test3.csv'));
-
+    stream.pipe(fs.createWriteStream('C:/Users/all4land/Desktop/test.csv'));
+    console.log("<COPY END>");
 }
 
 module.exports = router;
