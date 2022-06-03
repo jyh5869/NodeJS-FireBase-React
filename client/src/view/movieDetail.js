@@ -109,14 +109,19 @@ function MovieDetail(props) {
                     </tr>
                 </thead>
                 <tbody>
-                    {list1.map((list, index) => (   
-                        <tr key={list.id}> 
-                            <td className="text-center">{index+1}</td>
-                            <td className="text-center"><a href={url + list.id} key={list.id} className="text-center" >{list.title}</a></td>
-                            <td className="text-center">{list.genres}</td>
-                            <td className="text-center">{list.vote_average}</td>
-                        </tr>                   
-                    ))}
+                {
+                    list1.length != 0
+                    ?
+                        list1.map((list, index) => (   
+                            <tr key={list.id}> 
+                                <td className="text-center">{index+1}</td>
+                                <td className="text-center"><a href={url + list.id} key={list.id} className="text-center" >{list.title}</a></td>
+                                <td className="text-center">{list.genres}</td>
+                                <td className="text-center">{list.vote_average}</td>
+                            </tr>                   
+                        ))
+                    : <tr><td colSpan={4} className="text-center" >추천 데이터가 존재하지 않습니다.</td></tr>
+                    }
                 </tbody>
             </Table>
             
@@ -131,14 +136,19 @@ function MovieDetail(props) {
                     </tr>
                 </thead>
                 <tbody>
-                    {list2.map((list, index) => (   
-                        <tr key={list.id}> 
-                            <td className="text-center">{index+1}</td>
-                            <td className="text-center"><a href={url + list.id} key={list.id} className="text-center" >{list.title}</a></td>
-                            <td className="text-center">{list.genres}</td>
-                            <td className="text-center">{list.vote_average}</td>
-                        </tr>                   
-                    ))}
+                    {
+                    list2.length != 0
+                    ?
+                        list2.map((list, index) => (   
+                            <tr key={list.id}> 
+                                <td className="text-center">{index+1}</td>
+                                <td className="text-center"><a href={url + list.id} key={list.id} className="text-center" >{list.title}</a></td>
+                                <td className="text-center">{list.genres}</td>
+                                <td className="text-center">{list.vote_average}</td>
+                            </tr>                   
+                        ))
+                    : <tr><td colSpan={4} className="text-center" >추천데이터가 존재하지 않습니다.</td></tr>
+                    }
                 </tbody>
             </Table>              
         </React.Fragment>

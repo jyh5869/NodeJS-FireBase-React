@@ -32,7 +32,7 @@ function ProdList() {
                 {list.map((list, index) => ( 
                 <a href={url + list.id} key={list.id} className="text-center" >    
                 <div className={"card border-"+ color[Number(index%6)] +" col-md-5 m-2"} >
-                    <div className={"card-header bg-"+ color[Number(index%6)]}>{list.original_title} (개봉: {list.release_date})</div>
+                    <div className={"card-header bg-"+ color[Number(index%6)]}>{list.original_title} (개봉: {list.release_date})   {list.id} </div>
                     <div className={"card-body text-" + color[Number(index%6)]} >
                         {/* 
                             랜덤 이미지 링크 1, 2

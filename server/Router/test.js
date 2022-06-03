@@ -33,7 +33,7 @@ var db = firebase.firestore();
 /*  영화 데이터 리스트 세팅  */
 router.get("/", (req, res) => {
     
-    db.collection('movies').orderBy("release_date", "desc").limit(100).get()
+    db.collection('movies').orderBy("id",'asc').limit(100).get()
     .then((snapshot) => {
         var rows = [];
 
@@ -104,6 +104,26 @@ router.get("/reviewDeepLeaning", (req, res) => {
     콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환
     참고 사이트 : https://big-dream-world.tistory.com/66
     direct 호출 rul 셈플 : http://localhost:5000/movieRecommended?id=315011
+
+    100     10022   1002222
+    "1",
+    "0",
+    "0       100",
+    "1     10003",
+    "2    100042",
+    "3     10008",
+    "4     10012",
+    "5     10013",
+    "6     10014",
+    "7     10016",
+    "8     10017",
+    "9     10022",
+
+
+
+
+    "0    10003",
+    "1    10022",
 */
 router.get("/movieRecommended", (req, res) => {
 
@@ -126,56 +146,64 @@ router.get("/movieRecommended", (req, res) => {
             console.log(err);           
         }   
         else{
+            
             //성공시 TOP10 결과값 세팅
             var recommArr1 = [];
             var recommArr2 = [];
-            
-            top10Json1 = JSON.parse(results[0].replace("'",""))//앞뒤 공백 제거
+            top10Json1Cnt = JSON.parse(results[0].replace("'","")).movieExistYn//앞뒤 공백 제거
+            top10Json1    = JSON.parse(results[2].replace("'",""))             //앞뒤 공백 제거
 
-            //배열로 전환
-            var titleArr    = Object.values(top10Json1.title)
-            var idArr       = Object.values(top10Json1.id)
-            var genresArr   = Object.values(top10Json1.genres)
-            var averageArr  = Object.values(top10Json1.vote_average)
-            
-            for(var i = 0 ; i <titleArr.length; i ++){
+            if(Number(top10Json1Cnt) != 0){
+                //배열로 전환
+                var titleArr    = Object.values(top10Json1.title)
+                var idArr       = Object.values(top10Json1.id)
+                var genresArr   = Object.values(top10Json1.genres)
+                var averageArr  = Object.values(top10Json1.vote_average)
+                
+                for(var i = 0 ; i <titleArr.length; i ++){
 
-                var chileData = {
-                    id : idArr[i],
-                    title : titleArr[i],
-                    genres : genresArr[i],
-                    vote_average : averageArr[i]
-                    
+                    var chileData = {
+                        id : idArr[i],
+                        title : titleArr[i],
+                        genres : genresArr[i],
+                        vote_average : averageArr[i]
+                        
+                    }
+                    recommArr1.push(chileData);    
                 }
-                recommArr1.push(chileData);    
             }
 
-            top10Json2 = JSON.parse(results[1].replace("'",""))//앞뒤 공백 제거
+            top10Json2Cnt = JSON.parse(results[1].replace("'","")).creditsExistYn//앞뒤 공백 제거
+            top10Json2    = JSON.parse(results[3].replace("'",""))               //앞뒤 공백 제거
 
-            //배열로 전환
-            var titleArr    = Object.values(top10Json2.title)
-            var idArr       = Object.values(top10Json2.id)
-            var genresArr   = Object.values(top10Json2.genres)
-            var averageArr  = Object.values(top10Json2.vote_average)
-            
-            for(var i = 0 ; i <titleArr.length; i ++){
+            if(Number(top10Json2Cnt) != 0){
+                //배열로 전환
+                var titleArr    = Object.values(top10Json2.title)
+                var idArr       = Object.values(top10Json2.id)
+                var genresArr   = Object.values(top10Json2.genres)
+                var averageArr  = Object.values(top10Json2.vote_average)
+                
+                for(var i = 0 ; i <titleArr.length; i ++){
 
-                var chileData = {
-                    id : idArr[i],
-                    title : titleArr[i],
-                    genres : genresArr[i],
-                    vote_average : averageArr[i]
-                    
+                    var chileData = {
+                        id : idArr[i],
+                        title : titleArr[i],
+                        genres : genresArr[i],
+                        vote_average : averageArr[i]
+                        
+                    }
+                    recommArr2.push(chileData);    
                 }
-                recommArr2.push(chileData);    
             }
-            
+
             res.send( {recommArr1: recommArr1, recommArr2, recommArr2});    
+            
             //res.send( {results: results});     
         }
         //console.log('results: %j', results);
     });
 });
+
 
 /*
     추천 영화 머신러닝 예제 (참조링크  : https://proinlab.com/archives/2103 , https://www.npmjs.com/package/nodeml)
@@ -239,7 +267,7 @@ router.get("/moviesDataInit", (req, res) => {
     
     const moviesResult = [];
     const creditsRsult = [];
-    /* 영화 정보 */
+    /* 영화 정보 
     fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_movies.csv')
     .pipe(csv())
     .on('data', (data) => moviesResult.push(data))
@@ -277,38 +305,125 @@ router.get("/moviesDataInit", (req, res) => {
             movieDoc.set(postData);
         }); 
     });
+    */
+
+     /*  출연진 정보 */
+    fs.createReadStream('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_credits.csv')
+    .pipe(csv())
+    .on('data', (data) => creditsRsult.push(data))
+    .on('end', () => {
+        count = 0 
+        creditsRsult.forEach((doc) => {
+            //if(count > 20) return false
+            count++
+            var creditsDoc = db.collection("credits").doc();
+                var postData = {
+                    id       : doc.movie_id,
+                    title    : doc.title,
+                    cast     : doc.cast,
+                    crew     : doc.crew,
+                };
+                creditsDoc.set(postData);
+        });
+        res.json({data : creditsRsult});
+    });
+    
 });
 
 
 
-const iconv   = require('iconv-lite');     //데이터의 인코딩을 위한 라이브러리
-const xlsx    = require('xlsx');           //데이터를 엑셀파일로 저장하기 위한 라이브러리
-const request = require('request-promise');//API요청을 위한 라이브러리
-const JSONP   = require('node-jsonp');
-const convert = require('xml-js');
-const axios = require('axios');
+
+
+/*
+    ★ 민원 행정기관 처리 모듈 ★
+
+    1. 경로의 엑셀파일에서 데이터 추출
+    2. 주소 컬럼으로 주소API호출 
+    3. 호출 결과를 조합하여 좌표API호출
+    4. 주소와 좌표API 호출 결과를 엑셀파일로 추출
+*/
+const xlsx    = require('xlsx');            //데이터를 엑셀파일로 저장하기 위한 라이브러리
+const request = require('request-promise'); //API요청을 위한 라이브러리
+const JSONP   = require('node-jsonp');      //API요청을 JSONP로 받기 위한 라이브러리
+const convert = require('xml-js');          //JSONP를 XML로 변환 시키기 위한 라이브러리
+const axios   = require('axios');           //axios를 사용하기 위한 라이브러리
+const https   = require('http');            //httpAgent(new https.Agent({ keepAlive: true })를 방지하기 위한 https 라이브러리
+
+/*
+    Axios 통신 실패시 재시도 관련 세팅 및 작업
+*/
+axios.defaults.retry = 4;
+axios.defaults.retryDelay = 1000;
+
+axios.interceptors.response.use(undefined, function axiosRetryInterceptor(err) {
+    var config = err.config;
+    // If config does not exist or the retry option is not set, reject
+    if(!config || !config.retry) return Promise.reject(err);
+    
+    // Set the variable for keeping track of the retry count
+    config.__retryCount = config.__retryCount || 0;
+    
+    // Check if we've maxed out the total number of retries
+    if(config.__retryCount >= config.retry) {
+        // Reject with the error
+        return Promise.reject(err);
+    }
+    
+    // Increase the retry count
+    config.__retryCount += 1;
+    
+    // Create new promise to handle exponential backoff
+    var backoff = new Promise(function(resolve) {
+        setTimeout(function() {
+            resolve();
+        }, config.retryDelay || 1);
+    });
+    
+    // Return the promise in which recalls axios to retry the request
+    return backoff.then(function() {
+        return axios(config);
+    });
+});
 
 router.get("/minwonDataInit", async (req, res) => {
     
     const minwonResult = [];//엑셀에서 추출된 데이터
-    
-    fs.createReadStream('C:/Users/all4land/Desktop/민원행정기관utf8CSV.csv', {encoding: 'utf8'})
+    let minwonSliceArr;
+
+    fs.createReadStream('C:/Users/all4land/Desktop/결과없는 최종.csv', {encoding: 'utf8'})
     .pipe(csv())
     .on('data', (data) => minwonResult.push(data))
     .on('end', () => {
     
+        //var start = 0;     var end = 2000;
+        //var start = 2000;  var end = 4000;
+        //var start = 4000;  var end = 6000;
+        //var start = 6000;  var end = 8000;
+        //var start = 8000;  var end = 10000;
+        //var start = 10000; var end = 12000;
+        //var start = 12000; var end = 14000;
+        //var start = 14000; var end = 16000;
+        //var start = 16000; var end = 18000;
+        //var start = 18000; var end = 20000;
+        //var start = 20000; var end = 22000;
+        //var start = 22000; var end = minwonResult.length;
+        var start = 0;       var end = minwonResult.length;
+
+        minwonSliceArr = minwonResult.slice(start, end);
+
         const row = [];//엑셀로 추출될 데이터 배열
-        var count = minwonResult.length
-        var totalCount = 0
+        var count = minwonSliceArr.length
+
         for(var i = 0 ; i < count ; i ++) {
             (async function(i) {
-                //await delay(10*i)//반복문 마다 0.1초씩 지연
+                
+                await delay(50*i)//반복문 마다 0.1초씩 지연
 
-                var doc1 = minwonResult[i]
+                var doc1 = minwonSliceArr[i]
 
-                var fclts_lclas_cd = String(doc1.FCLTS_LCLAS_CD); //기관코드1
-                var fclts_mlsfc_cd = String(doc1.FCLTS_MLSFC_CD); //기관코드2
-                var fclts_sclas_cd = String(doc1.FCLTS_SCLAS_CD); //기관코드3
+                var fclts_lclas_cd = String(doc1.fclts_lclas_cd); //기관코드1
+                var fclts_mlsfc_cd = String(doc1.fclts_mlsfc_cd); //기관코드2
+                var fclts_sclas_cd = String(doc1.fclts_sclas_cd); //기관코드3
                 var bd_mgt_sn      = "";                          //건물번호
                 var sig_cd         = "";                          //시군구코드
                 var emd_cd         = "";                          //읍면동코드
@@ -317,9 +432,9 @@ router.get("/minwonDataInit", async (req, res) => {
                 var pos_bul_nm     = String(doc1.pos_bul_nm);     //기관명
                 var lc_x           = "";                          //좌표x
                 var lx_y           = "";                          //좌표y
-                var tel_cn         = String(doc1.TEL_CN);         //전화번호
-                var fax            = "";                          //팩스
-                var hmpg_url       = "";                          //링크
+                var tel_cn         = String(doc1.tel_cn);         //전화번호
+                var fax            = String(doc1.fax);            //팩스
+                var hmpg_url       = String(doc1.hmpg_url);       //링크
                 var use_yn         = String(doc1.use_yn);         //사용여부
                 var reg_dt         = String(doc1.reg_dt);         //등록일자
             
@@ -329,48 +444,47 @@ router.get("/minwonDataInit", async (req, res) => {
                 var rnMgtSn              //도로명코드
                 var buldMnnm             //건물 본번
                 var buldSlno             //건물 부번
-                
-                
+            
                 axios
-                .get('http://www.juso.go.kr/addrlink/addrLinkApi.do?keyword='+encodeURI(doc1.rn_addr)+'&confmKey=U01TX0FVVEgyMDE3MDIxNzA5MjEwODE5MDg2&resultType=json')
+                .get('http://www.juso.go.kr/addrlink/addrLinkApi.do?keyword='+encodeURI(doc1.rn_addr)+'&confmKey=U01TX0FVVEgyMDE3MDIxNzA5MjEwODE5MDg2&resultType=json&hstryYn=Y', {
+                    timeout: 30000, 
+                    httpsAgent: new https.Agent({ keepAlive: true }
+                )})
                 .then(response => {
-                    (async function(i) {
+                    (async function(i) {//소스의 순차적 실행을 위한 설정
 
-                            jusoResult = response.data;
+                        jusoResult = response.data;
 
-                            var status = jusoResult.results.common.errorMessage
-                            var totCnt = jusoResult.results.common.totalCount
-                            //console.log(totCnt)
+                        var status = jusoResult.results.common.errorMessage
+                        var totCnt = jusoResult.results.common.totalCount
 
+                        if(jusoResult.results.juso != null && totCnt != "0" ){
+                            var doc2 = jusoResult.results.juso[0];
 
-                            if(jusoResult.results.juso[0] != null && totCnt != "0" ){
-                                var doc2 = jusoResult.results.juso[0];
+                            bd_mgt_sn   = doc2.bdMgtSn;             //건물번호
+                            sig_cd      = doc2.rnMgtSn.substr(0,3); //시군구코드
+                            emd_cd      = doc2.rnMgtSn.substr(3,2); //읍면동코드
+                            rn_cd       = doc2.rnMgtSn.substr(5,7); //도로명코드
 
-                                bd_mgt_sn   = doc2.bdMgtSn;             //건물번호
-                                sig_cd      = doc2.rnMgtSn.substr(0,3); //시군구코드
-                                emd_cd      = doc2.rnMgtSn.substr(3,2); //읍면동코드
-                                rn_cd       = doc2.rnMgtSn.substr(5,7); //도로명코드
-
-                                admCd       = doc2.admCd         //행정동 코드
-                                udrtYn      = doc2.udrtYn         //지하여부
-                                rnMgtSn     = doc2.rnMgtSn         //도로명코드
-                                buldMnnm    = doc2.buldMnnm         //건물 본번
-                                buldSlno    = doc2.buldSlno         //건물 부번
-                            }
-                        
-                        
+                            admCd       = doc2.admCd                //행정동 코드
+                            udrtYn      = doc2.udrtYn               //지하여부
+                            rnMgtSn     = doc2.rnMgtSn              //도로명코드
+                            buldMnnm    = doc2.buldMnnm             //건물 본번
+                            buldSlno    = doc2.buldSlno             //건물 부번
+                        }
                         
                         let lc_x = "";
                         let lx_y = "";
-                        
-                        JSONP ( 'http://www.juso.go.kr/addrlink/addrCoordApiJsonp.do?admCd='+admCd+'&rnMgtSn='+rnMgtSn+'&udrtYn='+udrtYn+'&buldMnnm='+buldMnnm+'&buldSlno='+buldSlno+'&confmKey=U01TX0FVVEgyMDIxMTAyNjE3MzMzOTExMTgwNjY=' , function ( json ) {
 
+                        await delay(10*i)//반복문 마다 0.1초씩 지연
+                        JSONP ( 'http://www.juso.go.kr/addrlink/addrCoordApiJsonp.do?admCd='+admCd+'&rnMgtSn='+rnMgtSn+'&udrtYn='+udrtYn+'&buldMnnm='+buldMnnm+'&buldSlno='+buldSlno+'&confmKey=U01TX0FVVEgyMDIxMTAyNjE3MzMzOTExMTgwNjY=' , function ( json ) {
+                        (async function(i) {
+                             
                             var xmlToJson = convert.xml2json(json.returnXml, {compact: true, spaces: 4});
-                            //console.log(rn_addr)
-                            //console.log('http://www.juso.go.kr/addrlink/addrCoordApiJsonp.do?admCd='+admCd+'&rnMgtSn='+rnMgtSn+'&udrtYn='+udrtYn+'&buldMnnm='+buldMnnm+'&buldSlno='+buldSlno+'&confmKey=U01TX0FVVEgyMDIxMTAyNjE3MzMzOTExMTgwNjY=');
                             var jsonData  = JSON.parse(xmlToJson).results
                             var totalCnt =  jsonData.common.totalCount._text
-                            var jusoData ; //여러건일 경우 
+                            var jusoData ;  //여러건일 경우 
+                            
                             if(totalCnt == 1){
                                 jusoData = jsonData.juso
 
@@ -384,11 +498,9 @@ router.get("/minwonDataInit", async (req, res) => {
                                 lx_y = jusoData.entY._text;
                             }
                             else {
-                                lc_x = "이력주소";
-                                lx_y = "이력주소";
+                                lc_x = "";
+                                lx_y = "";
                             }
-
-                            
                             
                             var postData = {
                                 fclts_lclas_cd : fclts_lclas_cd,        //기관코드1
@@ -400,50 +512,34 @@ router.get("/minwonDataInit", async (req, res) => {
                                 rn_cd          : "'"+String(rn_cd),     //도로명코드
                                 rn_addr        : rn_addr,               //풀주소
                                 pos_bul_nm     : pos_bul_nm,            //기관명
-                                lc_x           : lc_x,                  //좌표x
-                                lx_y           : lx_y,                  //좌표y
-                                tel_cn         : tel_cn,                //전화번호
-                                fax            : fax,                   //팩스
+                                lc_x           : "'"+String(lc_x),      //좌표x
+                                lc_y           : "'"+String(lx_y),      //좌표y
+                                tel_cn         : "'"+String(tel_cn),    //전화번호
+                                fax            : "'"+String(fax),       //팩스
                                 hmpg_url       : hmpg_url,              //링크
                                 use_yn         : use_yn,                //사용여부
-                                reg_dt         : reg_dt                 //등록일자
+                                reg_dt         : "",                    //등록일자
+                                updt_dt        : ""                     //수정일자        
                             };
                             
                             
                             row.push(postData);
+                            
+                            console.log(row.length + "     " + minwonSliceArr.length + "    "+minwonResult.length);
 
-                            console.log(row.length +    "                 "+ count + "                "+minwonResult.length);
-                            if(row.length === count) {
-                                makeExcel(row)
+                            if(row.length === minwonSliceArr.length) {   
+                                
+                                makeExcel(row , start+"~"+end)
                                 res.json({data : row});
+                                return false
                             }
-                        
-                            })
-                        
+                        })(i);
+                        })    
                     })(i);
                 })
                 .catch(error => { 
                     console.error(error);
                 });
-
-/*
-                //도로명주소 API를 호출하여 주소데이터 추출
-                request({
-                    uri: 'http://www.juso.go.kr/addrlink/addrLinkApi.do?keyword='+encodeURI(doc1.rn_addr)+'&confmKey=U01TX0FVVEgyMDE3MDIxNzA5MjEwODE5MDg2&resultType=json',
-                    method: 'GET',
-                    headers: {
-                        'Connection': 'keep-alive',
-                        'Accept-Encoding': '',
-                        'Accept-Language': 'en-US,en;q=0.8'
-                    },
-                    agent: false,
-                    requestTimeout: 16000,
-                    timeout : 16000
-                }, 
-                function ( error, response, body)  {
-                    
-                });
-*/
             })(i);
         }
     });
@@ -456,14 +552,18 @@ function delay(n){
     });
 }
 
-function makeExcel(rows){
+/*
+    배열 과 파일명을 파라메터로 받아 엘셀파일로 추출
+*/
+function makeExcel(rows, fileNum){
     console.log("<COPY START>");
     const workSheet = xlsx.utils.json_to_sheet(rows);
-    
+
     // csv로 저장하는 경우
     const stream = xlsx.stream.to_csv(workSheet);
-    stream.pipe(fs.createWriteStream('C:/Users/all4land/Desktop/test.csv'));
+    stream.pipe(fs.createWriteStream('C:/Users/all4land/Desktop/test_'+fileNum+'.csv'));
     console.log("<COPY END>");
 }
+
 
 module.exports = router;
