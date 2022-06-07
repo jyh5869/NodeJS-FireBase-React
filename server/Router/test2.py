@@ -43,8 +43,8 @@ credits_dict2  = list(map(lambda x: x.to_dict(), credits_docs2)) # list(Map) 타
 movieExistYn   = len(pd.DataFrame(movies_dict2))
 creditsExistYn = len(pd.DataFrame(credits_dict2))
 
-print(json.dumps({'movieExistYn'   : movieExistYn}))
-print(json.dumps({'creditsExistYn' : creditsExistYn}))
+# print(json.dumps({'movieExistYn'   : movieExistYn}))
+# print(json.dumps({'creditsExistYn' : creditsExistYn}))
 
 
 
@@ -55,7 +55,7 @@ print(json.dumps({'creditsExistYn' : creditsExistYn}))
 if movieExistYn != 0:
 
     # 데이터 조회
-    movies_query   = movies_ref.order_by("id").limit(10)            # 개봉일 기준 limit의 레코드 호출 쿼리 작성
+    movies_query   = movies_ref.order_by("id").limit(10)           # 개봉일 기준 limit의 레코드 호출 쿼리 작성
     movies_docs    = movies_query.stream()                          # 쿼리 조건에 맞는 데이터 가져오기
     movies_dict    = list(map(lambda x: x.to_dict(), movies_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
 
@@ -67,9 +67,10 @@ if movieExistYn != 0:
     # print(smd['id']) 대상 IDX 조회
 
     # 유사 콘텐츠를 뽑을 타겟 추출 (title, id)
-    selectMovie = smd[smd['id'] == int(sys.argv[1])]
-    targetTitle = selectMovie.iloc[0]['title']
-    targetId    = selectMovie.iloc[0]['id']
+    # selectMovie = smd[smd['id'] == int(sys.argv[1])]
+    # targetTitle = selectMovie.iloc[0]['title']
+    # targetId    = selectMovie.iloc[0]['id']
+    targetId    = int(sys.argv[1])
 
     # description 데이터를 만들고 결측값을 ''로 채움(fillna(''))
     smd['tagline']     = smd['tagline'].fillna('')
@@ -104,11 +105,18 @@ if movieExistYn != 0:
         movie_indices = [i[0] for i in sim_scores] 
         return smd.iloc[movie_indices]
 
-    # 유사 콘텐츠 추출
-    print(getrecommandations1(targetId)[['id','title', 'genres', 'vote_average']].to_json())
+    
+    # 해당 데이터 프레임에 조회하고자 하는 데이터 정보 포함 여부 체크
+    flag_true_false = (smd['id'] == targetId).any()
 
+    # 유사 컨텐츠 추출
+    if flag_true_false:
+        print(json.dumps({'totalCnt' : movieExistYn, 'result' : getrecommandations1(targetId)[['id','title', 'genres', 'vote_average']].to_json()}))
+    else:
+        print(json.dumps({'totalCnt' : 0 , 'result' : "No Result"}))
+    
 else:
-    print(json.dumps({'result' : 'No Result Movie'}))
+    print(json.dumps({'totalCnt' : 0 , 'result' : "No Result"}))
 
 
 #########################################################
@@ -119,7 +127,7 @@ else:
 if creditsExistYn != 0:
 
     #데이터 조회
-    credits_query  = credits_ref.order_by("id").limit(10)           # 개봉일 기준 limit의 레코드 호출 쿼리 작성
+    credits_query  = credits_ref.order_by("id").limit(10)          # 개봉일 기준 limit의 레코드 호출 쿼리 작성
     credits_docs   = credits_query.stream()                         # 쿼리 조건에 맞는 데이터 가져오기
     credits_dict   = list(map(lambda x: x.to_dict(), credits_docs)) # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
 
@@ -208,11 +216,11 @@ if creditsExistYn != 0:
 
     # 유사 컨텐츠 추출
     if flag_true_false:
-        print(getrecommandations2(targetId)[['id','title', 'genres', 'vote_average']].to_json())
+        print(json.dumps({'totalCnt' : creditsExistYn, 'result' : getrecommandations2(targetId)[['id','title', 'genres', 'vote_average']].to_json()}))
     else:
-        print("No result")
+        print(json.dumps({'totalCnt' : 0 , 'result' : "No Result"}))
 else:
-    print(json.dumps({'result' : 'No Result Credits'}))
+    print(json.dumps({'totalCnt' : 0 , 'result' : "No Result"}))
 
 
 

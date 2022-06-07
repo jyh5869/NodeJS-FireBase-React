@@ -33,7 +33,7 @@ var db = firebase.firestore();
 /*  영화 데이터 리스트 세팅  */
 router.get("/", (req, res) => {
     
-    db.collection('movies').orderBy("id",'asc').limit(100).get()
+    db.collection('movies').orderBy("id",'asc').limit(10).get()
     .then((snapshot) => {
         var rows = [];
 
@@ -150,10 +150,11 @@ router.get("/movieRecommended", (req, res) => {
             //성공시 TOP10 결과값 세팅
             var recommArr1 = [];
             var recommArr2 = [];
-            top10Json1Cnt = JSON.parse(results[0].replace("'","")).movieExistYn//앞뒤 공백 제거
-            top10Json1    = JSON.parse(results[2].replace("'",""))             //앞뒤 공백 제거
+            top10Json1Cnt = JSON.parse(results[0].replace("'","")).totalCnt//앞뒤 공백 제거
+            top10Json1    = JSON.parse(results[0].replace("'","")).result  //앞뒤 공백 제거
 
             if(Number(top10Json1Cnt) != 0){
+                top10Json1 = JSON.parse(top10Json1);
                 //배열로 전환
                 var titleArr    = Object.values(top10Json1.title)
                 var idArr       = Object.values(top10Json1.id)
@@ -173,10 +174,11 @@ router.get("/movieRecommended", (req, res) => {
                 }
             }
 
-            top10Json2Cnt = JSON.parse(results[1].replace("'","")).creditsExistYn//앞뒤 공백 제거
-            top10Json2    = JSON.parse(results[3].replace("'",""))               //앞뒤 공백 제거
+            top10Json2Cnt = JSON.parse(results[1].replace("'","")).totalCnt//앞뒤 공백 제거
+            top10Json2    = JSON.parse(results[1].replace("'","")).result//앞뒤 공백 제거
 
-            if(Number(top10Json2Cnt) != 0){
+            if(Number(top10Json2Cnt) != 0){ 
+                top10Json2 = JSON.parse(top10Json2);
                 //배열로 전환
                 var titleArr    = Object.values(top10Json2.title)
                 var idArr       = Object.values(top10Json2.id)
@@ -195,7 +197,7 @@ router.get("/movieRecommended", (req, res) => {
                     recommArr2.push(chileData);    
                 }
             }
-
+            
             res.send( {recommArr1: recommArr1, recommArr2, recommArr2});    
             
             //res.send( {results: results});     
