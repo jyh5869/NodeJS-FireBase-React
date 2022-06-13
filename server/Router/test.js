@@ -89,9 +89,11 @@ router.get("/reviewDeepLeaning", (req, res) => {
         }   
         else{
 
-
+            let data = results[0].replace(`b\'`, '').replace(`\'`, '');
+            let buff = Buffer.from(data, 'base64');
+            let text = buff.toString('utf-8');
         
-            res.send( {results: results});     
+            res.send( {results: text});     
         }
         //console.log('results: %j', results);
     });
