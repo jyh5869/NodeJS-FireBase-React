@@ -89,11 +89,22 @@ router.get("/reviewDeepLeaning", (req, res) => {
         }   
         else{
 
-            let data = results[0].replace(`b\'`, '').replace(`\'`, '');
-            let buff = Buffer.from(data, 'base64');
-            let text = buff.toString('utf-8');
-        
-            res.send( {results: text});     
+            resultArr = []
+
+            results.forEach((document, index) => {
+
+                if(index == results.length -1 ){
+                    let oringData   = document.replace(`b\'`, '').replace(`\'`, '');
+                    let toBuffer    = Buffer.from(oringData, 'base64');
+                    let encodingStr = toBuffer.toString('utf-8');
+
+                    resultArr.push(encodingStr);
+                }
+                else{
+                    resultArr.push(document);
+                }
+            });
+            res.send( {results: resultArr});     
         }
         //console.log('results: %j', results);
     });
