@@ -82,7 +82,7 @@ router.get("/reviewDeepLeaning", (req, res) => {
     };
 
 
-    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/reviewDeepLearning.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/reviewDeepLearning2.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
@@ -104,14 +104,39 @@ router.get("/reviewDeepLeaning", (req, res) => {
                     resultArr.push(document);
                 }
             });
-            res.send( {results: resultArr});     
+            res.send( {results: results});     
         }
         //console.log('results: %j', results);
     });
     
 });
 
+/*  영화 상세보기  */
+router.get("/imageDeepLeaning", (req, res) => {
 
+    var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: ["vlaue1", 'value2'],
+        encoding : 'utf8'
+    };
+
+
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/imageDeepLearningType1.py', options, function (err, results) {
+
+        if (err) {
+            console.log(err);           
+        }   
+        else{
+
+            res.send( {results: results});     
+        }
+        //console.log('results: %j', results);
+    });
+    
+});
 /*
     PythonShell을 이용한 ignore 협업 필터링 사용
     콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환

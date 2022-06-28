@@ -30,7 +30,8 @@
    
    ※ 참고 URL : https://docs.microsoft.com/ko-KR/cpp/windows/latest-supported-vc-redist?view=msvc-170
 
-8. 모델 트레이닝 과정을 차트로 보기 위한 라이브러리 : pip install matplotlib
+8. 모델 트레이닝 과정을 차트로 보기 위한 데이터 시각화 라이브러리 : pip install matplotlib
+9. 모델 트레이닝 데이터 사용을 위한 라이브 러리 : pip install tensorflow_datasets
 
 
 

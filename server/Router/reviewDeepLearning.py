@@ -13,7 +13,7 @@ from tensorflow import keras
 
 import numpy as np
 
-
+import matplotlib.pyplot as plt # 트레이닝 과정을 보기 위한 그래프 라이브러리
 
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 # from tensorflow.keras.models import Sequential
@@ -72,12 +72,12 @@ model.add(keras.layers.GlobalAveragePooling1D())
 model.add(keras.layers.Dense(16, activation='relu'))
 model.add(keras.layers.Dense(1, activation='sigmoid'))
 
-# print(model.summary())
+print(model.summary())
 
 
 model.compile(optimizer='adam',
               loss='binary_crossentropy',
-              metrics=['accuracy'])
+              metrics=['accuracy', 'binary_crossentropy'])
 
 
 
@@ -88,16 +88,17 @@ y_val = train_labels[:10000]
 partial_y_train = train_labels[10000:]
 
 
+# 1. verbose = 0 : 로깅하지않음  2. verbose = 1이상 : 0보다 클수록 상세하게 로깅을 프린트함 ( 로깅은 처리속도 저하에 영향을 끼침 )
 model.fit(partial_x_train,
                      partial_y_train,
-                     epochs=40,
+                     epochs=20,
                      batch_size=512,
                      validation_data=(x_val, y_val),
-                     verbose=1)
+                     verbose=0)
 
 
 # 테스트 데이터를 통한 모델 평가 (result 에 정확도 반환)
-results = model.evaluate(test_data,  test_labels, verbose=2)
+results = model.evaluate(test_data,  test_labels, verbose=0)
 print(results)
  
 
