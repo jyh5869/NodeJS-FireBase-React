@@ -3,12 +3,14 @@ import re
 import base64 # 인코딩
 
 import numpy as np
+import cv2
 import os
 import PIL
 import PIL.Image
 import tensorflow as tf
 import tensorflow_datasets as tfds
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import matplotlib.pyplot as plt        # 이미지 표출을 위한 LIB
 import pathlib
@@ -94,9 +96,32 @@ train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
 val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 
+
+data_augmentation = tf.keras.Sequential(
+  [
+    tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
+                                                 input_shape=(img_height, 
+                                                              img_width,
+                                                              3)),
+    tf.keras.layers.experimental.preprocessing.RandomRotation(0.1),
+    tf.keras.layers.experimental.preprocessing.RandomZoom(0.1),
+  ]
+)
+
+# 데이터 증강 확인 하기
+# plt.figure(figsize=(10, 10))
+# for images, _ in train_ds.take(1):
+#   for i in range(9):
+#     augmented_images = data_augmentation(images)
+#     ax = plt.subplot(3, 3, i + 1)
+#     plt.imshow(augmented_images[0].numpy().astype("uint8"))
+#     plt.axis("off")
+
+
 # 모델 훈련
 num_classes = 5 
 model = tf.keras.Sequential([
+    data_augmentation,
     tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
     tf.keras.layers.Conv2D(32, 1, activation='relu'),
     tf.keras.layers.MaxPooling2D(),
@@ -104,10 +129,12 @@ model = tf.keras.Sequential([
     tf.keras.layers.MaxPooling2D(),
     tf.keras.layers.Conv2D(32, 1, activation='relu'),
     tf.keras.layers.MaxPooling2D(),
+    tf.keras.layers.Dropout(0.2), # 과대적합 방지(정규화의 한 형태인 드롭아웃을 네트워크에 적용) 
     tf.keras.layers.Flatten(),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dense(num_classes)
 ])
+
 
 model.compile(
     optimizer='adam',
@@ -117,10 +144,116 @@ model.compile(
 
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-model.fit(
-    train_ds,
-    validation_data=val_ds,
-    epochs=1 # 하나의 epochs에 대해서만 학습 (빠른 실행을 위해)
+# model.fit(
+#     train_ds,
+#     validation_data=val_ds,
+#     epochs=1 # 하나의 epochs에 대해서만 학습 (빠른 실행을 위해)
+# )
+
+epochs = 1
+history = model.fit(
+  train_ds,
+  validation_data=val_ds,
+  epochs=epochs
 )
 
 
+
+
+
+# 모델 레이어 보기
+model.summary()
+
+# 모델 훈련 후 히스토리 축척
+# epochs=10
+# history = model.fit(
+#     train_ds,
+#     validation_data=val_ds,
+#     epochs=epochs
+# )
+
+
+# 모델 저장
+# model.save('model.h5')
+# 이미지 로드 후 분류 하기
+# model = load_model('model.h5')
+
+# model.compile(loss='binary_crossentropy',
+#              optimizer='rmsprop',
+#              metrics=['accuracy'])
+
+img = tf.keras.preprocessing.image.load_img(
+    'C:/Users/all4land/Desktop/validatonImg.jpg', target_size=(img_height, img_width)
+)
+img_array = tf.keras.preprocessing.image.img_to_array(img)
+img_array = tf.expand_dims(img_array, 0) # Create a batch
+
+predictions = model.predict(img_array)
+
+score = tf.nn.softmax(predictions[0])
+
+print(
+    "This image most likely belongs to {} with a {:.2f} percent confidence."
+    .format(class_names[np.argmax(score)], 100 * np.max(score))
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+
+loss = history.history['loss']
+val_loss = history.history['val_loss']
+
+epochs_range = range(epochs)
+
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
+
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.show()
