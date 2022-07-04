@@ -18,49 +18,17 @@ import pathlib
 # TENSOR VERSION
 print(tf.__version__)
 
-# 이미지 다운로드 후 경로 세팅
-dataset_url = "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
-data_dir = tf.keras.utils.get_file(origin=dataset_url, 
-                                   fname='flower_photos', 
-                                   untar=True
+(train_ds, val_ds, test_ds), metadata = tfds.load(
+    'tf_flowers',
+    split=['train[:80%]', 'train[80%:90%]', 'train[90%:]'],
+    with_info=True,
+    as_supervised=True,
 )
-data_dir = pathlib.Path(data_dir)
-
-# 인자로 받은 리스트의 길이 를 반환 (3670)
-# glob - 함수는 인자로 받은 패턴과 이름이 일치하는 모든 파일과 디렉터리의 리스트를 반환 (daisy/dasy1.jpg)
-image_count = len(list(data_dir.glob('*/*.jpg')))
-print(image_count)
-
-# roses경로의 첫번째 이미지를 표출
-roses = list(data_dir.glob('roses/*'))
-PIL.Image.open(str(roses[0]))
-
-# 매개변수 정의
-batch_size = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
-img_height = 180 # 이미지 높이
-img_width = 180  # 이미지 넓이
-
-
-# 트레이닝, 검증  데이터 생성 (검증 분할을 사용 이미지의 80%를 훈련에 사용하고 20%를 유효성 검사에 사용합니다.)
-train_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    data_dir,
-    validation_split=0.2, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
-    subset="training",
-    seed=123,
-    image_size=(img_height, img_width),
-    batch_size=batch_size
-)
-val_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    data_dir,
-    validation_split=0.2, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
-    subset="validation",
-    seed=123,
-    image_size=(img_height, img_width),
-    batch_size=batch_size
-)
+IMG_SIZE = 180
+batch_size = 32
 
 # class_names 속성을 이용해 클래스 조회(파일경로의 하위 디렉토리명)
-class_names = train_ds.class_names
+class_names = metadata.features['label'].num_classes
 print(class_names)
 
 
@@ -80,35 +48,34 @@ for image_batch, labels_batch in train_ds:
   print(labels_batch.shape)
   break
 
-# 데이터 표준화 - RGB 채널 값 [0, 255] ( 신경망에 이상적이지 않습니다. 일반적으로 입력 값을 작게 만들어야 한다.) ->  [0, 1] 범위에 있도록 표준화 
-normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./255)
+# # 데이터 표준화 - RGB 채널 값 [0, 255] ( 신경망에 이상적이지 않습니다. 일반적으로 입력 값을 작게 만들어야 한다.) ->  [0, 1] 범위에 있도록 표준화 
+# normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./255)
 
-normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
-image_batch, labels_batch = next(iter(normalized_ds))
-first_image = image_batch[0]
-# Notice the pixels values are now in `[0,1]`.
-print(np.min(first_image), np.max(first_image))
-
-
-AUTOTUNE = tf.data.AUTOTUNE
-# 훈련기간동안 이미지를 메모리에 유지함으로서 사용성능이 높은 온디스크 캐시를 생성
-train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
-val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+# normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
+# image_batch, labels_batch = next(iter(normalized_ds))
+# first_image = image_batch[0]
+# # Notice the pixels values are now in `[0,1]`.
+# print(np.min(first_image), np.max(first_image))
 
 
 
-data_augmentation = tf.keras.Sequential(
-  [
-    tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
-                                                 input_shape=(img_height, 
-                                                              img_width,
-                                                              3)),
-    tf.keras.layers.experimental.preprocessing.RandomRotation(0.1),
-    tf.keras.layers.experimental.preprocessing.RandomZoom(0.1),
-  ]
-)
 
-# 데이터 증강 확인 하기
+
+
+# 데이터 증강 1-1 : 배율 및 크기조정
+resize_and_rescale = tf.keras.Sequential([
+  tf.keras.layers.experimental.preprocessing.Resizing(IMG_SIZE, IMG_SIZE),
+  tf.keras.layers.experimental.preprocessing.Rescaling(1./255)
+])
+
+# 데이터 증강 1-2 : 이미지 플립
+data_augmentation = tf.keras.Sequential([
+  tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal_and_vertical"),
+  tf.keras.layers.experimental.preprocessing.RandomRotation(0.2),
+])
+
+
+# # 데이터 증강 1 확인 하기
 # plt.figure(figsize=(10, 10))
 # for images, _ in train_ds.take(1):
 #   for i in range(9):
@@ -116,18 +83,85 @@ data_augmentation = tf.keras.Sequential(
 #     ax = plt.subplot(3, 3, i + 1)
 #     plt.imshow(augmented_images[0].numpy().astype("uint8"))
 #     plt.axis("off")
+#     plt.show()
+
+
+
+
+
+# 데이터세트에 전처리 레이어 적용하기 1
+AUTOTUNE = tf.data.AUTOTUNE
+
+# 데이터 증강 1 레이어 적용 1
+def prepare(ds, shuffle=False, augment=False):
+  # Resize and rescale all datasets
+  ds = ds.map(lambda x, y: (resize_and_rescale(x), y), 
+               num_parallel_calls=AUTOTUNE)
+
+  if shuffle:
+    ds = ds.shuffle(1000)
+
+  # Batch all datasets
+  ds = ds.batch(batch_size)
+
+  # Use data augmentation only on the training set
+  if augment:
+    ds = ds.map(lambda x, y: (data_augmentation(x, training=True), y), 
+                num_parallel_calls=AUTOTUNE)
+
+  # Use buffered prefecting on all datasets
+  return ds.cache().prefetch(buffer_size=AUTOTUNE)
+
+
+train_ds = prepare(train_ds, shuffle=True, augment=True)
+val_ds   = prepare(val_ds)
+test_ds   = prepare(test_ds)
+
+# def random_invert_img(x, p=0.5):
+#   if  tf.random.uniform([]) < p:
+#     x = (255-x)
+#   else:
+#     x
+#   return x
+
+# def random_invert(factor=0.5):
+#   return tf.keras.layers.Lambda(lambda x: random_invert_img(x, factor))
+
+# random_invert = random_invert()
+
+# # plt.figure(figsize=(10, 10))
+# # for images, _ in train_ds.take(1):
+# #   for i in range(9):
+# #     augmented_images = random_invert(images)
+# #     ax = plt.subplot(3, 3, i + 1)
+# #     plt.imshow(augmented_images[0].numpy().astype("uint8"))
+# #     plt.axis("off")
+# #     plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 모델 훈련
 num_classes = 5 
 model = tf.keras.Sequential([
-    data_augmentation,
     tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
-    tf.keras.layers.Conv2D(32, 1, activation='relu'),
+    tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
     tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 1, activation='relu'),
+    tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
     tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 1, activation='relu'),
+    tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
     tf.keras.layers.MaxPooling2D(),
     tf.keras.layers.Dropout(0.2), # 과대적합 방지(정규화의 한 형태인 드롭아웃을 네트워크에 적용) 
     tf.keras.layers.Flatten(),
@@ -154,10 +188,12 @@ epochs = 1
 history = model.fit(
   train_ds,
   validation_data=val_ds,
-  epochs=epochs
+  epochs=epochs,
+  verbose=0
 )
 
-
+# loss, acc = model.evaluate(test_ds)
+# print("Accuracy", acc)
 
 
 
@@ -183,8 +219,11 @@ model.summary()
 #              metrics=['accuracy'])
 
 img = tf.keras.preprocessing.image.load_img(
-    'C:/Users/all4land/Desktop/validatonImg.jpg', target_size=(img_height, img_width)
+    'C:/Users/all4land/Desktop/validatonImg.jpg', target_size=(IMG_SIZE, IMG_SIZE)
 )
+
+# img = prepare(img)
+
 img_array = tf.keras.preprocessing.image.img_to_array(img)
 img_array = tf.expand_dims(img_array, 0) # Create a batch
 
@@ -193,9 +232,12 @@ predictions = model.predict(img_array)
 score = tf.nn.softmax(predictions[0])
 
 print(
-    "This image most likely belongs to {} with a {:.2f} percent confidence."
-    .format(class_names[np.argmax(score)], 100 * np.max(score))
+    score
 )
+# print(
+#     "This image most likely belongs to {} with a {:.2f} percent confidence."
+#     .format(class_names[np.argmax(score)], 100 * np.max(score))
+# )
 
 
 
@@ -235,25 +277,25 @@ print(
 
 
 
+# #훈련 과정 그래프 표출 
+# acc = history.history['accuracy']
+# val_acc = history.history['val_accuracy']
 
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
+# loss = history.history['loss']
+# val_loss = history.history['val_loss']
 
-loss = history.history['loss']
-val_loss = history.history['val_loss']
+# epochs_range = range(epochs)
 
-epochs_range = range(epochs)
+# plt.figure(figsize=(8, 8))
+# plt.subplot(1, 2, 1)
+# plt.plot(epochs_range, acc, label='Training Accuracy')
+# plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+# plt.legend(loc='lower right')
+# plt.title('Training and Validation Accuracy')
 
-plt.figure(figsize=(8, 8))
-plt.subplot(1, 2, 1)
-plt.plot(epochs_range, acc, label='Training Accuracy')
-plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
-plt.title('Training and Validation Accuracy')
-
-plt.subplot(1, 2, 2)
-plt.plot(epochs_range, loss, label='Training Loss')
-plt.plot(epochs_range, val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.title('Training and Validation Loss')
-plt.show()
+# plt.subplot(1, 2, 2)
+# plt.plot(epochs_range, loss, label='Training Loss')
+# plt.plot(epochs_range, val_loss, label='Validation Loss')
+# plt.legend(loc='upper right')
+# plt.title('Training and Validation Loss')
+# plt.show()

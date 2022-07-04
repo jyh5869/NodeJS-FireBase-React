@@ -112,7 +112,7 @@ router.get("/reviewDeepLeaning", (req, res) => {
 });
 
 /*  영화 상세보기  */
-router.get("/imageDeepLeaning", (req, res) => {
+router.get("/imageDeepLeaning1", (req, res) => {
 
     var options = {
         mode: 'text',
@@ -125,6 +125,33 @@ router.get("/imageDeepLeaning", (req, res) => {
 
 
     PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/imageDeepLearningType1.py', options, function (err, results) {
+
+        if (err) {
+            console.log(err);           
+        }   
+        else{
+
+            res.send( {results: results});     
+        }
+        //console.log('results: %j', results);
+    });
+    
+});
+
+/*  영화 상세보기  */
+router.get("/imageDeepLeaning2", (req, res) => {
+
+    var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: ["vlaue1", 'value2'],
+        encoding : 'utf8'
+    };
+
+
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/imageDeepLearningType2.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
