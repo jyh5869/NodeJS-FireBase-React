@@ -215,11 +215,11 @@ num_classes = 5
 model = tf.keras.Sequential([
     data_augmentation,
     tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
-    tf.keras.layers.Conv2D(32, 1, activation='relu'),
+    tf.keras.layers.Conv2D(16, 3, activation='relu'),
     tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 1, activation='relu'),
+    tf.keras.layers.Conv2D(32, 3, activation='relu'),
     tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 1, activation='relu'),
+    tf.keras.layers.Conv2D(63, 3, activation='relu'),
     tf.keras.layers.MaxPooling2D(),
     tf.keras.layers.Dropout(0.2), # 과대적합 방지(정규화의 한 형태인 드롭아웃을 네트워크에 적용) 
     tf.keras.layers.Flatten(),

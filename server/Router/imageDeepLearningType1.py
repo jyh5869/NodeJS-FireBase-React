@@ -27,39 +27,28 @@ print(tf.__version__)
 IMG_SIZE = 180
 batch_size = 32
 
-# class_names 속성을 이용해 클래스 조회(파일경로의 하위 디렉토리명)
-class_names = metadata.features['label'].num_classes
-print(class_names)
-
-
-# 데이터 시각화 (트레이닝 데이터 이미지를 호출하여 화면에 띄운다.)
-# plt.figure(figsize=(10, 10))
-# for images, labels in train_ds.take(1):
-#     for i in range(9):
-#         ax = plt.subplot(3, 3, i + 1)
-#         plt.imshow(images[i].numpy().astype("uint8"))
-#         plt.title(class_names[labels[i]])
-#         plt.axis("off")
-#         plt.show()
-
-# 수도으로 이미지 베치 검색
-for image_batch, labels_batch in train_ds:
-  print(image_batch.shape)
-  print(labels_batch.shape)
-  break
-
-# # 데이터 표준화 - RGB 채널 값 [0, 255] ( 신경망에 이상적이지 않습니다. 일반적으로 입력 값을 작게 만들어야 한다.) ->  [0, 1] 범위에 있도록 표준화 
-# normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./255)
-
-# normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
-# image_batch, labels_batch = next(iter(normalized_ds))
-# first_image = image_batch[0]
-# # Notice the pixels values are now in `[0,1]`.
-# print(np.min(first_image), np.max(first_image))
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+# # 데이터 시각화 (트레이닝 데이터 이미지를 호출하여 화면에 띄운다.)
+# get_label_name = metadata.features['label'].int2str
+
+image, label = next(iter(train_ds))
+# _ = plt.imshow(image)
+# _ = plt.title(get_label_name(label))
+# _ = plt.show()
 
 
 # 데이터 증강 1-1 : 배율 및 크기조정
@@ -74,19 +63,8 @@ data_augmentation = tf.keras.Sequential([
   tf.keras.layers.experimental.preprocessing.RandomRotation(0.2),
 ])
 
-
-# # 데이터 증강 1 확인 하기
-# plt.figure(figsize=(10, 10))
-# for images, _ in train_ds.take(1):
-#   for i in range(9):
-#     augmented_images = data_augmentation(images)
-#     ax = plt.subplot(3, 3, i + 1)
-#     plt.imshow(augmented_images[0].numpy().astype("uint8"))
-#     plt.axis("off")
-#     plt.show()
-
-
-
+num_classes = metadata.features['label']
+print(num_classes)
 
 
 # 데이터세트에 전처리 레이어 적용하기 1
@@ -113,60 +91,58 @@ def prepare(ds, shuffle=False, augment=False):
   return ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 
-train_ds = prepare(train_ds, shuffle=True, augment=True)
+train_ds = prepare(train_ds)
 val_ds   = prepare(val_ds)
 test_ds   = prepare(test_ds)
 
-# def random_invert_img(x, p=0.5):
-#   if  tf.random.uniform([]) < p:
-#     x = (255-x)
-#   else:
-#     x
-#   return x
+# train_ds = train_ds.cache().prefetch(buffer_size=AUTOTUNE)
+# val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+# test_ds = test_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
-# def random_invert(factor=0.5):
-#   return tf.keras.layers.Lambda(lambda x: random_invert_img(x, factor))
 
-# random_invert = random_invert()
+# class_names 속성을 이용해 클래스 조회(파일경로의 하위 디렉토리명)
+for image_batch, labels_batch in train_ds:
+  print(image_batch.shape)
+  print(labels_batch.shape)
+  break
 
-# # plt.figure(figsize=(10, 10))
-# # for images, _ in train_ds.take(1):
-# #   for i in range(9):
-# #     augmented_images = random_invert(images)
-# #     ax = plt.subplot(3, 3, i + 1)
-# #     plt.imshow(augmented_images[0].numpy().astype("uint8"))
-# #     plt.axis("off")
-# #     plt.show()
+# 데이터 표준화 - RGB 채널 값 [0, 255] ( 신경망에 이상적이지 않습니다. 일반적으로 입력 값을 작게 만들어야 한다.) ->  [0, 1] 범위에 있도록 표준화 
+normalization_layer = tf.keras.layers.experimental.preprocessing.Rescaling(1./255)
 
+normalized_ds = train_ds.map(lambda x, y: (normalization_layer(x), y))
+image_batch, labels_batch = next(iter(normalized_ds))
+first_image = image_batch[0]
+# Notice the pixels values are now in `[0,1]`.
+print(np.min(first_image), np.max(first_image))
 
 
 
-
-
-
-
-
-
-
-
-
-
+data_augmentation = tf.keras.Sequential(
+  [
+    tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
+                                                 input_shape=(IMG_SIZE, 
+                                                              IMG_SIZE,
+                                                              3)),
+    tf.keras.layers.experimental.preprocessing.RandomRotation(0.1),
+    tf.keras.layers.experimental.preprocessing.RandomZoom(0.1),
+  ]
+)
 
 
 # 모델 훈련
 num_classes = 5 
 model = tf.keras.Sequential([
-    tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
-    tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
-    tf.keras.layers.MaxPooling2D(),
-    tf.keras.layers.Dropout(0.2), # 과대적합 방지(정규화의 한 형태인 드롭아웃을 네트워크에 적용) 
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(num_classes)
+  data_augmentation,
+  tf.keras.layers.experimental.preprocessing.Rescaling(1./255),
+  tf.keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
+  tf.keras.layers.MaxPooling2D(),
+  tf.keras.layers.Flatten(),
+  tf.keras.layers.Dense(128, activation='relu'),
+  tf.keras.layers.Dense(num_classes)
 ])
 
 
@@ -218,26 +194,76 @@ model.summary()
 #              optimizer='rmsprop',
 #              metrics=['accuracy'])
 
-img = tf.keras.preprocessing.image.load_img(
+class_names = ['dandelion', 'daisy', 'tulips', 'sunflowers', 'roses']
+
+img1 = tf.keras.preprocessing.image.load_img(
     'C:/Users/all4land/Desktop/validatonImg.jpg', target_size=(IMG_SIZE, IMG_SIZE)
 )
 
 # img = prepare(img)
 
-img_array = tf.keras.preprocessing.image.img_to_array(img)
-img_array = tf.expand_dims(img_array, 0) # Create a batch
+img_array1 = tf.keras.preprocessing.image.img_to_array(img1)
+img_array1 = tf.expand_dims(img_array1, 0) # Create a batch
 
-predictions = model.predict(img_array)
+predictions = model.predict(img_array1)
 
-score = tf.nn.softmax(predictions[0])
+score1 = tf.nn.softmax(predictions[0])
+
 
 print(
-    score
+    score1
 )
-# print(
-#     "This image most likely belongs to {} with a {:.2f} percent confidence."
-#     .format(class_names[np.argmax(score)], 100 * np.max(score))
-# )
+print(np.argmax(score1))
+print(
+    "This image most likely belongs to {} with a {:.2f} percent confidence."
+    .format(class_names[np.argmax(score1)], 100 * np.max(score1))
+)
+
+img2 = tf.keras.preprocessing.image.load_img(
+    'C:/Users/all4land/Desktop/validatonImg2.jpg', target_size=(IMG_SIZE, IMG_SIZE)
+)
+
+# img = prepare(img)
+
+img_array2 = tf.keras.preprocessing.image.img_to_array(img2)
+img_array2 = tf.expand_dims(img_array2, 0) # Create a batch
+
+predictions = model.predict(img_array2)
+
+score2 = tf.nn.softmax(predictions[0])
+
+
+print(
+    score2
+)
+print(np.argmax(score2))
+print(
+    "This image most likely belongs to {} with a {:.2f} percent confidence."
+    .format(class_names[np.argmax(score2)], 100 * np.max(score2))
+)
+
+img3 = tf.keras.preprocessing.image.load_img(
+    'C:/Users/all4land/Desktop/validatonImg3.jpg', target_size=(IMG_SIZE, IMG_SIZE)
+)
+
+# img = prepare(img)
+
+img_array3 = tf.keras.preprocessing.image.img_to_array(img3)
+img_array3 = tf.expand_dims(img_array3, 0) # Create a batch
+
+predictions = model.predict(img_array3)
+
+score3 = tf.nn.softmax(predictions[0])
+
+
+print(
+    score3
+)
+print(np.argmax(score3))
+print(
+    "This image most likely belongs to {} with a {:.2f} percent confidence."
+    .format(class_names[np.argmax(score3)], 100 * np.max(score3))
+)
 
 
 
