@@ -47,6 +47,16 @@ a:hover { color: darkslategray;}
 }
 
 
+
+.btn_type1{
+    width: -webkit-fill-available;
+}
+
+.contents.title{
+    margin: 50px 0px;
+    text-align: center;
+}
+
 @media screen and (max-width: 991px) {
     .form1 {
         display: grid;

@@ -14,6 +14,22 @@ const tf  = require("@tensorflow/tfjs");//느리다... @tensorflow/tfjs_node로 
 
 const PythonShell = require("python-shell");
 
+/* 파일 업로드를 위한 multer, stream 세팅 s */
+const multer = require("multer")
+const storage = multer.diskStorage({
+    destination: (req, file, callBack) => {
+        callBack(null, 'C:/service/') //절대경로
+        //callBack(null, 'uploads/') //상대경로(프로젝트 내부)
+    },
+    filename: (req, file, callBack) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+        callBack(null, uniqueSuffix + '-' + `${file.originalname}` )
+    }
+})
+const upload = multer({
+    //storage: storage, //파일을 해당경로에 지정이름으로 저장
+    storage: multer.memoryStorage() // 저장하지않고 파일정보와 buffer 반환.
+});
 
 /* 영화 DB */
 const config = {
@@ -164,6 +180,67 @@ router.get("/imageDeepLeaning2", (req, res) => {
     });
     
 });
+
+
+/*  위 두 컨트롤러에서 생성된 모델을 사용해 이미지 분류(꽃)  */
+router.post("/flowerAnalysis", upload.single('file'),  (req, res,  next) => {
+
+    const file = req.file;
+
+    console.log(file);
+    //console.log(file.buffer);
+    
+    if (!file) {
+      const error = new Error('No File')
+      error.httpStatusCode = 400
+      return next(error)
+    }
+    
+    var fs = require("fs");
+
+
+    //var data = fs.readFileSync("C:/service/555.jpg"); // I will get video frame from the client.
+    //var base64 = data.toString("base64");
+    //console.log(data);  //이미지 버퍼
+    //console.log(base64);//버퍼 암호화
+    
+    var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: ["vlaue1", 'value2'],
+    };
+    dat = {
+        binary: file.buffer
+    };
+
+    //shell = new PythonShell.PythonShell ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/flowerAnalysis.py', options, function (err) {
+    let pyshell = new PythonShell.PythonShell('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/callLeaningModel/flowerAnalysis.py', options); 
+    pyshell.send(JSON.stringify(dat), { mode: "json" })
+    pyshell.on('message', function (results) { //But never receive data from pythonFile.
+        //console.log(results)
+        //var imgdata     = JSON.parse(results).img;
+        var analyResult = JSON.parse(results);
+        //console.log(imgdata);
+        console.log(analyResult);
+        //imbuffer = new Buffer.from(imgdata);
+        //console.log(imbuffer);
+        
+        //local write
+        //이미지를 로컬에 저장하여 확인해본다.
+        //fs.writeFileSync("C:/service/pytonIMG.jpg", imbuffer);
+        //console.log("complete"); 
+        res.send( {results: analyResult});
+    });
+    pyshell.end(function (err) { // Just run it
+        if (err)  throw err;
+        console.log('finished'); //appear this message
+    });
+});
+
+
+
 /*
     PythonShell을 이용한 ignore 협업 필터링 사용
     콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환

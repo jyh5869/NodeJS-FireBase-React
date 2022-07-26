@@ -226,7 +226,7 @@ model.summary()
 
 
 # 모델 저장 및 로드 하기 
-# model.save('model.h5.flower2')
+model.save('model.h5.flower2')
 # model = load_model('model.h5')
 
 # model.compile(loss='binary_crossentropy',

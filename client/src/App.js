@@ -3,10 +3,11 @@ import React from "react";
 import {BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown, Form, Button, FormControl } from 'react-bootstrap';
 
-import ProdList     from './view/prodList';
-import Detail       from './view/detail';
-import List         from './view/list';
-import MovieDetail  from './view/movieDetail';
+import ProdList        from './view/prodList';
+import Detail          from './view/detail';
+import List            from './view/list';
+import MovieDetail     from './view/movieDetail';
+import FlowerAnalysis  from './view/flowerAnalysis';
 
 import './assets/css/common.css';
 
@@ -23,8 +24,9 @@ function App() {
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="ml-auto">
-                            <Nav.Link href="/view/prodList">Movie</Nav.Link>
                             <Nav.Link href="/view/list">Shoes</Nav.Link>
+                            <Nav.Link href="/view/prodList">Movie</Nav.Link>
+                            <Nav.Link href="/view/flowerAnalysis">flower</Nav.Link>
                             {/* 
                             <NavDropdown title="Dropdown" id="basic-nav-dropdown">
                                 <NavDropdown.Item href="#action/3.1">Action</NavDropdown.Item>
@@ -48,6 +50,7 @@ function App() {
                     <Route path="/view/detail/:id" element={ <Detail/> }></Route>
                     <Route path="/view/prodList" element={ <ProdList/> } ></Route>
                     <Route path="/view/movieDetail/:id" element={ <MovieDetail/> } ></Route>
+                    <Route path="/view/flowerAnalysis" element={ <FlowerAnalysis/> } ></Route>
                 </Routes>
             </div>
         </div>

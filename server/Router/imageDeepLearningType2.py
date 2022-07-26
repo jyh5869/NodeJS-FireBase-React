@@ -155,7 +155,7 @@ print("Accuracy = ", acc)
 model.summary()
 
 
-# 모델 저장 및 로드 하기 
+# 모델 저장 및 로드 하 
 # model.save('model.h5.flower2')
 # model = load_model('model.h5')
 
