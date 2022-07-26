@@ -63,7 +63,7 @@ function ProdList() {
             },
         });
         document.getElementById('analysisResult').value = "분석 완료"
-        setObj(response);
+        setObj(response.data.results.result0);
         console.log(response);
     }
 
@@ -99,7 +99,7 @@ function ProdList() {
                 </Form.Group>
             </Form>
             <div id="analysisResult">
-
+                {obj}
             </div>
             <div className="preview">
                 {imageSrc && <img src={imageSrc} alt="preview-img" />}
