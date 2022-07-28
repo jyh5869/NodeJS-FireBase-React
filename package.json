@@ -28,6 +28,7 @@
     "nodeml": "^0.4.0",
     "pandas": "^0.0.3",
     "python-shell": "^3.0.1",
+    "react-spinners": "^0.13.3",
     "request": "^2.88.2",
     "request-promise": "^4.2.6",
     "uuid": "7.0",

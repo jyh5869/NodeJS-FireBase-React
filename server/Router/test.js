@@ -185,52 +185,46 @@ router.get("/imageDeepLeaning2", (req, res) => {
 /*  위 두 컨트롤러에서 생성된 모델을 사용해 이미지 분류(꽃)  */
 router.post("/flowerAnalysis", upload.single('file'),  (req, res,  next) => {
 
-    const file = req.file;
-
-    console.log(file);
-    //console.log(file.buffer);
+    const file = req.file;// Multer를 이용한 파일 객체
     
     if (!file) {
-      const error = new Error('No File')
-      error.httpStatusCode = 400
-      return next(error)
+        const error = new Error('No File')
+        error.httpStatusCode = 400
+        return next(error)
+    }
+    else{
+        //console.log(file);
     }
     
     var fs = require("fs");
-
-
-    //var data = fs.readFileSync("C:/service/555.jpg"); // I will get video frame from the client.
-    //var base64 = data.toString("base64");
-    //console.log(data);  //이미지 버퍼
-    //console.log(base64);//버퍼 암호화
     
+    //파이썬 쉘 요청 옵션
     var options = {
-        mode: 'text',
-        pythonPath: '',
+        mode         : 'text',
+        pythonPath   : '',
         pythonOptions: ['-u'],
-        scriptPath: '',
-        args: ["vlaue1", 'value2'],
-    };
-    dat = {
-        binary: file.buffer
+        scriptPath   : '',
+        args         : ["vlaue1", 'value2'],
     };
 
-    //shell = new PythonShell.PythonShell ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/flowerAnalysis.py', options, function (err) {
+    data = { binary: file.buffer };
+    //data = { binary: file.buffer.toString("base64")};
+
+    //파이썬 쉘 생성, 요청 및 응답
     let pyshell = new PythonShell.PythonShell('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/callLeaningModel/flowerAnalysis.py', options); 
-    pyshell.send(JSON.stringify(dat), { mode: "json" })
+    pyshell.send(JSON.stringify(data), { mode: "json" })
     pyshell.on('message', function (results) { //But never receive data from pythonFile.
-        //console.log(results)
-        //var imgdata     = JSON.parse(results).img;
-        var analyResult = JSON.parse(results);
-        //console.log(imgdata);
-        console.log(analyResult);
-        //imbuffer = new Buffer.from(imgdata);
-        //console.log(imbuffer);
         
-        //local write
-        //이미지를 로컬에 저장하여 확인해본다.
-        //fs.writeFileSync("C:/service/pytonIMG.jpg", imbuffer);
-        //console.log("complete"); 
+        var imgdata     = JSON.parse(results).img;
+        var analyResult = JSON.parse(results).result;
+
+        //console.log(imgdata);
+        
+        //이미지 로컬 저장
+        imbuffer = new Buffer.from(imgdata);
+        fs.writeFileSync("C:/service/pytonIMG.jpg", imbuffer);
+        
+        console.log("complete"); 
         res.send( {results: analyResult});
     });
     pyshell.end(function (err) { // Just run it
@@ -246,26 +240,6 @@ router.post("/flowerAnalysis", upload.single('file'),  (req, res,  next) => {
     콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환
     참고 사이트 : https://big-dream-world.tistory.com/66
     direct 호출 rul 셈플 : http://localhost:5000/movieRecommended?id=315011
-
-    100     10022   1002222
-    "1",
-    "0",
-    "0       100",
-    "1     10003",
-    "2    100042",
-    "3     10008",
-    "4     10012",
-    "5     10013",
-    "6     10014",
-    "7     10016",
-    "8     10017",
-    "9     10022",
-
-
-
-
-    "0    10003",
-    "1    10022",
 */
 router.get("/movieRecommended", (req, res) => {
 
