@@ -42,6 +42,6 @@ a:hover { color: darkslategray;}
 }
 
 @media screen and (max-width: 450px) {
-    .card{ width: 100%;}
+    /* .card{ width: 100%;} */
     .card[class*='border']{width: 100%;}
 }

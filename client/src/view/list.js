@@ -42,8 +42,10 @@ function List() {
                         <Card.Body>
                             <Card.Title>{ props.shoes.title }</Card.Title>
                             <Card.Text>
-                                <p>{ props.shoes.content }</p>
-                                <p>{ props.shoes.price }</p>
+                                { props.shoes.content }
+                            </Card.Text>
+                            <Card.Text>
+                                { props.shoes.price }
                             </Card.Text>
                         </Card.Body>
                     </Link>

@@ -15,13 +15,15 @@ function Detail(props) {
         <Card className="text-center">
             <Card.Header as="h5">Featured</Card.Header>
             <Card.Body>
-                <Card.Img variant="top" className='m-4' src={shoes[id].img} />
+                <Card.Img variant="top" src={shoes[id].img} />
                 <Card.Title>
                     <p> {shoes[id].title}</p>
                 </Card.Title>
                 <Card.Text >
-                    <p>{shoes[id].content}</p>
-                    <p>{shoes[id].price}</p>
+                    {shoes[id].content}
+                </Card.Text>
+                <Card.Text >
+                    {shoes[id].price}
                 </Card.Text>
                 <Button variant="primary">Buy Now</Button>
             </Card.Body>

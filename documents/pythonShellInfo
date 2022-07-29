@@ -35,5 +35,10 @@
 10. 이미지 로드 후 모델 검증을 위한 라이브러리 : pip install opencv-python
 
 
+구글 크롤링을 위한 라이브러리(크롬 버전에 맞는 크롬 드라이버 설치)
+11. pip install selenium
+12. pip install beautifulsoup4
+13. pip install chromedriver-autoinstaller
+
 
 
