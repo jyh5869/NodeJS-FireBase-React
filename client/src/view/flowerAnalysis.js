@@ -55,11 +55,25 @@ function FlowerAnalysis() {
         setObj("이 꽃은 '"+response.data.results+ "' 입니다.");
     }
 
+    const getFlowerInfoResult = async () => {
+
+        let response = await axios({
+            method: 'get',
+            url: '/api/crawlingGoogle',
+            data: {'keyword' : 'rose'},
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+        })
+        console.log(response);
+    }
+
     //이미지 분석을 위한 데이터 전송
     function handleSubmit(e) {
         
-        getFlowerAnalyResult();
-        
+        getFlowerAnalyResult();//업로드된 이미지를 분류
+        getFlowerInfoResult(); //분류된 카테코리 정보 크롤링
+
         e.preventDefault();
     }
     
