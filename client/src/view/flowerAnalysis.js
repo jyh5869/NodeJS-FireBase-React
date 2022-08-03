@@ -15,6 +15,7 @@ function FlowerAnalysis() {
     const [obj  , setObj ] = useState([]);//업로드 이미지 분석 결과 객체
     const [loading, setLoading] = useState(false);//로딩 스피너
     const [imageSrc, setImageSrc] = useState('');//아마자 태그 변경시 실시간 미리보기
+    const [flwInfo , setFlwInfo] = useState([]);//해당꽃에대한 검색결과 리스트
     const color = [];
 
     //이미지가 등록 될시 미리보기 기능 제공
@@ -65,7 +66,17 @@ function FlowerAnalysis() {
               'Content-Type': 'multipart/form-data',
             },
         })
-        console.log(response);
+        
+        var datas =  JSON.parse(response.data.results)
+        var array = Object.values(datas)
+        console.log(array)
+        for (var i = 0; i < array.length; i++) { 	
+            console.log(array[i]); 		
+        } 
+        setFlwInfo(array)
+
+        
+        //console.log(JSON.parse(response.data.results))
     }
 
     //이미지 분석을 위한 데이터 전송
@@ -136,7 +147,33 @@ function FlowerAnalysis() {
                 {obj}
             </div>
             </div>           
-            <Loader loading={loading} color={color} onClick={setLoading}/>     
+            <Loader loading={loading} color={color} onClick={setLoading}/>
+            <Table striped>
+                <tbody>
+                {flwInfo.map((list, index) => (
+                    index != flwInfo.length -1
+                    ? (<tr key={index}>
+                        <td colSpan={2}>
+                            {list}
+                        </td>
+                    </tr>
+                    )
+                    : ( 
+                        <>
+                            {Object.values(JSON.parse(list)).map((list2, index) => (
+                                <tr>
+                                    <th>{Object.keys(JSON.parse(list))[index]}</th>
+                                    <td>
+                                        <a key={index}>{list2}</a> 
+                                    </td>
+                                </tr>
+                            ))}
+                        </>
+                    )
+                    
+                ))}
+                </tbody>
+            </Table>     
         </React.Fragment>
     )
 }

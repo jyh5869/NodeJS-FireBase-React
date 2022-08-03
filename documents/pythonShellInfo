@@ -1,4 +1,6 @@
 
+※ 파이썬 파일 CMD실행 : python + 경로
+
 ※ pip install --upgrade pip 명령어 실행으로 pip 업그레이드 후 pip 인식 불가 현상
 원인 : pip삭제 후 재 설치 되어야하나, 삭제만 되어 발생하는 현상
 해결 : 아래의 명령어 순차실행으로 pip 재설치
@@ -38,7 +40,8 @@
 구글 크롤링을 위한 라이브러리(크롬 버전에 맞는 크롬 드라이버 설치)
 11. pip install selenium
 12. pip install beautifulsoup4
-13. pip install chromedriver-autoinstaller
+13. pip install chromedriver-autoinstaller # 설치하지 않아도 될거같습니다.
+14. pip install webdriver_manager
 
 
 

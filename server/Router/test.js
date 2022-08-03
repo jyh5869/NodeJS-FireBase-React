@@ -256,6 +256,40 @@ router.get("/crawlingGoogle", upload.single('file'),async  (req, res,  next) => 
     pyshell.send(JSON.stringify("send"), { mode: "text" })
     pyshell.on('message', function (results) { //But never receive data from pythonFile.
         //results1 = results.replace(`b\'`, '').replace(`\'`, ''); 
+        console.log(results);
+        res.send( {results: results});
+        
+    })
+    pyshell.end(function (err) { // Just run it
+        if (err)  {throw err};
+        console.log('finished'); //appear this message
+    });
+});
+
+
+
+/*  위 두 컨트롤러에서 생성된 모델을 사용해 이미지 분류(꽃)  */
+router.get("/crawlingGoogleGrwFlw", upload.single('file'),async  (req, res,  next) => {
+
+    var keyword = req.query.keyword
+    
+    //파이썬 쉘 요청 옵션
+    var options = {
+        mode         : 'text',
+        pythonPath   : '',
+        pythonOptions: ['-u'],
+        scriptPath   : '',
+        args         : [keyword],
+        encoding : 'utf8',
+    };
+    
+
+    //파이썬 쉘 생성, 요청 및 응답
+    let pyshell = new PythonShell.PythonShell('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/pythonCommon/crawlingGoogleGrwFlw.py', options); 
+    pyshell.send(JSON.stringify("send"), { mode: "text" })
+    pyshell.on('message', function (results) { //But never receive data from pythonFile.
+        //results1 = results.replace(`b\'`, '').replace(`\'`, ''); 
+        console.log(results);
         res.send( {results: results});
         
     })

@@ -22,9 +22,10 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 # keyword = sys.argv[0]
 baseUrl = 'https://www.google.com/search?q='
-plusUrl = 'flower  rose'
+plusUrl = '장미 키우기'
 
 url = baseUrl + quote_plus(plusUrl)
+
 
 def chromeWebdriver():
     options = Options()
@@ -47,45 +48,44 @@ driver.get(url)
 html = driver.page_source
 soup = BeautifulSoup(html)
 
-# v = soup.select('.I6TXqe').select_one('.SPZz6b')
-v1 = soup.select('.I6TXqe')
-
-
+v1 = soup.select_one('.GLI8Bc.UK95Uc').text
+print(v1)
 # 자료형 타입
 # print(type(v))
 
-for i in v1:
+# for i in v1:
+    # print("하위하위")
     # print(i.select_one('.LC20lb.DKV0Md').text)
     # print(i.a.attrs['href'])
     # print(i.h2.text)
     # print(i.div.span.text)
 
-    titles    = i.select('.w8qArf')
-    contents = i.select('.LrzXr.kno-fv.wHYlTd.z8gr9e')
+    # titles    = i.select('.w8qArf')
+    # contents = i.select('.LrzXr.kno-fv.wHYlTd.z8gr9e')
 
-    content_list = []    # 빈 리스트 생성
-    title_list   = []
+    # content_list = []    # 빈 리스트 생성
+    # title_list   = []
 
-    for a in titles:
-        title_list.append(a.a.text)
-        # print(a.text)
+    # for a in titles:
+    #     title_list.append(a.a.text)
+    #     # print(a.text)
     
-    for j in contents:
-        content_list.append(j.text)
-        # print(j.text)
+    # for j in contents:
+    #     content_list.append(j.text)
+    #     # print(j.text)
 
 
-    dictionary = dict(zip(title_list, content_list))
-    jsonData = json.dumps(dictionary, ensure_ascii=False)
+    # dictionary = dict(zip(title_list, content_list))
+    # jsonData = json.dumps(dictionary, ensure_ascii=False)
     # print(jsonData)
 
-    print(json.dumps({
-        'name'       : i.select_one('.SPZz6b').h2.text,
-        'category'   : i.select_one('.SPZz6b').div.span.text,
-        'info'       : i.select_one('.PZPZlf.hb8SAc').span.text,
-        'infoList'   : jsonData, # for문 돌려야함.
-    }, 
-    ensure_ascii=False)) # 한글이 ascii코드로 바뀌는 문제를 방지하기 위한 옵션 
+    # print(json.dumps({
+    #     'name'       : i.select_one('.SPZz6b').h2.text,
+    #     'category'   : i.select_one('.SPZz6b').div.span.text,
+    #     'info'       : i.select_one('.PZPZlf.hb8SAc').span.text,
+    #     'infoList'   : jsonData, # for문 돌려야함.
+    # }, 
+    # ensure_ascii=False)) # 한글이 ascii코드로 바뀌는 문제를 방지하기 위한 옵션 
 
 
 
