@@ -20,9 +20,10 @@ sys.stdout.reconfigure(encoding='utf-8')
 # print(sys.stdin.encoding)
 # print(sys.stdout.encoding)
 
-# keyword = sys.argv[0]
+# keyword = sys.args[0]
+keyword = sys.stdin.read()
 baseUrl = 'https://www.google.com/search?q='
-plusUrl = '장미 키우기'
+plusUrl = keyword + ' 관리'
 
 url = baseUrl + quote_plus(plusUrl)
 
@@ -48,8 +49,40 @@ driver.get(url)
 html = driver.page_source
 soup = BeautifulSoup(html)
 
-v1 = soup.select_one('.GLI8Bc.UK95Uc').text
-print(v1)
+v1 = soup.select('.jtfYYd.UK95Uc')
+
+result_list = []
+
+for i in v1:
+
+    # 검색결과 JSON데이터 생성
+    obj_search_res = json.dumps({
+            # 'searchRes' : {
+                'title'     : i.h3.text,
+                'url'       : i.select_one('.yuRUbf').a.attrs['href'],
+                'contents'  : i.select_one('.VwiC3b.yXK7lf.MUxGbd.yDYNvb.lyLwlc.lEBKkf').text, # for문 돌려야함.
+            # }
+        }, 
+        ensure_ascii=False) # 한글이 ascii코드로 바뀌는 문제를 방지하기 위한 옵션
+
+    result_list.append(obj_search_res)
+
+    # result_list['result'] = obj_search_res
+    
+    # result_json = ','.join(result_list)
+
+
+# # 배열을 딕셔너리로 바꿔 리턴 
+# res = {(i + 1): result_list[i] for i in range(0, len(result_list))}
+# jsonData = json.dumps(res ,ensure_ascii=False)
+# print(jsonData)
+
+# # 배열을 JSON문자열로 바꿔 리턴
+print( json.dumps(result_list, ensure_ascii=False))
+
+# # 배열을 그대로 리턴
+# print( result_list)
+
 # 자료형 타입
 # print(type(v))
 

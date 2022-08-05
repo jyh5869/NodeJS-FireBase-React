@@ -59,7 +59,7 @@ IMG_SIZE = 180
 # 클레스 갯수와 각 라벨을 추출
 num_classes = metadata.features['label']
 label_name = metadata.features['label'].int2str
-label_name_kor = ['민들레','데이지','튤립','해바라기','장미']
+label_name_kor = ['민들레','데이지','튤립','해바라기숙','장미']
 
 # 저장 모델 로드 하기 
 model = tf.keras.models.load_model('model.h5.flower2')
@@ -91,7 +91,7 @@ for index, value in enumerate(img_url, start=0):
 
 # 결과 데이터 생성후 리턴
 print(json.dumps({
-  'result': label_name_kor[np.argmax(score)] + '('+label_name(np.argmax(score))+')',
+  'result': {'korNm': label_name_kor[np.argmax(score)] ,'endNm' : label_name(np.argmax(score))},
   'img'   : imnb
 }))
   

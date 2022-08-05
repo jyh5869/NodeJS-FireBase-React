@@ -16,6 +16,7 @@ function FlowerAnalysis() {
     const [loading, setLoading] = useState(false);//로딩 스피너
     const [imageSrc, setImageSrc] = useState('');//아마자 태그 변경시 실시간 미리보기
     const [flwInfo , setFlwInfo] = useState([]);//해당꽃에대한 검색결과 리스트
+    const [flwGrwInfo , setFlwGrwInfo] = useState([]);//해당꽃에대한 검색결과 리스트
     const color = [];
 
     //이미지가 등록 될시 미리보기 기능 제공
@@ -52,16 +53,19 @@ function FlowerAnalysis() {
             },
             
         })
-        //console.log(response);
-        setObj("이 꽃은 '"+response.data.results+ "' 입니다.");
+        let analysisRes = response.data.results.korNm
+        getFlowerInfoResult(analysisRes); //분류된 카테코리 정보 크롤링
+        getFlowerGrwResult(analysisRes);
+
+        setObj("이 꽃은 '"+analysisRes+ "' 입니다.");
     }
 
-    const getFlowerInfoResult = async () => {
+    const getFlowerInfoResult = async (analysisRes) => {
 
         let response = await axios({
             method: 'get',
             url: '/api/crawlingGoogle',
-            data: {'keyword' : 'rose'},
+            params: {'keyword' : analysisRes},
             headers: {
               'Content-Type': 'multipart/form-data',
             },
@@ -69,21 +73,32 @@ function FlowerAnalysis() {
         
         var datas =  JSON.parse(response.data.results)
         var array = Object.values(datas)
-        console.log(array)
+        //console.log(array)
         for (var i = 0; i < array.length; i++) { 	
-            console.log(array[i]); 		
+            //console.log(array[i]); 		
         } 
         setFlwInfo(array)
+    }
 
+    const getFlowerGrwResult = async (analysisRes) => {
+
+        let response = await axios({
+            method: 'get',
+            url: '/api/crawlingGoogleGrwFlw',
+            params: {'keyword' : analysisRes},
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+        })
+        var datas =  response.data.results
         
-        //console.log(JSON.parse(response.data.results))
+        setFlwGrwInfo(datas)
     }
 
     //이미지 분석을 위한 데이터 전송
     function handleSubmit(e) {
         
         getFlowerAnalyResult();//업로드된 이미지를 분류
-        getFlowerInfoResult(); //분류된 카테코리 정보 크롤링
 
         e.preventDefault();
     }
@@ -148,23 +163,24 @@ function FlowerAnalysis() {
             </div>
             </div>           
             <Loader loading={loading} color={color} onClick={setLoading}/>
-            <Table striped>
+            <Table bordered className="form2">
                 <tbody>
                 {flwInfo.map((list, index) => (
                     index != flwInfo.length -1
-                    ? (<tr key={index}>
-                        <td colSpan={2}>
-                            {list}
-                        </td>
-                    </tr>
+                    ? (
+                        <tr key={index}>
+                            <td colSpan={2} className='text-center'>
+                                {list}
+                            </td>
+                        </tr>
                     )
                     : ( 
                         <>
                             {Object.values(JSON.parse(list)).map((list2, index) => (
-                                <tr>
-                                    <th>{Object.keys(JSON.parse(list))[index]}</th>
+                                <tr key={index+'@'}>
+                                    <th className='text-center' >{Object.keys(JSON.parse(list))[index]}</th>
                                     <td>
-                                        <a key={index}>{list2}</a> 
+                                        <a>{list2}</a> 
                                     </td>
                                 </tr>
                             ))}
@@ -173,7 +189,19 @@ function FlowerAnalysis() {
                     
                 ))}
                 </tbody>
-            </Table>     
+            </Table>    
+            <Table hover className="form2">
+                <tbody>
+                {flwGrwInfo.map((list, index) => (
+                    <tr key={index} >
+                        <td className="py-4 px-2">
+                            <h5><a href={list.url} target='_blank'>{list.title}</a></h5>
+                            <div>{list.contents}</div>
+                        </td>
+                    </tr>
+                ))}
+                </tbody>
+            </Table>      
         </React.Fragment>
     )
 }

@@ -20,9 +20,10 @@ sys.stdout.reconfigure(encoding='utf-8')
 # print(sys.stdin.encoding)
 # print(sys.stdout.encoding)
 
-# keyword = sys.argv[0]
+# keyword = sys.args[0]
+keyword = sys.stdin.read()
 baseUrl = 'https://www.google.com/search?q='
-plusUrl = 'flower  rose'
+plusUrl = '꽃 ' + keyword
 
 url = baseUrl + quote_plus(plusUrl)
 

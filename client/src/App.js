@@ -17,7 +17,7 @@ function App() {
 
     return(
         <div>
-            <header className="my-2">
+            <header>
                 <Navbar bg="light" expand="lg" >
                     <Navbar.Brand href="#home">{' '}
                         <img alt=""src={logo} width="40" height="40" className="d-inline-block align-top mt-n1"/>React Bootstrap</Navbar.Brand>

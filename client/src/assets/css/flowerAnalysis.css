@@ -1,15 +1,18 @@
+#flowerAnalysis img{vertical-align: middle; border: solid lightsteelblue 3px; border-radius: 25px;} 
+
 #flowerAnalysis .preview{text-align: center;} 
 #flowerAnalysis .wrap_imgInput{display: inline; width: 80%;}
 #flowerAnalysis .btn_type1{display: inline;width: 20%;}
 #flowerAnalysis .content_2{margin: 0px 150px;}
 
 @media screen and (max-width: 991px) {
-    #flowerAnalysis .content_2 { margin: 0px;}
+    #flowerAnalysis .content_2 { margin: 0px; }
     #flowerAnalysis .wrap_imgInput{ width: 70%;}
     #flowerAnalysis .btn_type1{width: 30%;}
 }
 
 @media screen and (max-width: 450px) {
+    #flowerAnalysis .content_2 { margin: 0px; padding: 0;}
     #flowerAnalysis .btn_type1{display: block; width: 100%;}
     #flowerAnalysis .wrap_imgInput{display: block; width: 100%;}
 }
