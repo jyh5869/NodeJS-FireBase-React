@@ -59,7 +59,7 @@ IMG_SIZE = 180
 # 클레스 갯수와 각 라벨을 추출
 num_classes = metadata.features['label']
 label_name = metadata.features['label'].int2str
-label_name_kor = ['민들레','데이지','튤립','해바라기숙','장미']
+label_name_kor = ['민들레','데이지','튤립','해바라기','장미']
 
 # 저장 모델 로드 하기 
 model = tf.keras.models.load_model('model.h5.flower2')
