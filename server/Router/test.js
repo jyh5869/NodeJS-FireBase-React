@@ -309,6 +309,52 @@ router.get("/crawlingGoogleGrwFlw",async  (req, res,  next) => {
 });
 
 
+/*  위 두 컨트롤러에서 생성된 모델을 사용해 이미지 분류(꽃)  */
+router.get("/FlwTrainingNewClass", async  (req, res,  next) => {
+
+    var keyword = req.query.keyword
+
+    //파이썬 쉘 요청 옵션
+    var options = {
+        mode         : 'text',
+        pythonPath   : '',
+        pythonOptions: ['-u'],
+        scriptPath   : '',
+        args         : [keyword],
+        encoding : 'utf8',
+    };
+    
+
+    //파이썬 쉘 생성, 요청 및 응답
+    /*
+    let pyshell = new PythonShell.PythonShell('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwTrainingNewClass.py', options); 
+    pyshell.send(keyword, { mode: "text" })
+    pyshell.run('message', function (results) { //But never receive data from pythonFile.
+        
+        res.json( {results : results});
+        
+    })
+    pyshell.end(function (err) { // Just run it
+        if (err)  {throw err};
+        console.log('finished!!'); //appear this message
+        
+    });
+    */
+
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwTrainingNewClass.py', options, function (err, results) {
+
+        if (err) {
+            console.log(err);           
+        }   
+        else{
+
+            res.send( {results: results});     
+        }
+        //console.log('results: %j', results);
+    });
+});
+
+
 /*
     PythonShell을 이용한 ignore 협업 필터링 사용
     콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환
