@@ -26,6 +26,7 @@ nav{ padding: 10px 7%;}
 .card-header { --bs-bg-opacity: 0.7;}
 .card-footer { --bs-bg-opacity: 0.3;}
 .card[class*='border']{display: inline-block; width: 46%;}
+.cardWrap{vertical-align: top;}
 
 .form1 { display: inherit; float: right; width: auto;}
 .form2 { margin: 2% 7%; width: -webkit-fill-available}

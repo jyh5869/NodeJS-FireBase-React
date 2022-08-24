@@ -36,7 +36,7 @@ function FlowerAnalysis() {
 
             reader.onload = () => {
                 setImageSrc(reader.result);
-                resolve();
+                resolve(); 
             };  
         });
     };
