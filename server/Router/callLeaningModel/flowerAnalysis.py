@@ -49,20 +49,15 @@ anaImg = io.BytesIO(imenb)
 # 저장된 분석모델을 호출
 IMG_SIZE = 180
 
-(train_ds, val_ds, test_ds), metadata = tfds.load(
-    'tf_flowers',
-    split=['train[:80%]', 'train[80%:90%]', 'train[90%:]'],
-    with_info=True,
-    as_supervised=True,
-)
+# label_name_eng = ['dandelion','daisy','tulips','sunflowers','roses']
+# label_name_kor = ['민들레','데이지','튤립','해바라기','장미']
 
-# 클레스 갯수와 각 라벨을 추출
-num_classes = metadata.features['label']
-label_name = metadata.features['label'].int2str
-label_name_kor = ['민들레','데이지','튤립','해바라기','장미']
+label_name_eng = ['cosmos', 'daisy', 'dandelion', 'forsythia', 'myosotis', 'roses', 'sunflowers', 'tulips']
+label_name_kor = ['코스모스', '데이지', '민들레', '개나리', '물망초', '장미', '해바라기속', '튤립']
 
 # 저장 모델 로드 하기 
-model = tf.keras.models.load_model('model.h5.flower2')
+# model = tf.keras.models.load_model('model.h5.flower1')
+model = tf.keras.models.load_model('C:/Users/all4land/.keras/model/model_flower.h5')
 
 model.compile(loss='binary_crossentropy',
              optimizer='rmsprop',
@@ -85,13 +80,10 @@ for index, value in enumerate(img_url, start=0):
 
   score = tf.nn.softmax(predictions[0])
 
-  # result = json.dumps({'result' + str(index): label_name_kor[np.argmax(score)] + '('+label_name(np.argmax(score))+')'})
-  
-
 
 # 결과 데이터 생성후 리턴
 print(json.dumps({
-  'result': {'korNm': label_name_kor[np.argmax(score)] ,'endNm' : label_name(np.argmax(score))},
+  'result': {'korNm': label_name_kor[np.argmax(score)] ,'endNm' : label_name_eng[np.argmax(score)]},
   'img'   : imnb
 }))
   

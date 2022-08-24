@@ -98,7 +98,7 @@ router.get("/reviewDeepLeaning", (req, res) => {
     };
 
 
-    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/reviewDeepLearning2.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/reviewDeepLearning2.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
@@ -140,7 +140,7 @@ router.get("/imageDeepLeaning1", (req, res) => {
     };
 
 
-    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/imageDeepLearningType1.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/imageDeepLearningType1.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
@@ -167,7 +167,7 @@ router.get("/imageDeepLeaning2", (req, res) => {
     };
 
 
-    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/imageDeepLearningType2.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/imageDeepLearningType2.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
@@ -178,7 +178,6 @@ router.get("/imageDeepLeaning2", (req, res) => {
         }
         //console.log('results: %j', results);
     });
-    
 });
 
 
@@ -310,7 +309,7 @@ router.get("/crawlingGoogleGrwFlw",async  (req, res,  next) => {
 
 
 /*  위 두 컨트롤러에서 생성된 모델을 사용해 이미지 분류(꽃)  */
-router.get("/FlwTrainingNewClass", async  (req, res,  next) => {
+router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
 
     var keyword = req.query.keyword
 
@@ -327,7 +326,7 @@ router.get("/FlwTrainingNewClass", async  (req, res,  next) => {
 
     //파이썬 쉘 생성, 요청 및 응답
     /*
-    let pyshell = new PythonShell.PythonShell('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwTrainingNewClass.py', options); 
+    let pyshell = new PythonShell.PythonShell('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwDeepLearningNewClass.py', options); 
     pyshell.send(keyword, { mode: "text" })
     pyshell.run('message', function (results) { //But never receive data from pythonFile.
         
@@ -341,7 +340,7 @@ router.get("/FlwTrainingNewClass", async  (req, res,  next) => {
     });
     */
 
-    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwTrainingNewClass.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwDeepLearningNewClass.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
@@ -353,6 +352,22 @@ router.get("/FlwTrainingNewClass", async  (req, res,  next) => {
         //console.log('results: %j', results);
     });
 });
+
+/*  
+    모델 저장 디렉토리에 해당 모델 존재여부 확인 
+    모델이 없을 경우 생성 컨트롤러 호출 or 생성 안내 문구 표출   
+*/
+router.get("/getModelExistYn",async  (req, res,  next) => {
+
+    var modelNm = req.query.modelNm
+
+    var exists = fs.existsSync("C:/Users/all4land/.keras/model/"+ modelNm +".h5")
+
+    res.send( {results: exists});
+
+});
+
+
 
 
 /*
@@ -376,7 +391,7 @@ router.get("/movieRecommended", (req, res) => {
 
     let top10Arr  ;//배열 상태의 결과값
     let top10Json ;//제이슨 상태의 결과값
-    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/test2.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/movieRecomDeepLeaning2.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           

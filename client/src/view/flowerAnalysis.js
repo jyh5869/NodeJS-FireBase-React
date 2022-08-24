@@ -43,7 +43,11 @@ function FlowerAnalysis() {
 
     //업로드된 이미지로 분류 컨트롤러 호출 Axios
     const getFlowerAnalyResult = async () => {
-
+        if(formData.get('file') == null){ 
+            alert('등록된 이미지가 없습니다\n분석할 이미지를 참부 주세요.');
+            return false;
+        }
+        
         let response = await axios({
             method: 'post',
             url: '/api/flowerAnalysis',
@@ -95,11 +99,35 @@ function FlowerAnalysis() {
         setFlwGrwInfo(datas)
     }
 
+    const getModelExistYn = async (modelNm) => {
+
+        let response = await axios({
+            method: 'get',
+            url: '/api/getModelExistYn',
+            params: {'modelNm' : modelNm},
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+        })
+        var datas =  response.data.results
+
+        return datas;
+    }
+
     //이미지 분석을 위한 데이터 전송
     function handleSubmit(e) {
-        
-        getFlowerAnalyResult();//업로드된 이미지를 분류
+        let modelNm = 'model_flower';
+        let modelExistYn = getModelExistYn(modelNm);//모델 존재 여부 파악
 
+        modelExistYn.then((value) => {
+            if(value == true){
+                getFlowerAnalyResult();//업로드된 이미지를 분류
+            }
+            else {
+                alert(modelNm+ " 모델이 없습니다.\n모델 생성후 다시시도 해주세요.");
+            }
+        });
+        
         e.preventDefault();
     }
     

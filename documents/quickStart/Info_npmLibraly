@@ -1,0 +1,8 @@
+
+
+1. danfojs-node - 구조화된 데이터를 조작하고 처리할 수 있는 라이브러리 1
+2. pandas-node - 구조화된 데이터를 조작하고 처리할 수 있는 라이브러리 2
+3. multer - 파일 업로드를 위한 라이브러리
+4. react-spinners - 리엑트 스피너 → npm install react-spinners
+5. @emotion/react - 리엑트 스피너 의 CSS적용을 위한 라이브러리 → npm install @emotion/react
+6. python-shell - nodejs에서 파이썬 파일을 실행시키기 위한 라이브러리

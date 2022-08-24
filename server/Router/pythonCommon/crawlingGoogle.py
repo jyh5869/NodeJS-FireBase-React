@@ -10,6 +10,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome          import ChromeDriverManager
 
+# 크롤링이 되지 않을경우( 오류발생 ) 
+# 1. 크롬 드라이버를 pip를 통해 버전업 (pip install ChromeDriverManager)
+# 2. 검색 결과창을 통해 올바른 선택자가 세팅 되어있는지 확인(종종 class mark-up이 바뀐다.)
 
 sys.stdin.reconfigure(encoding='utf-8')
 sys.stdout.reconfigure(encoding='utf-8')
@@ -18,7 +21,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 keyword = sys.stdin.read()
 baseUrl = 'https://www.google.com/search?q='
-plusUrl = '꽃 ' + keyword
+plusUrl =  keyword + ' 꽃'
 
 url = baseUrl + quote_plus(plusUrl)
 

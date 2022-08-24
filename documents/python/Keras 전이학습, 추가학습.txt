@@ -1,0 +1,42 @@
+
+
+1. 모델 전이학습 및 추가 학습
+
+# 참고 URL (https://stackoverflow.com/questions/51498608/how-add-new-class-in-saved-keras-sequential-model)
+
+# 기존 모델 호출
+model_load = tf.keras.models.load_model('모델명')
+
+# 모델 컴파일
+model_load.compile(
+      optimizer='adam',
+      loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
+      metrics=['accuracy']
+)
+
+# 새로운 모델 생성
+model = tf.keras.Sequential()
+
+
+# 기존모델의 레이어들을 새 모델에 추가
+for layer in model_load.layers[:-1]: 
+   model.add(layer)
+
+
+# 추가된 레이어만 훈련할 수 있도록 기존 레이어 트레이닝 여부 False
+for layer in model.layers:
+     layer.trainable = False
+
+
+# 레이어 추가 (레이어 명이 중복되지 않도록 이름 설정)
+model.add(tf.keras.layers.Dense(8, name='new_Dense', activation='softmax')) 
+
+
+# 새로운 모델 컴파일
+model.compile(
+   optimizer='adam',
+   loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
+   metrics=['accuracy']
+)
+
+# 이후 모델 훈련및 저장

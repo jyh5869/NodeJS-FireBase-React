@@ -10,6 +10,10 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome          import ChromeDriverManager
 
+# 크롤링이 되지 않을경우( 오류발생 ) 
+# 1. 크롬 드라이버를 pip를 통해 버전업 (pip install ChromeDriverManager)
+# 2. 검색 결과창을 통해 올바른 선택자가 세팅 되어있는지 확인(종종 class mark-up이 바뀐다.)
+
 
 sys.stdin.reconfigure(encoding='utf-8')
 sys.stdout.reconfigure(encoding='utf-8')
@@ -34,7 +38,7 @@ def chromeWebdriver():
     options.add_experimental_option('excludeSwitches', ['enable-logging'])  # 시스템 장치 에러 숨기기
     user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36'
     options.add_argument(f'user-agent={user_agent}')    
-    options.add_argument('--headless')  # 웹 브라우저를 시각적으로 띄우지 않는 headless chrome 옵션
+    # options.add_argument('--headless')  # 웹 브라우저를 시각적으로 띄우지 않는 headless chrome 옵션
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options) 
     return driver
 
@@ -45,7 +49,10 @@ driver.get(url)
 html = driver.page_source
 soup = BeautifulSoup(html)
 
-v1 = soup.select('.jtfYYd.UK95Uc')
+# v1 = soup.select('.jtfYYd.UK95Uc')
+# v1 = soup.select('.MjjYud')
+v1 = soup.select('.kvH3mc.BToiNc.UK95Uc')
+
 
 driver.close()
 
