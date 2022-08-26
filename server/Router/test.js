@@ -40,7 +40,7 @@ const config = {
     messagingSenderId: "189981538409",
     appId: "1:189981538409:web:8467d889ba0b0a66c9caf8",
     measurementId: "G-6HBJMJ7DKV"
-  };
+};
 
 firebase.initializeApp(config);
 var db = firebase.firestore();
@@ -352,6 +352,62 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
         //console.log('results: %j', results);
     });
 });
+
+/* 배열에 있는 클레스 파일에 추가 */
+router.get("/flwNewClass", async (req, res) => {
+    
+    const label_name_eng = ['cosmos', 'daisy', 'dandelion', 'forsythia', 'myosotis', 'roses', 'sunflowers', 'tulips']
+    const label_name_kor = ['코스모스', '데이지', '민들레', '개나리', '물망초', '장미', '해바라기속', '튤립']
+    
+    let callType = req.query.callType;
+
+    if(callType == 'insert'){
+        await label_name_eng.forEach( (doc, index) =>  {
+            var modelClassDoc = db.collection("model_class_list").doc();
+                var postData = {
+                    id            : modelClassDoc.id,
+                    model_nm      : 'flower',
+                    class_eng_nm  : label_name_eng[index],
+                    class_kor_nm  : label_name_kor[index], 
+                    use_yn        : "Y",
+                    train_dt      : "",
+                    reg_dt        : Date.now(),
+                };
+                modelClassDoc.set(postData);
+        }); 
+    }
+    else if(callType == 'select'){
+
+        await db.collection('model_class_list').orderBy('reg_dt', "desc").get()
+        .then((snapshot) => {
+            var rows = [];
+            snapshot.forEach((doc) => {
+                var childData = doc.data();
+                //새로운 게시물(하루전), 업데이트된(하루전) 게시물 세팅
+                const today       = new Date();
+                const regDate    = new Date(childData.reg_dt);
+                const traingDate     = new Date(childData.train_dt);
+
+                const refNewDate = new Date(regDate.getFullYear(), regDate.getMonth(), regDate.getDate() +1 ,regDate.getHours(), regDate.getMinutes(), regDate.getSeconds(), regDate.getMilliseconds() );
+                const refUpdDate = new Date(traingDate.getFullYear(), traingDate.getMonth(), traingDate.getDate() +1 ,traingDate.getHours(), traingDate.getMinutes(), traingDate.getSeconds(), traingDate.getMilliseconds());
+
+                childData.newRegYn    = today <= refNewDate ? "Y" : "N";
+                childData.newtrainYn  = today <= refUpdDate ? "Y" : "N";
+
+                childData.train_dt  = dateFormat(childData.train_dt ,"yyyy-mm-dd hh:MM:ss");
+                childData.reg_dt    = dateFormat(childData.reg_dt   ,"yyyy-mm-dd hh:MM:ss");
+
+                rows.push(childData);
+            });
+            res.send({rows: rows});
+        })
+        .catch((err) => {
+            console.log('Error getting documents', err);
+        });
+    }
+    
+});
+
 
 /*  
     모델 저장 디렉토리에 해당 모델 존재여부 확인 
