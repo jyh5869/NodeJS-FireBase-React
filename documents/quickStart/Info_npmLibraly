@@ -6,3 +6,4 @@
 4. react-spinners - 리엑트 스피너 → npm install react-spinners
 5. @emotion/react - 리엑트 스피너 의 CSS적용을 위한 라이브러리 → npm install @emotion/react
 6. python-shell - nodejs에서 파이썬 파일을 실행시키기 위한 라이브러리
+7. node-schedule - nodejs에서 스케줄러 사용을 위한 라이브러리 → npm install node-schedule

@@ -7,6 +7,8 @@ var dateFormat = require('dateformat');
 const csv = require('csv-parser');
 const fs  = require('fs'        );
 
+const schedule = require('node-schedule');//스케줄러 사용을 위한 라이브러리
+
 //유사 콘텐츠 추출을 위한 머신러닝 라이브러리
 const dfd = require("danfojs"         );
 const pd  = require("pandas"          );
@@ -375,6 +377,7 @@ router.get("/flwNewClass", async (req, res) => {
                 };
                 modelClassDoc.set(postData);
         }); 
+        res.send({rows: "등록완료"});
     }
     else if(callType == 'select'){
 
@@ -404,6 +407,51 @@ router.get("/flwNewClass", async (req, res) => {
         .catch((err) => {
             console.log('Error getting documents', err);
         });
+    }
+    else if(callType == 'modify'){
+        let targetId = req.query.targetId;
+        let targetVal = req.query.targetVal;
+
+        let returnStr = "";
+        boardDoc = db.collection("model_class_list").doc(targetId);
+
+        await boardDoc.update({
+            use_yn     : targetVal,
+        }).then(function() {
+            //console.log("Class Update Success");
+            returnStr = "Class Update Success";
+        })
+        .catch(function(error) {
+            //console.log("Class Delete Fail----->" + error);
+            returnStr = "Class Update Fail----->" + error;
+            
+        });
+
+        console.log("수정하기기기기")
+        res.send({results: returnStr});
+        
+    }
+    else if(callType == 'delete'){
+
+        let targetId = req.query.targetId;
+        let returnStr = "";
+
+         //데이터 삭제
+         await db.collection('model_class_list').doc(targetId).delete()
+         .then(function() {
+            //console.log("Class Delete Success");
+            returnStr = "Class Delete Success";
+         })
+         .catch(function(error) {
+            //console.log("Class Delete Fail----->" + error);
+            returnStr = "Class Delete Fail----->" + error;
+         });
+
+        console.log("삭제 해보즈아")
+        res.send({results: returnStr});
+    }
+    else{
+        res.send({results: 'error'});
     }
     
 });
@@ -872,6 +920,88 @@ function makeExcel(rows, fileNum){
     const stream = xlsx.stream.to_csv(workSheet);
     stream.pipe(fs.createWriteStream('C:/Users/all4land/Desktop/test_'+fileNum+'.csv'));
     console.log("<COPY END>");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 
+    ※ 모델 훈련을 위한 배치 작업
+
+
+*/
+var trainingModelBatch =  schedule.scheduleJob("* 1 * * * *", function() {
+
+    console.log("하이");
+    
+    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwDeepLearningNewClass.py', options, async function (err, results) {
+
+        if (err) {
+            console.log(err);           
+        }   
+        else{
+            console.log(results)
+            var modelHistDoc = db.collection("model_training_history").doc();
+            var postData = {
+                // id            : modelHistDoc.id,
+                // model_nm      : 'flower',
+                // class_eng_nm  : label_name_eng[index],
+                // class_kor_nm  : label_name_kor[index], 
+                // use_yn        : "Y",
+                // train_dt      : "",
+                // reg_dt        : Date.now(),
+            };
+            modelHistDoc.set(postData);
+            //배치 종료 함수 TEST용
+            calcelBatch(); 
+            
+        }
+    });
+});
+
+function calcelBatch(){
+    trainingModelBatch.cancel();
+    return false;
 }
 
 

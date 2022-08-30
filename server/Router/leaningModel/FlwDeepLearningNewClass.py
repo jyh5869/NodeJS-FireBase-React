@@ -1,5 +1,6 @@
 import sys
 import re
+import json
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -147,10 +148,10 @@ import matplotlib.pyplot   as plt
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # TENSOR VERSION
-print(tf.__version__)
+# print(tf.__version__)
 
 # print(data_dir)
-data_dir = pathlib.Path('C:/Users/all4land/.keras/datasets/flower_photos_2')
+data_dir = pathlib.Path('C:/Users/all4land/.keras/datasets/flower_photos_3')
 
 # 매개변수 정의
 batch_size = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
@@ -165,7 +166,7 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     subset="training",
     seed=123,
     image_size=(img_height, img_width),
-    batch_size=batch_size
+    batch_size=batch_size,
 )
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir,
@@ -178,7 +179,7 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
 
 # class_names 속성을 이용해 클래스 조회(파일경로의 하위 디렉토리명)
 class_names = train_ds.class_names
-print(class_names)
+# print(class_names)
 
 
 # 데이터 증강 레이어 적용 1 (Accuracy =  0.5490463376045227)
@@ -231,7 +232,7 @@ model.compile(
 # 모델 훈련 후 히스토리 축척
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs = 35
+epochs = 1
 history = model.fit(
   train_ds,
   validation_data=val_ds,
@@ -241,48 +242,48 @@ history = model.fit(
 
 
 loss, acc = model.evaluate(val_ds)
-print("Accuracy = ", acc)
+# print("Accuracy = ", acc)
 
 
 # 모델 레이어 보기
-model.summary()
+# model.summary()
 
 
 # 모델 저장 및
 IMG_SIZE = 180
 
-img_url = [
-  'C:/Users/all4land/Desktop/validatonImg5.jpg',
-  'C:/Users/all4land/Desktop/validatonImg6.jpg',
-  'C:/Users/all4land/Desktop/validatonImg7.jpg',
-  'C:/Users/all4land/Desktop/validatonImg8.jpg',
-]
+# img_url = [
+#   'C:/Users/all4land/Desktop/validatonImg5.jpg',
+#   'C:/Users/all4land/Desktop/validatonImg6.jpg',
+#   'C:/Users/all4land/Desktop/validatonImg7.jpg',
+#   'C:/Users/all4land/Desktop/validatonImg8.jpg',
+# ]
 
 
-for index, value in enumerate(img_url, start=0):
-  print(index, value)
+# for index, value in enumerate(img_url, start=0):
+#   print(index, value)
 
-  img = tf.keras.preprocessing.image.load_img(
-    value, target_size=(IMG_SIZE, IMG_SIZE)
-  )
-  img_array = tf.keras.preprocessing.image.img_to_array(img)
-  img_array = tf.expand_dims(img_array, 0) # Create a batch
+#   img = tf.keras.preprocessing.image.load_img(
+#     value, target_size=(IMG_SIZE, IMG_SIZE)
+#   )
+#   img_array = tf.keras.preprocessing.image.img_to_array(img)
+#   img_array = tf.expand_dims(img_array, 0) # Create a batch
 
-  predictions = model.predict(img_array)
+#   predictions = model.predict(img_array)
 
-  score = tf.nn.softmax(predictions[0])
+#   score = tf.nn.softmax(predictions[0])
 
-  print(score)
-  print(np.argmax(score))
-  print(
-      "1 This image most likely belongs to {} with a {:.2f} percent confidence."
-      .format(class_names[np.argmax(score)], 100 * np.max(score))
-  )
+#   print(score)
+#   print(np.argmax(score))
+#   print(
+#       "1 This image most likely belongs to {} with a {:.2f} percent confidence."
+#       .format(class_names[np.argmax(score)], 100 * np.max(score))
+#   )
 
 
 # 모델 검증 후 저장
 # model.save('model.h5.flower1')
-model.save('C:/Users/all4land/.keras/model/model_flower.h5')
+model.save('C:/Users/all4land/.keras/model/model_flower_delete.h5')
 
 # 훈련 과정 그래프 표출 
 acc = history.history['accuracy']
@@ -306,3 +307,12 @@ plt.plot(epochs_range, val_loss, label='Validation Loss')
 plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
 plt.show()
+
+# 이미지 저장
+# 훈련 클래스 리스트
+# 훈련 과정 파라메터
+print(history.params)
+# 훈련 결과 파라메터
+print(history.history)
+# 훈련 정상여부
+
