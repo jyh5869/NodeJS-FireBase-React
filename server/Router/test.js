@@ -970,28 +970,35 @@ function makeExcel(rows, fileNum){
 
 
 */
-var trainingModelBatch =  schedule.scheduleJob("* 1 * * * *", function() {
-
-    console.log("하이");
+var trainingModelBatch =  schedule.scheduleJob("* 59 * * * *", function() {
     
+    var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: ["vlaue1", 'value2'],
+        encoding : 'utf8'
+    };
+
     PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwDeepLearningNewClass.py', options, async function (err, results) {
 
         if (err) {
             console.log(err);           
         }   
         else{
-            console.log(results)
-            var modelHistDoc = db.collection("model_training_history").doc();
-            var postData = {
-                // id            : modelHistDoc.id,
-                // model_nm      : 'flower',
-                // class_eng_nm  : label_name_eng[index],
-                // class_kor_nm  : label_name_kor[index], 
-                // use_yn        : "Y",
-                // train_dt      : "",
-                // reg_dt        : Date.now(),
-            };
-            modelHistDoc.set(postData);
+            // console.log(results)
+            // var modelHistDoc = db.collection("model_training_history").doc();
+            // var postData = {
+            //     // id            : modelHistDoc.id,
+            //     // model_nm      : 'flower',
+            //     // class_eng_nm  : label_name_eng[index],
+            //     // class_kor_nm  : label_name_kor[index], 
+            //     // use_yn        : "Y",
+            //     // train_dt      : "",
+            //     // reg_dt        : Date.now(),
+            // };
+            // modelHistDoc.set(postData);
             //배치 종료 함수 TEST용
             calcelBatch(); 
             

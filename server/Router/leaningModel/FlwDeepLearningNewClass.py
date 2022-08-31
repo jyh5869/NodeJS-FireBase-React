@@ -144,49 +144,87 @@ import numpy               as np
 import tensorflow          as tf
 import tensorflow_datasets as tfds
 import matplotlib.pyplot   as plt 
+import firebase_admin # 파이어베이스 클라우드 연동 라이브러리
+import time
+
+from firebase_admin                  import credentials
+from firebase_admin                  import firestore
+
+
+# Firebase 연계 초기 세팅
+cred = credentials.Certificate('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/firebase_appKey_Movies.json') # server\Router\firebase_appKey_Movies.json
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 # TENSOR VERSION
 # print(tf.__version__)
 
-# print(data_dir)
-data_dir = pathlib.Path('C:/Users/all4land/.keras/datasets/flower_photos_3')
 
-# 매개변수 정의
-batch_size = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
-img_height = 180 # 이미지 높이
-img_width = 180  # 이미지 넓이
+# 모델 훈련 후 히스토리 축척
+# epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
+#          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
+epochs = 1
+training_status = ""
+parmas_hist     = ""
+history_hist    = ""
+training_Id     = str(time.time())
+load_status     = ""
 
+try:
 
-# 트레이닝, 검증  데이터 생성 (검증 분할을 사용 이미지의 80%를 훈련에 사용하고 20%를 유효성 검사에 사용합니다.)
-train_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    data_dir,
-    validation_split=0.1, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
-    subset="training",
-    seed=123,
-    image_size=(img_height, img_width),
-    batch_size=batch_size,
-)
-val_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    data_dir,
-    validation_split=0.1, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
-    subset="validation",
-    seed=123,
-    image_size=(img_height, img_width),
-    batch_size=batch_size
-)
+    data_dir = pathlib.Path('C:/Users/all4land/.keras/datasets/flower_photos_3')
 
-# class_names 속성을 이용해 클래스 조회(파일경로의 하위 디렉토리명)
-class_names = train_ds.class_names
-# print(class_names)
+    # 매개변수 정의
+    batch_size = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
+    img_height = 180 # 이미지 높이
+    img_width = 180  # 이미지 넓이
 
 
-# 데이터 증강 레이어 적용 1 (Accuracy =  0.5490463376045227)
-AUTOTUNE = tf.data.AUTOTUNE
-# 훈련기간동안 이미지를 메모리에 유지함으로서 사용성능이 높은 온디스크 캐시를 생성
-train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
-val_ds = val_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+    # 트레이닝, 검증  데이터 생성 (검증 분할을 사용 이미지의 80%를 훈련에 사용하고 20%를 유효성 검사에 사용합니다.)
+    train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+        data_dir,
+        validation_split=0.1, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
+        subset="training",
+        seed=123,
+        image_size=(img_height, img_width),
+        batch_size=batch_size,
+    )
+    val_ds = tf.keras.preprocessing.image_dataset_from_directory(
+        data_dir,
+        validation_split=0.1, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
+        subset="validation",
+        seed=123,
+        image_size=(img_height, img_width),
+        batch_size=batch_size,
+    )
+
+    # class_names 속성을 이용해 클래스 조회(파일경로의 하위 디렉토리명)
+    class_names = train_ds.class_names
+
+    # 데이터 증강 레이어 적용 1 (Accuracy =  0.5490463376045227)
+    AUTOTUNE = tf.data.AUTOTUNE
+    # 훈련기간동안 이미지를 메모리에 유지함으로서 사용성능이 높은 온디스크 캐시를 생성
+    train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+    val_ds = val_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+
+except ValueError as e:
+    load_status = 'Fail => ' + str(e)
+except TypeError as e:
+    load_status = 'Fail => ' + str(e)
+except NameError as e:
+    load_status = 'Fail => ' + str(e)
+except ZeroDivisionError as e:
+    load_status = 'Fail => ' + str(e)
+except OverflowError as e:
+    load_status = 'Fail => ' + str(e)
+else :
+    load_status = 'Success'
+
+
+
 
 
 # 데이터 증강 (1. 배율 조정  2.이미지  수평, 수직 플립 - 옵션 : [ horizontal_and_vertical : 82.89(av = 80%) / horizontal : 97.57 (av = 90%) ] )
@@ -228,91 +266,95 @@ model.compile(
 )
 
 
+# 모델 훈련 
+try:
+    history = model.fit(
+        train_ds,
+        validation_data=val_ds,
+        epochs=epochs,
+        verbose=0
+    )
 
-# 모델 훈련 후 히스토리 축척
-# epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
-#          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs = 1
-history = model.fit(
-  train_ds,
-  validation_data=val_ds,
-  epochs=epochs,
-  verbose=0
-)
+except ValueError as e:
+    taining_status = 'Fail => ' + str(e)
+except TypeError as e:
+    training_status = 'Fail => ' + str(e)
+except NameError as e:
+    training_status = 'Fail => ' + str(e)
+except ZeroDivisionError as e:
+    training_status = 'Fail => ' + str(e)
+except OverflowError as e:
+    training_status = 'Fail => ' + str(e)
+else :
+    parmas_hist = history.params
+    history_hist = history.history
+    # loss, acc = model.evaluate(val_ds)
+    # print("Accuracy = ", acc)
+
+    # 모델 레이어 보기
+    # model.summary()
+
+    # 모델 검증 후 저장
+    save_model_nm = 'model_flower_delete'
+    # model.save('model.h5.flower1')
+    model.save('C:/Users/all4land/.keras/model/model_flower_delete.h5')
+
+    # 훈련 과정 그래프 표출 
+    acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
+
+    loss = history.history['loss']
+    val_loss = history.history['val_loss']
+
+    epochs_range = range(epochs)
+
+    plt.figure(figsize=(8, 8))
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs_range, acc, label='Training Accuracy')
+    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
+
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs_range, loss, label='Training Loss')
+    plt.plot(epochs_range, val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.savefig('C:/Users/all4land/.keras/trainingResImg/'+save_model_nm +'_'+ str(training_Id) + '.png')
+    # 이미지 표출
+    # plt.show()
+
+    training_status = 'Success'
 
 
-loss, acc = model.evaluate(val_ds)
-# print("Accuracy = ", acc)
 
-
-# 모델 레이어 보기
-# model.summary()
-
-
-# 모델 저장 및
-IMG_SIZE = 180
-
-# img_url = [
-#   'C:/Users/all4land/Desktop/validatonImg5.jpg',
-#   'C:/Users/all4land/Desktop/validatonImg6.jpg',
-#   'C:/Users/all4land/Desktop/validatonImg7.jpg',
-#   'C:/Users/all4land/Desktop/validatonImg8.jpg',
-# ]
-
-
-# for index, value in enumerate(img_url, start=0):
-#   print(index, value)
-
-#   img = tf.keras.preprocessing.image.load_img(
-#     value, target_size=(IMG_SIZE, IMG_SIZE)
-#   )
-#   img_array = tf.keras.preprocessing.image.img_to_array(img)
-#   img_array = tf.expand_dims(img_array, 0) # Create a batch
-
-#   predictions = model.predict(img_array)
-
-#   score = tf.nn.softmax(predictions[0])
-
-#   print(score)
-#   print(np.argmax(score))
-#   print(
-#       "1 This image most likely belongs to {} with a {:.2f} percent confidence."
-#       .format(class_names[np.argmax(score)], 100 * np.max(score))
-#   )
-
-
-# 모델 검증 후 저장
-# model.save('model.h5.flower1')
-model.save('C:/Users/all4land/.keras/model/model_flower_delete.h5')
-
-# 훈련 과정 그래프 표출 
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
-
-loss = history.history['loss']
-val_loss = history.history['val_loss']
-
-epochs_range = range(epochs)
-
-plt.figure(figsize=(8, 8))
-plt.subplot(1, 2, 1)
-plt.plot(epochs_range, acc, label='Training Accuracy')
-plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
-plt.title('Training and Validation Accuracy')
-
-plt.subplot(1, 2, 2)
-plt.plot(epochs_range, loss, label='Training Loss')
-plt.plot(epochs_range, val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.title('Training and Validation Loss')
-plt.show()
-
-# 이미지 저장
 # 훈련 클래스 리스트
+print('class_names = ' + str(class_names))
 # 훈련 과정 파라메터
-print(history.params)
+print('parmas_hist = ' + str(parmas_hist))
 # 훈련 결과 파라메터
-print(history.history)
+print('history_hist = ' + str(history_hist))
+# 훈련 데이터 로드
+print('load_status = ' + str(load_status))
 # 훈련 정상여부
+print('training_status = '+ str(training_status))
+# 모델 생성 날짜
+print('training_Id = ' + training_Id)
 
+data_documnets = {
+    'IDX'             : training_Id,
+    'LOAD_STATUS'     : load_status,
+    'TRAINING_STATUS' : training_status,
+    'CLASS_NM'        : class_names,
+    'VERBOSE'         : parmas_hist['verbose'],
+    'EPOCHS'          : parmas_hist['epochs'],
+    'STEP'            : parmas_hist['steps'],
+    'LOSS'            : history_hist['loss'][0],
+    'ACCURACY'        : history_hist['accuracy'][0],
+    'VAL_LOSS'        : history_hist['val_loss'][0],
+    'VAL_ACCURACY'    : history_hist['val_accuracy'][0],
+    'RESULT_IMG_PATH' : 'C:/Users/all4land/.keras/trainingResImg/'+save_model_nm +'_'+ training_Id + '.png'
+}
+
+# 모델 훈련 결과 데이터 INSERT
+db.collection('MODEL_TRN_HIST').document(training_Id).set(data_documnets)
