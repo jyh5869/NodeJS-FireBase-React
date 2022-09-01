@@ -9,6 +9,7 @@ import List            from './view/list';
 import MovieDetail     from './view/movieDetail';
 import FlowerAnalysis  from './view/flowerAnalysis';
 import FlowerAddClass  from './view/flower/flowerAddClass';
+import FlowerTrainHist from './view/flower/FlowerTrainHist';
 
 import './assets/css/common.css';
 
@@ -31,7 +32,7 @@ function App() {
                             <NavDropdown title="flower" id="basic-nav-dropdown">
                                 <NavDropdown.Item href="/view/flowerAnalysis">flower Analysis</NavDropdown.Item>
                                 <NavDropdown.Divider />
-                                <NavDropdown.Item href="#action/3.2">model Training schedules</NavDropdown.Item>
+                                <NavDropdown.Item href="/view/flower/FlowerTrainHist">model Training schedules</NavDropdown.Item>
                                 <NavDropdown.Item href="/view/flower/flowerAddClass">Add flowerClass</NavDropdown.Item>
                             </NavDropdown> 
 
@@ -52,6 +53,7 @@ function App() {
                     <Route path="/view/movieDetail/:id" element={ <MovieDetail/> } ></Route>
                     <Route path="/view/flowerAnalysis" element={ <FlowerAnalysis/> } ></Route>
                     <Route path="/view/flower/flowerAddClass" element={ <FlowerAddClass/> } ></Route>
+                    <Route path="/view/flower/FlowerTrainHist" element={ <FlowerTrainHist/> } ></Route>
                 </Routes>
             </div>
         </div>

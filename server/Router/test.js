@@ -472,7 +472,65 @@ router.get("/getModelExistYn",async  (req, res,  next) => {
 });
 
 
+/* 배열에 있는 클레스 파일에 추가 */
+router.get("/getTrainingHist", async (req, res) => {
+    
+    let callType = req.query.callType;
 
+    if(callType == 'select'){
+
+        await db.collection('model_trn_hist').orderBy('id', "desc").get()
+        .then((snapshot) => {
+            var rows = [];
+            snapshot.forEach((doc) => {
+                var childData = doc.data();
+                //새로운 게시물(하루전), 업데이트된(하루전) 게시물 세팅
+                const today          = new Date();
+                const regDate        = new Date(Number(childData.id));
+
+                const refNewDate = new Date(regDate.getFullYear(), regDate.getMonth(), regDate.getDate() +1 ,regDate.getHours(), regDate.getMinutes(), regDate.getSeconds(), regDate.getMilliseconds() );
+
+                childData.newRegYn    = today <= refNewDate ? "Y" : "N";
+                
+                childData.reg_dt1    = dateFormat(Number(childData.id)  ,"yyyy-mm-dd");
+                childData.reg_dt2   = dateFormat(Number(childData.id)   ,"yyyy-mm-dd hh:MM:ss");
+
+                childData.down_status_summary = childData.down_status == 'Success' ? 'Success' : 'Fail' 
+                childData.load_status_summary = childData.load_status == 'Success' ? 'Success' : 'Fail' 
+                childData.training_status_summary = childData.training_status == 'Success' ? 'Success' : 'Fail' 
+
+                rows.push(childData);
+            });
+            res.send({rows: rows});
+        })
+        .catch((err) => {
+            console.log('Error getting documents', err);
+        });
+    }
+    else if(callType == 'delete'){
+
+        let targetId = req.query.targetId;
+        let returnStr = "";
+
+         //데이터 삭제
+         await db.collection('model_class_list').doc(targetId).delete()
+         .then(function() {
+            //console.log("Class Delete Success");
+            returnStr = "Class Delete Success";
+         })
+         .catch(function(error) {
+            //console.log("Class Delete Fail----->" + error);
+            returnStr = "Class Delete Fail----->" + error;
+         });
+
+        console.log("삭제 해보즈아")
+        res.send({results: returnStr});
+    }
+    else{
+        res.send({results: 'error'});
+    }
+    
+});
 
 /*
     PythonShell을 이용한 ignore 협업 필터링 사용
@@ -923,7 +981,16 @@ function makeExcel(rows, fileNum){
 }
 
 
+router.get("/getImgs",async  (req, res,  next) => {
 
+    var path = req.query.path
+
+    fs.readFile(path, function(error, data){
+        res.writeHead(200,{'Content-Type' : 'text/html'});
+        res.end(data);
+    });
+
+});
 
 
 
@@ -970,6 +1037,7 @@ function makeExcel(rows, fileNum){
 
 
 */
+/*
 var trainingModelBatch =  schedule.scheduleJob("* 59 * * * *", function() {
     
     var options = {
@@ -1005,7 +1073,7 @@ var trainingModelBatch =  schedule.scheduleJob("* 59 * * * *", function() {
         }
     });
 });
-
+*/
 function calcelBatch(){
     trainingModelBatch.cancel();
     return false;

@@ -22,6 +22,7 @@ a:hover { color: darkslategray;}
 nav{ padding: 10px 7%;}
 
 table tr .td_div_50{ width: 50%; display: inline-block;}
+table tr td{ vertical-align: middle;}
 
 .card img{ width: 100%; padding-bottom: 10px;}
 .card img.movie.detail{ width: 50%; padding-bottom: 10px;}

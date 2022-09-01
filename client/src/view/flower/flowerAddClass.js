@@ -35,7 +35,6 @@ function List() {
 
     const SelectBox = (props) => {
 
-        
         const modifyAction = async  (params, e) => {
 
             let response = await axios({

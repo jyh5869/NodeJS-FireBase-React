@@ -157,21 +157,24 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
+# 텐서플로 사용 초기 세팅
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-# TENSOR VERSION
-# print(tf.__version__)
 
-
-# 모델 훈련 후 히스토리 축척
+# 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs = 1
-training_status = ""
-parmas_hist     = ""
-history_hist    = ""
-training_Id     = str(time.time())
-load_status     = ""
+epochs          = 3                # 훈련반복 횟수 
+down_status     = "Success"        # 이미지 크롤링 결과
+load_status     = ""               # 데이터 로드 결과 (Success / Fail -> error)
+training_status = ""               # 훈련 결과 (Success / Fail -> error)
+parmas_hist     = {}               # 훈련 과정 파라메터 (epochs, step, verbose) 
+history_hist    = {}               # 훈련 결과 파라메터 (Loss,accuracy , val_loss, val_accuracy)
+class_names     = ""               # 훈련 클래스 리스트
+class_count     = 0                # 훈련 클래스 갯수
+training_Id     = str(time.time()) # 훈련 시간 (이력의 id값으로 활용)
+save_model_nm   = ""               # 훈현 모델명         
+result_img_path = ""               # 훈련과정 이미지 저장 경로
 
 try:
 
@@ -181,7 +184,6 @@ try:
     batch_size = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
     img_height = 180 # 이미지 높이
     img_width = 180  # 이미지 넓이
-
 
     # 트레이닝, 검증  데이터 생성 (검증 분할을 사용 이미지의 80%를 훈련에 사용하고 20%를 유효성 검사에 사용합니다.)
     train_ds = tf.keras.preprocessing.image_dataset_from_directory(
@@ -201,160 +203,159 @@ try:
         batch_size=batch_size,
     )
 
-    # class_names 속성을 이용해 클래스 조회(파일경로의 하위 디렉토리명)
+    # class_names 속성을 이용해 클래스리스트, 갯수 조회(파일경로의 하위 디렉토리명)
     class_names = train_ds.class_names
-
+    # class_names =  if aa == 0 else aa
+    class_count = len(class_names)
+    
     # 데이터 증강 레이어 적용 1 (Accuracy =  0.5490463376045227)
     AUTOTUNE = tf.data.AUTOTUNE
-    # 훈련기간동안 이미지를 메모리에 유지함으로서 사용성능이 높은 온디스크 캐시를 생성
+    # 훈련기간동안 이미지를 메모리에 유지함으로서 사용성능이 높은 온디스크 캐시를 생성 - cache()
     train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
     val_ds = val_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
 
 except ValueError as e:
-    load_status = 'Fail => ' + str(e)
+    load_status = 'Fail -> ' + str(e)
 except TypeError as e:
-    load_status = 'Fail => ' + str(e)
+    load_status = 'Fail -> ' + str(e)
 except NameError as e:
-    load_status = 'Fail => ' + str(e)
+    load_status = 'Fail -> ' + str(e)
 except ZeroDivisionError as e:
-    load_status = 'Fail => ' + str(e)
+    load_status = 'Fail -> ' + str(e)
 except OverflowError as e:
-    load_status = 'Fail => ' + str(e)
+    load_status = 'Fail -> ' + str(e)
 else :
     load_status = 'Success'
 
-
-
-
-
-# 데이터 증강 (1. 배율 조정  2.이미지  수평, 수직 플립 - 옵션 : [ horizontal_and_vertical : 82.89(av = 80%) / horizontal : 97.57 (av = 90%) ] )
-data_augmentation = tf.keras.Sequential(
-  [
-    tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
-                                                 input_shape=(img_height, 
-                                                              img_width,
-                                                              3)),
-    tf.keras.layers.experimental.preprocessing.RandomRotation(0.1),
-    tf.keras.layers.experimental.preprocessing.RandomZoom(0.1),
-  ]
-)
-
-
-# 새로운 모델 
-num_classes = 8
-model = tf.keras.Sequential(
-    [
-        data_augmentation,
-        tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
-        tf.keras.layers.Conv2D(16, 3, activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Conv2D(32, 3, activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Conv2D(64, 3, activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Dropout(0.2), # 과대적합 방지(정규화의 한 형태인 드롭아웃을 네트워크에 적용) 
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dense(8)
-    ]
-)
-
-model.compile(
-    optimizer='adam',
-    loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
-    metrics=['accuracy']
-)
-
-
-# 모델 훈련 
-try:
-    history = model.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=epochs,
-        verbose=0
+    # 데이터 증강 (1. 배율 조정  2.이미지  수평, 수직 플립 - 옵션 : [ horizontal_and_vertical : 82.89(av = 80%) / horizontal : 97.57 (av = 90%) ] )
+    data_augmentation = tf.keras.Sequential(
+        [
+            tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
+                                                        input_shape=(img_height, 
+                                                                    img_width,
+                                                                    3)),
+            tf.keras.layers.experimental.preprocessing.RandomRotation(0.1),
+            tf.keras.layers.experimental.preprocessing.RandomZoom(0.1),
+        ]
     )
 
-except ValueError as e:
-    taining_status = 'Fail => ' + str(e)
-except TypeError as e:
-    training_status = 'Fail => ' + str(e)
-except NameError as e:
-    training_status = 'Fail => ' + str(e)
-except ZeroDivisionError as e:
-    training_status = 'Fail => ' + str(e)
-except OverflowError as e:
-    training_status = 'Fail => ' + str(e)
-else :
-    parmas_hist = history.params
-    history_hist = history.history
-    # loss, acc = model.evaluate(val_ds)
-    # print("Accuracy = ", acc)
+    # 새로운 모델 
+    num_classes = class_count
+    model = tf.keras.Sequential(
+        [
+            data_augmentation,
+            tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
+            tf.keras.layers.Conv2D(16, 3, activation='relu'),
+            tf.keras.layers.MaxPooling2D(),
+            tf.keras.layers.Conv2D(32, 3, activation='relu'),
+            tf.keras.layers.MaxPooling2D(),
+            tf.keras.layers.Conv2D(64, 3, activation='relu'),
+            tf.keras.layers.MaxPooling2D(),
+            tf.keras.layers.Dropout(0.2), # 과대적합 방지(정규화의 한 형태인 드롭아웃을 네트워크에 적용) 
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dense(num_classes)
+        ]
+    )
 
-    # 모델 레이어 보기
-    # model.summary()
+    model.compile(
+        optimizer='adam',
+        loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
+        metrics=['accuracy']
+    )
 
-    # 모델 검증 후 저장
-    save_model_nm = 'model_flower_delete'
-    # model.save('model.h5.flower1')
-    model.save('C:/Users/all4land/.keras/model/model_flower_delete.h5')
+    # 모델 훈련 
+    try:
+        history = model.fit(
+            train_ds,
+            validation_data=val_ds,
+            epochs=epochs,
+            verbose=0
+        )
 
-    # 훈련 과정 그래프 표출 
-    acc = history.history['accuracy']
-    val_acc = history.history['val_accuracy']
+    except ValueError as e:
+        training_status = 'Fail -> ' + str(e)
+    except TypeError as e:
+        training_status = 'Fail -> ' + str(e)
+    except NameError as e:
+        training_status = 'Fail -> ' + str(e)
+    except ZeroDivisionError as e:
+        training_status = 'Fail -> ' + str(e)
+    except OverflowError as e:
+        training_status = 'Fail -> ' + str(e)
+    else :
+        parmas_hist = history.params
+        history_hist = history.history
+        # loss, acc = model.evaluate(val_ds)
+        # print("Accuracy = ", acc)
 
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
+        # 모델 레이어 보기
+        # model.summary()
 
-    epochs_range = range(epochs)
+        # 모델 검증 후 저장
+        save_model_nm = 'model_flower_delete'
+        # model.save('model.h5.flower1')
+        model.save('C:/Users/all4land/.keras/model/model_flower_delete.h5')
 
-    plt.figure(figsize=(8, 8))
-    plt.subplot(1, 2, 1)
-    plt.plot(epochs_range, acc, label='Training Accuracy')
-    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-    plt.legend(loc='lower right')
-    plt.title('Training and Validation Accuracy')
+        # 훈련 과정 그래프 표출 
+        acc = history.history['accuracy']
+        val_acc = history.history['val_accuracy']
 
-    plt.subplot(1, 2, 2)
-    plt.plot(epochs_range, loss, label='Training Loss')
-    plt.plot(epochs_range, val_loss, label='Validation Loss')
-    plt.legend(loc='upper right')
-    plt.title('Training and Validation Loss')
-    plt.savefig('C:/Users/all4land/.keras/trainingResImg/'+save_model_nm +'_'+ str(training_Id) + '.png')
-    # 이미지 표출
-    # plt.show()
+        loss = history.history['loss']
+        val_loss = history.history['val_loss']
 
-    training_status = 'Success'
+        epochs_range = range(epochs)
+
+        plt.figure(figsize=(8, 8))
+        plt.subplot(1, 2, 1)
+        plt.plot(epochs_range, acc, label='Training Accuracy')
+        plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+        plt.legend(loc='lower right')
+        plt.title('Training and Validation Accuracy')
+
+        plt.subplot(1, 2, 2)
+        plt.plot(epochs_range, loss, label='Training Loss')
+        plt.plot(epochs_range, val_loss, label='Validation Loss')
+        plt.legend(loc='upper right')
+        plt.title('Training and Validation Loss')
+        plt.savefig('C:/Users/all4land/.keras/trainingResImg/'+save_model_nm +'_'+ str(training_Id) + '.png')
+        # 이미지 표출
+        # plt.show()
+
+        result_img_path = 'C:/Users/all4land/.keras/trainingResImg/'+save_model_nm +'_'+ training_Id + '.png'
+        training_status = 'Success'
 
 
 
 # 훈련 클래스 리스트
-print('class_names = ' + str(class_names))
+print('class_names -> ' + str(class_names) + str(class_count))
 # 훈련 과정 파라메터
-print('parmas_hist = ' + str(parmas_hist))
+print('parmas_hist -> ' + str(parmas_hist))
 # 훈련 결과 파라메터
-print('history_hist = ' + str(history_hist))
+print('history_hist -> ' + str(history_hist))
 # 훈련 데이터 로드
-print('load_status = ' + str(load_status))
+print('load_status -> ' + str(load_status))
 # 훈련 정상여부
-print('training_status = '+ str(training_status))
+print('training_status -> '+ str(training_status))
 # 모델 생성 날짜
-print('training_Id = ' + training_Id)
+print('training_Id -> ' + training_Id)
 
 data_documnets = {
-    'IDX'             : training_Id,
-    'LOAD_STATUS'     : load_status,
-    'TRAINING_STATUS' : training_status,
-    'CLASS_NM'        : class_names,
-    'VERBOSE'         : parmas_hist['verbose'],
-    'EPOCHS'          : parmas_hist['epochs'],
-    'STEP'            : parmas_hist['steps'],
-    'LOSS'            : history_hist['loss'][0],
-    'ACCURACY'        : history_hist['accuracy'][0],
-    'VAL_LOSS'        : history_hist['val_loss'][0],
-    'VAL_ACCURACY'    : history_hist['val_accuracy'][0],
-    'RESULT_IMG_PATH' : 'C:/Users/all4land/.keras/trainingResImg/'+save_model_nm +'_'+ training_Id + '.png'
+    'id'              : training_Id,
+    'model_nm'        : save_model_nm,
+    'down_status'     : down_status,
+    'load_status'     : load_status,
+    'training_status' : training_status,
+    'class_nm   '     : class_names,
+    'verbose'         : parmas_hist['verbose']                                             if len(parmas_hist)  != 0 else 0,
+    'epochs'          : parmas_hist['epochs']                                              if len(parmas_hist)  != 0 else 0,
+    'steps'           : parmas_hist['steps']                                               if len(parmas_hist)  != 0 else 0,
+    'loss'            : history_hist['loss'][len(history_hist['loss']) -1]                 if len(history_hist) != 0 else 0,
+    'accuracy'        : history_hist['accuracy'][len(history_hist['accuracy']) -1]         if len(history_hist) != 0 else 0,
+    'val_loss'        : history_hist['val_loss'][len(history_hist['val_loss']) -1]         if len(history_hist) != 0 else 0,
+    'val_accuracy'    : history_hist['val_accuracy'][len(history_hist['val_accuracy']) -1] if len(history_hist) != 0 else 0,
+    'result_img_path' : result_img_path
 }
 
 # 모델 훈련 결과 데이터 INSERT
-db.collection('MODEL_TRN_HIST').document(training_Id).set(data_documnets)
+db.collection('model_trn_hist').document(training_Id).set(data_documnets)
