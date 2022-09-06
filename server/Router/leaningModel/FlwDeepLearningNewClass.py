@@ -160,25 +160,29 @@ db = firestore.client()
 # 텐서플로 사용 초기 세팅
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
+print()
+print()
 
 # 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs          = 3                # 훈련반복 횟수 
-down_status     = "Success"        # 이미지 크롤링 결과
-load_status     = ""               # 데이터 로드 결과 (Success / Fail -> error)
-training_status = ""               # 훈련 결과 (Success / Fail -> error)
-parmas_hist     = {}               # 훈련 과정 파라메터 (epochs, step, verbose) 
-history_hist    = {}               # 훈련 결과 파라메터 (Loss,accuracy , val_loss, val_accuracy)
-class_names     = ""               # 훈련 클래스 리스트
-class_count     = 0                # 훈련 클래스 갯수
-training_Id     = str(time.time()) # 훈련 시간 (이력의 id값으로 활용)
-save_model_nm   = ""               # 훈현 모델명         
-result_img_path = ""               # 훈련과정 이미지 저장 경로
+epochs          = 5                 # 훈련반복 횟수 
+down_status     = "Success"         # 이미지 크롤링 결과
+load_status     = ""                # 데이터 로드 결과 (Success / Fail -> error)
+training_status = ""                # 훈련 결과 (Success / Fail -> error)
+parmas_hist     = {}                # 훈련 과정 파라메터 (epochs, step, verbose) 
+history_hist    = {}                # 훈련 결과 파라메터 (Loss,accuracy , val_loss, val_accuracy)
+class_names     = ""                # 훈련 클래스 리스트
+class_count     = 0                 # 훈련 클래스 갯수
+training_Id     = str(time.time())  # 훈련 시간 (이력의 id값으로 활용)
+save_model_nm   = str(sys.argv[1])  # 훈현 모델명         
+dataset_url     = str(sys.argv[2])  # 데이터셋 url
+result_img_path = str(sys.argv[3])  # 훈련과정 이미지 저장 경로
+save_model_url  = str(sys.argv[4])  # 모델 저장 경로
 
 try:
 
-    data_dir = pathlib.Path('C:/Users/all4land/.keras/datasets/flower_photos_3')
+    data_dir = pathlib.Path(dataset_url)
 
     # 매개변수 정의
     batch_size = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
@@ -293,9 +297,8 @@ else :
         # model.summary()
 
         # 모델 검증 후 저장
-        save_model_nm = 'model_flower_delete'
         # model.save('model.h5.flower1')
-        model.save('C:/Users/all4land/.keras/model/model_flower_delete.h5')
+        model.save(save_model_url + save_model_nm +'.h5')
 
         # 훈련 과정 그래프 표출 
         acc = history.history['accuracy']
@@ -318,11 +321,11 @@ else :
         plt.plot(epochs_range, val_loss, label='Validation Loss')
         plt.legend(loc='upper right')
         plt.title('Training and Validation Loss')
-        plt.savefig('C:/Users/all4land/.keras/trainingResImg/'+save_model_nm +'_'+ str(training_Id) + '.png')
-        # 이미지 표출
-        # plt.show()
 
-        result_img_path = 'C:/Users/all4land/.keras/trainingResImg/'+save_model_nm +'_'+ training_Id + '.png'
+        result_img_path = str(result_img_path + save_model_nm + '_'+ training_Id + '.png')
+
+        plt.savefig(result_img_path)
+
         training_status = 'Success'
 
 
@@ -346,7 +349,7 @@ data_documnets = {
     'down_status'     : down_status,
     'load_status'     : load_status,
     'training_status' : training_status,
-    'class_nm   '     : class_names,
+    'class_nm'        : class_names,
     'verbose'         : parmas_hist['verbose']                                             if len(parmas_hist)  != 0 else 0,
     'epochs'          : parmas_hist['epochs']                                              if len(parmas_hist)  != 0 else 0,
     'steps'           : parmas_hist['steps']                                               if len(parmas_hist)  != 0 else 0,
@@ -354,7 +357,9 @@ data_documnets = {
     'accuracy'        : history_hist['accuracy'][len(history_hist['accuracy']) -1]         if len(history_hist) != 0 else 0,
     'val_loss'        : history_hist['val_loss'][len(history_hist['val_loss']) -1]         if len(history_hist) != 0 else 0,
     'val_accuracy'    : history_hist['val_accuracy'][len(history_hist['val_accuracy']) -1] if len(history_hist) != 0 else 0,
-    'result_img_path' : result_img_path
+    'result_img_path' : result_img_path,
+    'save_model_url'  : save_model_url,
+    'dataset_url'     : dataset_url
 }
 
 # 모델 훈련 결과 데이터 INSERT

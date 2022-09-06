@@ -313,34 +313,19 @@ router.get("/crawlingGoogleGrwFlw",async  (req, res,  next) => {
 /*  위 두 컨트롤러에서 생성된 모델을 사용해 이미지 분류(꽃)  */
 router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
 
-    var keyword = req.query.keyword
-
+    var datasetUrl    = req.query.keyword       != undefined ? req.query.keyword       : 'model_test1';
+    var saveModelNm   = req.query.saveModelNm   != undefined ? req.query.saveModelNm   : 'C:/Users/all4land/.keras/datasets/flower_photos_3';
+    var reulstImgPath = req.query.reulstImgPath != undefined ? req.query.reulstImgPath : 'C:/Users/all4land/.keras/trainingResImg/'
+    var saveModelUrl  = req.query.saveModelUrl  != undefined ? req.query.saveModelUrl  : 'C:/Users/all4land/.keras/model/'
     //파이썬 쉘 요청 옵션
     var options = {
         mode         : 'text',
         pythonPath   : '',
         pythonOptions: ['-u'],
         scriptPath   : '',
-        args         : [keyword],
+        args         : [datasetUrl, saveModelNm, reulstImgPath, saveModelUrl],
         encoding : 'utf8',
     };
-    
-
-    //파이썬 쉘 생성, 요청 및 응답
-    /*
-    let pyshell = new PythonShell.PythonShell('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwDeepLearningNewClass.py', options); 
-    pyshell.send(keyword, { mode: "text" })
-    pyshell.run('message', function (results) { //But never receive data from pythonFile.
-        
-        res.json( {results : results});
-        
-    })
-    pyshell.end(function (err) { // Just run it
-        if (err)  {throw err};
-        console.log('finished!!'); //appear this message
-        
-    });
-    */
 
     PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwDeepLearningNewClass.py', options, function (err, results) {
 
@@ -348,10 +333,8 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
             console.log(err);           
         }   
         else{
-
             res.send( {results: results});     
         }
-        //console.log('results: %j', results);
     });
 });
 
@@ -513,7 +496,7 @@ router.get("/getTrainingHist", async (req, res) => {
         let returnStr = "";
 
          //데이터 삭제
-         await db.collection('model_class_list').doc(targetId).delete()
+         await db.collection('model_trn_hist').doc(targetId).delete()
          .then(function() {
             //console.log("Class Delete Success");
             returnStr = "Class Delete Success";
@@ -523,7 +506,6 @@ router.get("/getTrainingHist", async (req, res) => {
             returnStr = "Class Delete Fail----->" + error;
          });
 
-        console.log("삭제 해보즈아")
         res.send({results: returnStr});
     }
     else{

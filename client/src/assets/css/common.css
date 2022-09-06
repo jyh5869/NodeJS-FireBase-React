@@ -21,7 +21,8 @@ a:hover { color: darkslategray;}
 
 nav{ padding: 10px 7%;}
 
-table tr .td_div_50{ width: 50%; display: inline-block;}
+table tr .td_div_50{ width: 50%; display: inline;}
+table tr .td_div_50 button{ margin: 0px 10px;}
 table tr td{ vertical-align: middle;}
 
 .card img{ width: 100%; padding-bottom: 10px;}
@@ -45,6 +46,14 @@ table tr td{ vertical-align: middle;}
 
 .loding-text { left: 0; top: 54%; width: 100%; z-index: 9999; overflow: auto; position: fixed !important; text-align: center; color: blanchedalmond;}
 
+
+.success {
+    display: '';
+}
+  
+.failure {
+    display: none;
+}
 @media screen and (max-width: 991px) {
 
     nav{padding:0;}
