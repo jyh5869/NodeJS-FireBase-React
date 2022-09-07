@@ -7,8 +7,6 @@ var dateFormat = require('dateformat');
 const csv = require('csv-parser');
 const fs  = require('fs'        );
 
-const schedule = require('node-schedule');//스케줄러 사용을 위한 라이브러리
-
 //유사 콘텐츠 추출을 위한 머신러닝 라이브러리
 const dfd = require("danfojs"         );
 const pd  = require("pandas"          );
@@ -468,15 +466,15 @@ router.get("/getTrainingHist", async (req, res) => {
             snapshot.forEach((doc) => {
                 var childData = doc.data();
                 //새로운 게시물(하루전), 업데이트된(하루전) 게시물 세팅
-                const today          = new Date();
-                const regDate        = new Date(Number(childData.id));
+                const today      = new Date();
+                const regDate    = new Date(Number(childData.id));
 
                 const refNewDate = new Date(regDate.getFullYear(), regDate.getMonth(), regDate.getDate() +1 ,regDate.getHours(), regDate.getMinutes(), regDate.getSeconds(), regDate.getMilliseconds() );
 
-                childData.newRegYn    = today <= refNewDate ? "Y" : "N";
+                childData.newRegYn  = today <= refNewDate ? "Y" : "N";
                 
-                childData.reg_dt1    = dateFormat(Number(childData.id)  ,"yyyy-mm-dd");
-                childData.reg_dt2   = dateFormat(Number(childData.id)   ,"yyyy-mm-dd hh:MM:ss");
+                childData.reg_dt1   = dateFormat(Number(regDate)  ,"yyyy-mm-dd");
+                childData.reg_dt2   = dateFormat(Number(regDate)   ,"yyyy-mm-dd hh:MM:ss");
 
                 childData.down_status_summary = childData.down_status == 'Success' ? 'Success' : 'Fail' 
                 childData.load_status_summary = childData.load_status == 'Success' ? 'Success' : 'Fail' 
@@ -1057,9 +1055,17 @@ var trainingModelBatch =  schedule.scheduleJob("* 59 * * * *", function() {
 });
 */
 function calcelBatch(){
-    trainingModelBatch.cancel();
+    console.log('하위하위')
+    //trainingModelBatch.cancel();
     return false;
 }
 
+const schedule = require('node-schedule');//스케줄러 사용을 위한 라이브러리
+const app = express()
+app.listen(6000, (request, response) => {
 
+    schedule.scheduleJob('1 * * * * *', function(requestTime){
+        console.log('The answer to life, the universe, and everything!11111111111111111111111111');
+    });
+})
 module.exports = router;

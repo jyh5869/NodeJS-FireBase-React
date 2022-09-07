@@ -122,7 +122,7 @@ function List() {
                     <td>{ props.list.down_status_summary }</td>
                     <td>{ props.list.load_status_summary }</td>
                     <td>{ props.list.training_status_summary }</td>
-                    <td>{ props.list.reg_dt1 }</td>
+                    <td>{ props.list.reg_dt2}</td>
                     <td>
                         <div className='td_div_50'>
                             <Button variant="success" className={'more_'+props.index} onClick={(e)=>{showDetail({ 'index' : props.index}, e)}} >More</Button>

@@ -146,6 +146,9 @@ import tensorflow_datasets as tfds
 import matplotlib.pyplot   as plt 
 import firebase_admin # 파이어베이스 클라우드 연동 라이브러리
 import time
+from time import localtime
+from time import strptime
+
 
 from firebase_admin                  import credentials
 from firebase_admin                  import firestore
@@ -160,25 +163,22 @@ db = firestore.client()
 # 텐서플로 사용 초기 세팅
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-print()
-print()
-
 # 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs          = 5                 # 훈련반복 횟수 
-down_status     = "Success"         # 이미지 크롤링 결과
-load_status     = ""                # 데이터 로드 결과 (Success / Fail -> error)
-training_status = ""                # 훈련 결과 (Success / Fail -> error)
-parmas_hist     = {}                # 훈련 과정 파라메터 (epochs, step, verbose) 
-history_hist    = {}                # 훈련 결과 파라메터 (Loss,accuracy , val_loss, val_accuracy)
-class_names     = ""                # 훈련 클래스 리스트
-class_count     = 0                 # 훈련 클래스 갯수
-training_Id     = str(time.time())  # 훈련 시간 (이력의 id값으로 활용)
-save_model_nm   = str(sys.argv[1])  # 훈현 모델명         
-dataset_url     = str(sys.argv[2])  # 데이터셋 url
-result_img_path = str(sys.argv[3])  # 훈련과정 이미지 저장 경로
-save_model_url  = str(sys.argv[4])  # 모델 저장 경로
+epochs          = 1                                       # 훈련반복 횟수 
+down_status     = "Success"                               # 이미지 크롤링 결과
+load_status     = ""                                      # 데이터 로드 결과 (Success / Fail -> error)
+training_status = ""                                      # 훈련 결과 (Success / Fail -> error)
+parmas_hist     = {}                                      # 훈련 과정 파라메터 (epochs, step, verbose) 
+history_hist    = {}                                      # 훈련 결과 파라메터 (Loss,accuracy , val_loss, val_accuracy)
+class_names     = ""                                      # 훈련 클래스 리스트
+class_count     = 0                                       # 훈련 클래스 갯수
+training_Id     = str(time.time()).replace('.','')[0:13]  # 훈련 시간 (이력의 id값으로 활용, nodejs에서 활용할수 있는 13자리 숫자 폼으로 변환)
+save_model_nm   = str(sys.argv[1])                        # 훈현 모델명         
+dataset_url     = str(sys.argv[2])                        # 데이터셋 url
+result_img_path = str(sys.argv[3])                        # 훈련과정 이미지 저장 경로
+save_model_url  = str(sys.argv[4])                        # 모델 저장 경로
 
 try:
 
@@ -340,8 +340,10 @@ print('history_hist -> ' + str(history_hist))
 print('load_status -> ' + str(load_status))
 # 훈련 정상여부
 print('training_status -> '+ str(training_status))
+# 모델 DB IDX = 날짜 로컬타임으로
+print('training_Id -> ' + str(training_Id))
 # 모델 생성 날짜
-print('training_Id -> ' + training_Id)
+print('training_dt -> ' + str(localtime(float(training_Id))))
 
 data_documnets = {
     'id'              : training_Id,
