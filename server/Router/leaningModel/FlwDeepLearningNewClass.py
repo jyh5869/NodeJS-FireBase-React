@@ -179,6 +179,8 @@ save_model_nm   = str(sys.argv[1])                        # 훈현 모델명
 dataset_url     = str(sys.argv[2])                        # 데이터셋 url
 result_img_path = str(sys.argv[3])                        # 훈련과정 이미지 저장 경로
 save_model_url  = str(sys.argv[4])                        # 모델 저장 경로
+start_dt        = ""
+end_dt          = ""
 
 try:
 
@@ -270,13 +272,15 @@ else :
 
     # 모델 훈련 
     try:
+        start_dt = str(time.time()).replace('.','')[0:13]
+        
         history = model.fit(
             train_ds,
             validation_data=val_ds,
             epochs=epochs,
             verbose=0
         )
-
+        end_dt   = str(time.time()).replace('.','')[0:13]
     except ValueError as e:
         training_status = 'Fail -> ' + str(e)
     except TypeError as e:
@@ -342,8 +346,6 @@ print('load_status -> ' + str(load_status))
 print('training_status -> '+ str(training_status))
 # 모델 DB IDX = 날짜 로컬타임으로
 print('training_Id -> ' + str(training_Id))
-# 모델 생성 날짜
-print('training_dt -> ' + str(localtime(float(training_Id))))
 
 data_documnets = {
     'id'              : training_Id,
@@ -361,7 +363,9 @@ data_documnets = {
     'val_accuracy'    : history_hist['val_accuracy'][len(history_hist['val_accuracy']) -1] if len(history_hist) != 0 else 0,
     'result_img_path' : result_img_path,
     'save_model_url'  : save_model_url,
-    'dataset_url'     : dataset_url
+    'dataset_url'     : dataset_url,
+    'start_dt'        : start_dt,
+    'end_dt'          : end_dt
 }
 
 # 모델 훈련 결과 데이터 INSERT

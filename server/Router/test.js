@@ -315,25 +315,30 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
     var saveModelNm   = req.query.saveModelNm   != undefined ? req.query.saveModelNm   : 'C:/Users/all4land/.keras/datasets/flower_photos_3';
     var reulstImgPath = req.query.reulstImgPath != undefined ? req.query.reulstImgPath : 'C:/Users/all4land/.keras/trainingResImg/'
     var saveModelUrl  = req.query.saveModelUrl  != undefined ? req.query.saveModelUrl  : 'C:/Users/all4land/.keras/model/'
-    //파이썬 쉘 요청 옵션
-    var options = {
-        mode         : 'text',
-        pythonPath   : '',
-        pythonOptions: ['-u'],
-        scriptPath   : '',
-        args         : [datasetUrl, saveModelNm, reulstImgPath, saveModelUrl],
-        encoding : 'utf8',
-    };
 
-    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwDeepLearningNewClass.py', options, function (err, results) {
-
-        if (err) {
-            console.log(err);           
-        }   
-        else{
-            res.send( {results: results});     
-        }
-    });
+    const promise1 = new Promise(async (resolve, reject)  => {
+        let results = await FlwDeepLearningNewClass(datasetUrl, saveModelNm, reulstImgPath, saveModelUrl)
+        .then(function(){
+            resolve(results); // resolve 가 실행이 되면 밑에 .then 이 실행이 됨
+            console.log("then!");
+        })
+        .catch(() => {
+            console.log("catch!");
+            reject()
+        });
+        
+        //reject(); // reject 가 실행이 되면 밑에 .catch 가 실행됨
+    })
+    promise1.then((results) => {
+            console.log("then!");
+            res.send({results: results});
+        })
+        .catch(() => {
+            console.log("catch!");
+            res.send({results: 'error'});
+        });
+    
+      
 });
 
 /* 배열에 있는 클레스 파일에 추가 */
@@ -468,6 +473,8 @@ router.get("/getTrainingHist", async (req, res) => {
                 //새로운 게시물(하루전), 업데이트된(하루전) 게시물 세팅
                 const today      = new Date();
                 const regDate    = new Date(Number(childData.id));
+                const strDate    = new Date(Number(childData.start_dt));
+                const endDate    = new Date(Number(childData.end_dt));
 
                 const refNewDate = new Date(regDate.getFullYear(), regDate.getMonth(), regDate.getDate() +1 ,regDate.getHours(), regDate.getMinutes(), regDate.getSeconds(), regDate.getMilliseconds() );
 
@@ -475,6 +482,9 @@ router.get("/getTrainingHist", async (req, res) => {
                 
                 childData.reg_dt1   = dateFormat(Number(regDate)  ,"yyyy-mm-dd");
                 childData.reg_dt2   = dateFormat(Number(regDate)   ,"yyyy-mm-dd hh:MM:ss");
+
+                childData.start_dt  = childData.start_dt != null ? dateFormat(Number(strDate)   ,"yyyy-mm-dd hh:MM:ss") : '-';
+                childData.end_dt    = childData.end_dt   != null ? dateFormat(Number(endDate)   ,"yyyy-mm-dd hh:MM:ss") : '-';
 
                 childData.down_status_summary = childData.down_status == 'Success' ? 'Success' : 'Fail' 
                 childData.load_status_summary = childData.load_status == 'Success' ? 'Success' : 'Fail' 
@@ -1017,42 +1027,32 @@ router.get("/getImgs",async  (req, res,  next) => {
 
 
 */
-/*
-var trainingModelBatch =  schedule.scheduleJob("* 59 * * * *", function() {
+async function FlwDeepLearningNewClass (datasetUrl, saveModelNm, reulstImgPath, saveModelUrl){
     
+    console.log("리리리하이"+ datasetUrl)
+    //파이썬 쉘 요청 옵션
     var options = {
-        mode: 'text',
-        pythonPath: '',
+        mode         : 'text',
+        pythonPath   : '',
         pythonOptions: ['-u'],
-        scriptPath: '',
-        args: ["vlaue1", 'value2'],
-        encoding : 'utf8'
+        scriptPath   : '',
+        args         : [datasetUrl, saveModelNm, reulstImgPath, saveModelUrl],
+        encoding : 'utf8',
     };
 
-    PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwDeepLearningNewClass.py', options, async function (err, results) {
+    await PythonShell.PythonShell.run ('C:/Users/all4land/Desktop/NodeJS-FireBase-React/server/Router/leaningModel/FlwDeepLearningNewClass.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
         }   
         else{
-            // console.log(results)
-            // var modelHistDoc = db.collection("model_training_history").doc();
-            // var postData = {
-            //     // id            : modelHistDoc.id,
-            //     // model_nm      : 'flower',
-            //     // class_eng_nm  : label_name_eng[index],
-            //     // class_kor_nm  : label_name_kor[index], 
-            //     // use_yn        : "Y",
-            //     // train_dt      : "",
-            //     // reg_dt        : Date.now(),
-            // };
-            // modelHistDoc.set(postData);
-            //배치 종료 함수 TEST용
-            calcelBatch(); 
-            
+               
         }
+        return results
     });
-});
+}
+/*
+
 */
 function calcelBatch(){
     console.log('하위하위')
@@ -1062,10 +1062,20 @@ function calcelBatch(){
 
 const schedule = require('node-schedule');//스케줄러 사용을 위한 라이브러리
 const app = express()
-app.listen(6000, (request, response) => {
+app.listen(6000, (request, response, next) => {
+    console.log('Example app listening on port 6000')
+    const trainingModelBatch = schedule.scheduleJob('1 25 * * * *', function(requestTime){
+        console.log('The answer to life, the universe, and everything = 배치 색인 시작');
 
-    schedule.scheduleJob('1 * * * * *', function(requestTime){
-        console.log('The answer to life, the universe, and everything!11111111111111111111111111');
+        var datasetUrl    = 'model_test1';
+        var saveModelNm   = 'C:/Users/all4land/.keras/datasets/flower_photos_3';
+        var reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
+        var saveModelUrl  = 'C:/Users/all4land/.keras/model/'
+
+        const results = FlwDeepLearningNewClass(datasetUrl, saveModelNm, reulstImgPath, saveModelUrl)
+
     });
 })
+
+
 module.exports = router;

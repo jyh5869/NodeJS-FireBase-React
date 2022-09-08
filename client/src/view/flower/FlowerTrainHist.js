@@ -172,6 +172,14 @@ function List() {
                                     <td colSpan={3}>{props.list.result_img_path}</td>
                                 </tr>
                                 <tr >
+                                    <th colSpan={2}>훈련시작</th>
+                                    <th colSpan={2}>훈련종료</th>
+                                </tr>
+                                <tr >
+                                    <td colSpan={2}>{ props.list.start_dt }</td>
+                                    <td colSpan={2}>{ props.list.end_dt }</td>
+                                </tr>
+                                <tr >
                                     <th colSpan={2}>에포크</th>
                                     <th colSpan={2}>스탭</th>
                                 </tr>
