@@ -7,10 +7,11 @@ import cv2
 import os
 import PIL
 import PIL.Image
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
 import tensorflow_datasets as tfds
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 import matplotlib.pyplot as plt        # 이미지 표출을 위한 LIB
 import pathlib
@@ -37,6 +38,7 @@ PIL.Image.open(str(roses[0]))
 
 # 매개변수 정의
 batch_size = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
+batch_size_val = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
 img_height = 180 # 이미지 높이
 img_width = 180  # 이미지 넓이
 
@@ -56,7 +58,7 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     subset="validation",
     seed=123,
     image_size=(img_height, img_width),
-    batch_size=batch_size
+    batch_size=batch_size_val
 )
 
 # class_names 속성을 이용해 클래스 조회(파일경로의 하위 디렉토리명)
@@ -139,7 +141,7 @@ model.compile(
 # 모델 훈련 후 히스토리 축척
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs = 1
+epochs = 2
 history = model.fit(
   train_ds,
   validation_data=val_ds,
@@ -155,20 +157,20 @@ print("Accuracy = ", acc)
 model.summary()
 
 
-# 모델 저장 및 로드 하 
+# # 모델 저장 및 로드 하 
 # model.save('model.h5.flower2')
 # model = load_model('model.h5')
 
-# model.compile(loss='binary_crossentropy',
-#              optimizer='rmsprop',
-#              metrics=['accuracy'])
+model.compile(loss='binary_crossentropy',
+             optimizer='rmsprop',
+             metrics=['accuracy'])
 
 IMG_SIZE = 180
 
 img_url = [
-  'C:/Users/all4land/Desktop/validatonImg.jpg',
-  'C:/Users/all4land/Desktop/validatonImg2.jpg',
-  'C:/Users/all4land/Desktop/validatonImg3.jpg',
+  'C:/Users/Younghyun Jo/Desktop/sunflower.jpg',
+  'C:/Users/Younghyun Jo/Desktop/tulips.jpg',
+  'C:/Users/Younghyun Jo/Desktop/rose.jpg',
 ]
 
 for index, value in enumerate(img_url, start=0):
@@ -226,28 +228,28 @@ for index, value in enumerate(img_url, start=0):
 
 
 
-# #훈련 과정 그래프 표출 
-# acc = history.history['accuracy']
-# val_acc = history.history['val_accuracy']
+#훈련 과정 그래프 표출 
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
 
-# loss = history.history['loss']
-# val_loss = history.history['val_loss']
+loss = history.history['loss']
+val_loss = history.history['val_loss']
 
-# epochs_range = range(epochs)
+epochs_range = range(epochs)
 
-# plt.figure(figsize=(8, 8))
-# plt.subplot(1, 2, 1)
-# plt.plot(epochs_range, acc, label='Training Accuracy')
-# plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-# plt.legend(loc='lower right')
-# plt.title('Training and Validation Accuracy')
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
 
-# plt.subplot(1, 2, 2)
-# plt.plot(epochs_range, loss, label='Training Loss')
-# plt.plot(epochs_range, val_loss, label='Validation Loss')
-# plt.legend(loc='upper right')
-# plt.title('Training and Validation Loss')
-# plt.show()
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.show()
 
 
 

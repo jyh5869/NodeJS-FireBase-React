@@ -2,6 +2,7 @@ import sys
 import re
 import base64 # 인코딩
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import numpy as np
 import cv2
 import os
@@ -10,7 +11,7 @@ import PIL.Image
 import tensorflow as tf
 import tensorflow_datasets as tfds
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 
 import matplotlib.pyplot as plt # 이미지 표출을 위한 LIB
 import pathlib

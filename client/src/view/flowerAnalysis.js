@@ -116,7 +116,7 @@ function FlowerAnalysis() {
 
     //이미지 분석을 위한 데이터 전송
     function handleSubmit(e) {
-        let modelNm = 'model_flower';
+        let modelNm = 'model_flw';
         let modelExistYn = getModelExistYn(modelNm);//모델 존재 여부 파악
 
         modelExistYn.then((value) => {

@@ -1,21 +1,23 @@
 import sys
-
 import re
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 import base64 # 인코딩
 import json
 import cv2
-import os
 import io
 import PIL
 import PIL.Image
-import numpy as np
-import tensorflow as tf
-import tensorflow_datasets as tfds
-
-import matplotlib.pyplot as plt # 이미지 표출을 위한 LIB
 import pathlib
+import numpy               as np
+import tensorflow          as tf
+import tensorflow_datasets as tfds
+import matplotlib.pyplot   as plt # 이미지 표출을 위한 LIB
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+
 
 
 # 파일 buffer데이터 받기(json)으로 받기.
@@ -57,7 +59,7 @@ label_name_kor = ['코스모스', '데이지', '민들레', '개나리', '물망
 
 # 저장 모델 로드 하기 
 # model = tf.keras.models.load_model('model.h5.flower1')
-model = tf.keras.models.load_model('C:/Users/all4land/.keras/model/model_flower.h5')
+model = tf.keras.models.load_model(str(sys.argv[1]) + 'model_flw.h5')
 
 model.compile(loss='binary_crossentropy',
              optimizer='rmsprop',
