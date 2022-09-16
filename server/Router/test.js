@@ -47,18 +47,18 @@ var db = firebase.firestore();
 
 
 
-/*
-const saveModelNm   = 'model_test1';
+
+const saveModelNm   = 'model_flw';
 const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos_3';
 const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
 const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
-*/
 
+/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
 const reulstImgPath = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/'
 const saveModelUrl  = 'D:/Development/DeveloperKits/Tensorflow/model/'
-
+*/
 
 /*  영화 데이터 리스트 세팅  */
 router.get("/", (req, res) => {
@@ -136,7 +136,6 @@ router.get("/reviewDeepLeaning", (req, res) => {
             });
             res.send( {results: results});     
         }
-        //console.log('results: %j', results);
     });
     
 });
@@ -163,7 +162,6 @@ router.get("/imageDeepLeaning1", (req, res) => {
 
             res.send( {results: results});     
         }
-        //console.log('results: %j', results);
     });
     
 });
@@ -326,21 +324,23 @@ router.get("/crawlingGoogleGrwFlw",async  (req, res,  next) => {
 /*  위 두 컨트롤러에서 생성된 모델을 사용해 이미지 분류(꽃)  */
 router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
 
-    var datasetUrl    = req.query.keyword       != undefined ? req.query.keyword       : 'model_test1';
-    var saveModelNm   = req.query.saveModelNm   != undefined ? req.query.saveModelNm   : 'C:/Users/all4land/.keras/datasets/flower_photos_3';
-    var reulstImgPath = req.query.reulstImgPath != undefined ? req.query.reulstImgPath : 'C:/Users/all4land/.keras/trainingResImg/'
-    var saveModelUrl  = req.query.saveModelUrl  != undefined ? req.query.saveModelUrl  : 'C:/Users/all4land/.keras/model/'
+    let saveModelNmReq   = req.query.keyword       != undefined ? req.query.keyword       : saveModelNm;
+    let datasetUrlReq    = req.query.saveModelNm   != undefined ? req.query.saveModelNm   : datasetUrl;
+    let reulstImgPathReq = req.query.reulstImgPath != undefined ? req.query.reulstImgPath : reulstImgPath
+    let saveModelUrlReq  = req.query.saveModelUrl  != undefined ? req.query.saveModelUrl  : saveModelUrl
 
     const promise1 = new Promise(async (resolve, reject)  => {
-        let results = await FlwDeepLearningNewClass(datasetUrl, saveModelNm, reulstImgPath, saveModelUrl)
+        let results = await FlwDeepLearningNewClass(saveModelNmReq, datasetUrlReq, reulstImgPathReq, saveModelUrlReq)
         .then(function(){
             resolve(results); // resolve 가 실행이 되면 밑에 .then 이 실행이 됨
             console.log("then!");
+            console.log(results)
         })
         .catch(() => {
             console.log("catch!");
             reject()
         });
+
     })
     promise1.then((results) => {
             console.log("then!");
@@ -1088,7 +1088,7 @@ const schedule = require('node-schedule');//스케줄러 사용을 위한 라이
 const app = express()
 app.listen(6000, (request, response, next) => {
     console.log('Example app listening on port 6000')
-    const trainingModelBatch = schedule.scheduleJob('1 53 * * * *', function(requestTime){
+    const trainingModelBatch = schedule.scheduleJob('1 47 * * * *', function(requestTime){
         console.log(requestTime + ' 딥러닝 모델 훈련 배치 시작');
 
         const results = FlwDeepLearningNewClass(saveModelNm, datasetUrl, reulstImgPath, saveModelUrl)

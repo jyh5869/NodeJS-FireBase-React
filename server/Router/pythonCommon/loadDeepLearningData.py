@@ -2,17 +2,46 @@ import sys
 import re
 import json
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 import os, time, random
-from bs4 import BeautifulSoup
+import firebase_admin # 파이어베이스 클라우드 연동 라이브러리
 import urllib.request
 
+from selenium                          import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome          import ChromeDriverManager
+from selenium.webdriver.common.by      import By
+from selenium.webdriver.common.keys    import Keys
+from bs4                               import BeautifulSoup
+from firebase_admin                    import credentials
+from firebase_admin                    import firestore
+
+# Firebase 연계 초기 세팅
+cred = credentials.Certificate('Router/firebase_appKey_Movies.json') # server\Router\firebase_appKey_Movies.json
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
+class_list_ref    = db.collection("model_class_list")
+
+# 데이터 조회 1 (조회하고자 하는 영화 데이터 존재 유무 파악)
+class_list_query  = class_list_ref.where('use_yn', '==', 'Y').where('train_dt', '==', '') # 개봉일 기준 limit의 레코드 호출 쿼리 작성
+class_list_docs   = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
+
+class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
+
+# 이미지데이터 저장 경로
 save_path = str(sys.argv[1])
+
+# 업로드 경로 존재 체크 및 생성과 저장경로 세팅
+def createDirectory(directory):
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory, exist_ok=True)
+
+        os.chdir(directory)    
+    except OSError:
+        return False
 
 def chromeWebdriver():
     options = Options()
@@ -38,13 +67,7 @@ def collect_image(search_word, extract_img_count):
 
     file_path = save_path
 
-    # os.chdir(file_path)
-    # os.makedirs(file_path + today_time + '_' + search_word)
-    # os.chdir(file_path + today_time + '_' + search_word)
-
-    os.chdir(file_path)
-    os.makedirs(file_path + '/' + search_word)
-    os.chdir(file_path + '/' + search_word)
+    createDirectory(file_path + '/' + search_word)
 
     file_save_dir = file_path + today_time + '_' + search_word
     # print(file_save_dir)
@@ -147,5 +170,6 @@ def collect_image(search_word, extract_img_count):
     driver.close()
 
 
-if __name__ == '__main__':
-    collect_image('나팔꽃', 50)
+# 훈련이 안된 클래스를 반복하며 크롤링 데이터 생성
+for key in class_list_dict:
+    collect_image(key['class_kor_nm'], 50)
