@@ -114,7 +114,8 @@ function List() {
                     <th>클래스명(영문)</th>
                     <th>등록 날짜</th>
                     <th>사용여부</th>
-                    <th>새클래스/새트레이닝</th>
+                    <th>훈련 가능여부</th>
+                    <th>삭제</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -144,8 +145,11 @@ function List() {
                 </td>
                 <td>
                     <div className='td_div_50'>
-                        { props.list.newRegYn } / { props.list.newtrainYn }  
+                        {/* { props.list.newRegYn } */} 
+                        { props.list.newtrainYn }   
                     </div>
+                </td>
+                <td>
                     <div className='td_div_50'>
                         <Button variant="success" onClick={(e)=>{deleteClass({ callType : 'delete', targetId : props.list.id}, e)}} >Delete</Button>
                     </div>

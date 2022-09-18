@@ -47,18 +47,18 @@ var db = firebase.firestore();
 
 
 
-
+/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos_3';
 const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
 const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
+*/
 
-/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
 const reulstImgPath = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/'
 const saveModelUrl  = 'D:/Development/DeveloperKits/Tensorflow/model/'
-*/
+
 
 /*  영화 데이터 리스트 세팅  */
 router.get("/", (req, res) => {
@@ -431,20 +431,33 @@ router.get("/flwNewClass", async (req, res) => {
     }
     else if(callType == 'delete'){
 
-        let targetId = req.query.targetId;
+        let targetId  = req.query.targetId;
         let returnStr = "";
 
-         //데이터 삭제
-         await db.collection('model_class_list').doc(targetId).delete()
-         .then(function() {
-            //console.log("Class Delete Success");
+
+        //훈련 이미지 데이터 삭제
+        console.log(targetId);
+        await  db.collection('model_class_list').where('id', '==', targetId ).get()
+        .then((snapshot) => {
+            snapshot.forEach((doc) => {
+                let dirNm = doc.data().class_kor_nm;
+                deleteall(datasetUrl + '/' + dirNm)
+            });
+        })
+        .catch((err) => {
+            console.log('Error getting documents', err);
+        });
+
+        //데이터 삭제  
+        await db.collection('model_class_list').doc(targetId).delete()
+        .then(function() {
             returnStr = "Class Delete Success";
-         })
-         .catch(function(error) {
+        })
+        .catch(function(error) {
             //console.log("Class Delete Fail----->" + error);
             returnStr = "Class Delete Fail----->" + error;
-         });
-
+        });
+        
         res.send({results: returnStr});
     }
     else{
@@ -512,7 +525,7 @@ router.get("/getTrainingHist", async (req, res) => {
             //console.log("Class Delete Fail----->" + error);
             returnStr = "Class Delete Fail----->" + error;
          });
-
+  
         res.send({results: returnStr});
     }
     else{
@@ -1012,8 +1025,23 @@ router.get("/getImgs",async  (req, res,  next) => {
 
 
 
-
-
+/* 디렉토리 삭제 함수 : 파일들을 일괄 삭제 후 디렉토리 삭제 */
+function deleteall(path) {
+	var files = [];
+	if(fs.existsSync(path)) {
+		files = fs.readdirSync(path);
+		files.forEach(function(file, index) {
+			var curPath = path + "/" + file;
+			if(fs.statSync(curPath).isDirectory()) { // recurse
+				deleteall(curPath);
+			} 
+            else { // delete file
+				fs.unlinkSync(curPath);
+			}
+		});
+		fs.rmdirSync(path);
+	}
+};
 
 
 
@@ -1088,11 +1116,10 @@ const schedule = require('node-schedule');//스케줄러 사용을 위한 라이
 const app = express()
 app.listen(6000, (request, response, next) => {
     console.log('Example app listening on port 6000')
-    const trainingModelBatch = schedule.scheduleJob('1 47 * * * *', function(requestTime){
+    const trainingModelBatch = schedule.scheduleJob('1 10 * * * *', function(requestTime){
         console.log(requestTime + ' 딥러닝 모델 훈련 배치 시작');
-
         const results = FlwDeepLearningNewClass(saveModelNm, datasetUrl, reulstImgPath, saveModelUrl)
-
+        console.log(requestTime + ' 딥러닝 모델 훈련 배치 종료');
     });
 })
 

@@ -172,4 +172,13 @@ def collect_image(search_word, extract_img_count):
 
 # 훈련이 안된 클래스를 반복하며 크롤링 데이터 생성
 for key in class_list_dict:
+    # 현재시간을 서버 표준 시간으로 세팅
+    train_dt = int(str(time.time()).replace('.','')[0:13])
+
+    # 크롤링 진행
     collect_image(key['class_kor_nm'], 50)
+    
+    # 트레이닝 날짜 업데이트
+    class_list_ref.document(key['id']).set({
+        u'train_dt': train_dt
+    }, merge = True)
