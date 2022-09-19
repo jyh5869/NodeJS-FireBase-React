@@ -60,14 +60,14 @@ end_dt          = ""
 
 data_dir = pathlib.Path(dataset_url)
 # 매개변수 정의
-batch_size = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
+batch_size = 66  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
 img_height = 180 # 이미지 높이
 img_width = 180  # 이미지 넓이
 
 # 트레이닝, 검증  데이터 생성 (검증 분할을 사용 이미지의 80%를 훈련에 사용하고 20%를 유효성 검사에 사용합니다.)
-train_ds = tf.keras.preprocessing.image_dataset_from_directory(
+train_ds  = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir,
-    validation_split=0.1, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
+    validation_split=0.2, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
     subset="training",
     seed=123,
     image_size=(img_height, img_width),
@@ -75,64 +75,119 @@ train_ds = tf.keras.preprocessing.image_dataset_from_directory(
 )
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir,
-    validation_split=0.1, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
+    validation_split=0.2, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
     subset="validation",
     seed=123,
     image_size=(img_height, img_width),
     batch_size=batch_size,
 )
+# print(train_labels.class_names)
+class_names = train_ds.class_names
+# print(len(train_images))
+# print(train_images)
+# train_images, train_labels = tuple(zip(*train_ds))
 
-train_images, train_labels = tuple(zip(*train_ds))
+# train_images = np.array(train_images)
+# train_labels = np.array(train_labels)
 
-train_images = np.array(train_images)
-train_labels = np.array(train_labels)
 # print(train_images)
 # print('★★★★★★★★★★★')
 # print(train_labels)
 # class_names 속성을 이용해 클래스리스트, 갯수 조회(파일경로의 하위 디렉토리명)
-class_names = train_ds.class_names
-print(class_names)
-# class_names =  if aa == 0 else aa
-class_count = len(class_names)
-# idx = np.argsort(class_names)
+
+# # 데이터 시각화 (트레이닝 데이터 이미지를 호출하여 화면에 띄운다.)
+# plt.figure(figsize=(10, 10))
+# for images, labels in train_ds.take(1):
+#     for i in range(9):
+#         ax = plt.subplot(3, 3, i + 1)
+#         plt.imshow(images[i].numpy().astype("uint8"))
+#         plt.title(class_names[labels[i]])
+#         plt.axis("off")
+#         plt.show()
+
+plt.figure(figsize=(10, 10))
+for images, labels in train_ds.take(1):  # only take first element of dataset
+
+    train_images = images.numpy()
+    train_labels = labels.numpy()
+
+    # for i in range(len(train_images)):
+        
+    #     plt.title(class_names[labels[i]])
+    #     plt.imshow(train_images[i].astype("uint8"))
+    #     plt.show()
+
+    # train_images = np.array(train_images)
+    # train_labels = np.array(train_labels)
+
+    idx = np.argsort(train_labels)
+    print(idx)
+    print(len(train_images))
+    print(len(train_labels))
+    train_images = train_images[idx]
+    train_labels = train_labels[idx]
+    # print(dix)
+    # print(train_labels)
+    # # labels = ["T-Shirt", "Trouser", "Pullover", "Dress", "Coat", 
+    # #           "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
+    # # train_ds = train_ds.label[idx]
+    # # print(train_labels)
 
 
-# idx = np.argsort(train_labels)
-# train_images = train_images[0:3]
-# train_labels = train_labels[0:3]
+    print(class_names)
+    # class_names =  if aa == 0 else aa
+    class_count = len(class_names)
+    # idx = np.argsort(class_names)
 
-# print(train_images)
-# idx = np.argsort(test_labels)
-# test_images = test_images[idx]
-# test_labels = test_labels[idx]
+    label_mapping = dict(zip(range(class_count), class_names))
+    # print(label_mapping)
 
-# labels = ["T-Shirt", "Trouser", "Pullover", "Dress", "Coat", 
-#           "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
-# train_ds = train_ds.label[idx]
-# print(train_labels)
-label_mapping = dict(zip(range(class_count), class_names))
-print(label_mapping)
-def get_data(mapping, classes):
-    X_train, X_test, y_train, y_test = [], [], [], []
-    for cls in classes:
-        bb = {v:k for k,v in mapping.items()} #// {'AA': '0', 'BB': '1', 'CC': '2'}
-        print(bb)
-        idx = bb.get(cls)
-        print(idx)
-        # idx = mapping[cls]
-        # idx = 0
-        start = idx*6000
-        end = idx*6000+6000
-        # print(start)
-        # print(end)
-        X_train.append(train_images[start : end])
-        y_train.append(train_labels[start : end])
-    return X_train, y_train
+    def get_data(mapping, classes):
+        X_train, X_test, y_train, y_test = [], [], [], []
+        for cls in classes:
+            bb = {v:k for k,v in mapping.items()} #// {'AA': '0', 'BB': '1', 'CC': '2'}
+            print(bb)
+            idx = bb.get(cls)
+            print(idx)
+            # idx = mapping[cls]
+            # idx = 0
+            start = idx*22
+            end = idx*22+22
+            print(start)
+            print(end)
+            X_train.append(train_images[start : end])
+            y_train.append(train_labels[start : end])
+        return X_train, y_train
 
-X_train, y_train = get_data(label_mapping, classes=["cosmos"])
+    X_train, y_train = get_data(label_mapping, classes=["na"])
 
-# dataset = tf.data.Dataset.from_tensor_slices(({"image":X_train}, y_train))
-# print(X_train)
-# print(y_train)
+    dataset1 = tf.data.Dataset.from_tensor_slices(({"image":X_train}, y_train))
+    # print(X_train)
+    # print(y_train)
+    print(len(X_train[0]))
+    print(len(y_train[0]))
+
+    for images, labels in X_train[0]:
+    plt.imshow(images.astype("uint8"))
+    plt.axis("off")
+    plt.show()
+
+    for images, labels in dataset1.take(1):
+        print(len(images))
+        # plt.imshow(images[0].numpy().astype("uint8"))
+        # plt.axis("off")
+        # plt.show()
+
+    # plt.figure(figsize=(10, 10))
+    # plt.imshow(X_train[1].numpy().astype("uint8"))
+    # plt.show()
+    # plt.figure(figsize=(10, 10))
+    # for images, labels in dataset1.take(1):
+    #     for i in range(9):
+    #         ax = plt.subplot(3, 3, i + 1)
+    #         plt.imshow(images[i].numpy().astype("uint8"))
+    #         plt.title(class_names[labels[i]])
+    #         plt.axis("off")
+    #         plt.show()
 
 
