@@ -47,18 +47,18 @@ var db = firebase.firestore();
 
 
 
-/*
+
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos_3';
 const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
 const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
-*/
 
+/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
 const reulstImgPath = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/'
 const saveModelUrl  = 'D:/Development/DeveloperKits/Tensorflow/model/'
-
+*/
 
 /*  영화 데이터 리스트 세팅  */
 router.get("/", (req, res) => {
@@ -1068,16 +1068,13 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
         encoding : 'utf8',
     };
 
-    /* 
-        훈련안된 클레스를 쿼리하여 이미지 다운 후 훈련 하고 이미지 분류 오류 수정(파이썬 버전차이로 추측)
-    */
-
+    
+    //훈련안된 클레스를 쿼리하여 이미지 다운 후 훈련 하고 이미지 분류 오류 수정(파이썬 버전차이로 추측)
     let pyshell = await new PythonShell.PythonShell('Router/pythonCommon/loadDeepLearningData.py', options1); 
     pyshell.send(datasetUrl, { mode: "text" })
     pyshell.on('message', function (results) { //But never receive data from pythonFile.
 
-        //console.log(results);
-        
+        //console.log(results);        
     })
     pyshell.end(function (err) { // Just run it
         if (err)  {
@@ -1087,7 +1084,9 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
         else{
             dwonStatus = 'Success'
         }
-        
+
+        // 1. 신규로 크롤링 된 갯수가 1이상일 경우 학습
+        // 2. 데이터 셋에서 비활성화 체크되어있는 ds 제외 후 학습
         var options2 = {
             mode         : 'text',
             pythonPath   : '',
@@ -1138,4 +1137,35 @@ router.get("/getModelExistYn",async  (req, res,  next) => {
 });
 
 
+
+
+
+
+
+
+
+
+
+router.get("/test",async  (req, res,  next) => {
+
+    var options2 = {
+        mode         : 'text',
+        pythonPath   : '',
+        pythonOptions: ['-u'],
+        scriptPath   : '',
+        args         : [saveModelNm, datasetUrl, reulstImgPath, saveModelUrl, 'Success'],
+        encoding : 'utf8',
+    };
+
+    PythonShell.PythonShell.run ('Router/leaningModel/01.test.py', options2, function (err, results) {
+
+        if (err) {
+            console.log(err);           
+        }   
+        else{
+            res.send( {results: results});
+        }
+    });
+
+});
 module.exports = router;
