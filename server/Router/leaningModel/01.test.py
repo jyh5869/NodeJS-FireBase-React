@@ -130,7 +130,11 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
     print(train_labels)
     print(len(train_labels))
 
-    
+    print('oooooooooooooooooooooooooooooo')
+    print(train_images.shape)
+    print(train_labels.shape)
+
+    print('oooooooooooooooooooooooooooooo')
     # print(dix)
     # print(train_labels)
     # # labels = ["T-Shirt", "Trouser", "Pullover", "Dress", "Coat", 
@@ -178,131 +182,165 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
 
         return x_train, y_train
 
-    x_train, y_train = get_data(label_mapping, classes=["cosmos", "sumfower"])
+    x_train, y_train = get_data(label_mapping, classes=["da", "fu"])
+
+    print('oooooooooooooooooooooooooooooo')
+    print(train_images.shape)
+    print(train_labels.shape)
+
+    print('oooooooooooooooooooooooooooooo')
+    # https://stackoverflow.com/questions/59275102/how-to-resize-elements-in-a-ragged-tensor-in-tensorflow
+    # train_images = tf.ragged.constant(x_train)
+    # train_labels = tf.ragged.constant(y_train)
+    
+    #https://towardsdatascience.com/using-tensorflow-ragged-tensors-2af07849a7bd
+    # maxlen=2494
+    # train_images = tf.keras.preprocessing.sequence.pad_sequences(x_train,maxlen=None, padding='post')
+    # train_labels = tf.keras.preprocessing.sequence.pad_sequences(y_train,maxlen=None, padding='post')
+
+    # https://github.com/tensorflow/models/issues/9978
+    train_images = tf.convert_to_tensor(x_train,maxlen=None, padding='post')
+    train_labels = tf.keras.preprocessing.sequence.pad_sequences(y_train,maxlen=None, padding='post')
+
+    # resize_lambda = lambda x: tf.image.resize(x, (60,60))
+    # train_images = tf.ragged.map_flat_values(resize_lambda, train_images)
 
 
-    train_images = tf.ragged.constant(x_train)
-    train_labels = tf.ragged.constant(y_train)
+    # train_images = tf.concat(
+    #     [tf.image.resize(train_images[i].to_tensor(), (180,180)) for i in tf.range(train_images.nrows())], 
+    #     axis=0
+    # )
+
+    print('oooooooooooooooooooooooooooooo')
+    print(train_images.shape)
+    print(train_labels.shape)
+    print('oooooooooooooooooooooooooooooo')
 
     AUTOTUNE = tf.data.AUTOTUNE
     train_ds = tf.data.Dataset.from_tensor_slices(( train_images, train_labels))
     train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(32)
 
-    data_augmentation = tf.keras.Sequential(
-        [
-            tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
-                                                        input_shape=(img_height, 
-                                                                    img_width,
-                                                                    3)),
-            tf.keras.layers.experimental.preprocessing.RandomRotation(0.1),
-            tf.keras.layers.experimental.preprocessing.RandomZoom(0.1),
-        ]
-    )
+    print('oooooooooooooooooooooooooooooo')
+    for image_batch, labels_batch in train_ds:
+        print(image_batch.shape)
+        print(labels_batch.shape)
+        break
+    print('oooooooooooooooooooooooooooooo')
+    # data_augmentation = tf.keras.Sequential(
+    #     [
+    #         tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
+    #                                                     input_shape=(10000,img_height, 
+    #                                                                 img_width,
+    #                                                                 3)),
+    #         tf.keras.layers.experimental.preprocessing.RandomRotation(0.1),
+    #         tf.keras.layers.experimental.preprocessing.RandomZoom(0.1),
+    #     ]
+    # )
 
 
 
-    # 모델 훈련 및 레이어 적용
-    num_classes = 2
-    model = tf.keras.Sequential([
-        data_augmentation,
-        tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
-        tf.keras.layers.Conv2D(16, 3, activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Conv2D(32, 3, activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Conv2D(64, 3, activation='relu'),
-        tf.keras.layers.MaxPooling2D(),
-        tf.keras.layers.Dropout(0.2), # 과대적합 방지(정규화의 한 형태인 드롭아웃을 네트워크에 적용) 
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dense(num_classes)
-    ])
+    # # 모델 훈련 및 레이어 적용
+    # num_classes = 2
+    # model = tf.keras.Sequential([
+    #     data_augmentation,
+    #     tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(10000,img_height, img_width, 3)),
+    #     tf.keras.layers.Conv2D(16, 3, activation='relu'),
+    #     tf.keras.layers.MaxPooling2D(),
+    #     tf.keras.layers.Conv2D(32, 3, activation='relu'),
+    #     tf.keras.layers.MaxPooling2D(),
+    #     tf.keras.layers.Conv2D(64, 3, activation='relu'),
+    #     tf.keras.layers.MaxPooling2D(),
+    #     tf.keras.layers.Dropout(0.2), # 과대적합 방지(정규화의 한 형태인 드롭아웃을 네트워크에 적용) 
+    #     tf.keras.layers.Flatten(),
+    #     tf.keras.layers.Dense(128, activation='relu'),
+    #     tf.keras.layers.Dense(num_classes)
+    # ])
 
 
-    model.compile(
-        optimizer='adam',
-        loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
-        metrics=['accuracy']
-    )
+    # model.compile(
+    #     optimizer='adam',
+    #     loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
+    #     metrics=['accuracy']
+    # )
 
-    # 모델 훈련 후 히스토리 축척
-    # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
-    #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-    epochs = 2
-    history = model.fit(
-        train_ds,
-        validation_data=val_ds,
-        epochs=epochs,
-        verbose=0
-    )
-
-
-
-
-
-
-
-
-
-
+    # # 모델 훈련 후 히스토리 축척
+    # # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
+    # #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
+    # epochs = 2
+    # history = model.fit(
+    #     train_ds,
+    #     validation_data=val_ds,
+    #     epochs=epochs,
+    #     verbose=0
+    # )
 
 
 
 
 
-    
-    print('--------------------------------------------------------')
-    print(len(y_train))
-    print(len(x_train[0]) + len(x_train[1]))
-    print(len(y_train[0]) + len(y_train[1]))
-    # print(len(x_train[0]) )
-    # print(len(x_train[1]) )
+
+
+
+
+
+
+
+
 
 
     
-    # for images in x_train:
-    #     plt.figure(figsize=(10, 10))
-    #     for i in range(2):
-    #         plt.imshow(images[i].astype("uint8"))
+    # print('--------------------------------------------------------')
+    # print(len(y_train))
+    # print(len(x_train[0]) + len(x_train[1]))
+    # print(len(y_train[0]) + len(y_train[1]))
+    # # print(len(x_train[0]) )
+    # # print(len(x_train[1]) )
+
+
+    
+    # # for images in x_train:
+    # #     plt.figure(figsize=(10, 10))
+    # #     for i in range(2):
+    # #         plt.imshow(images[i].astype("uint8"))
+    # #         plt.axis("off")
+    # #     plt.show()
+        
+
+    # print('*******************************************************')
+    # for images, labels in train_ds:
+        
+    #     for i in range(9):
+    #         ax = plt.subplot(3, 3, i + 1)
+    #         plt.imshow(images[i].numpy().astype("uint8"))
+    #         plt.title(class_names[labels[i]])
     #         plt.axis("off")
+        
     #     plt.show()
-        
-
-    print('*******************************************************')
-    for images, labels in train_ds:
-        
-        for i in range(9):
-            ax = plt.subplot(3, 3, i + 1)
-            plt.imshow(images[i].numpy().astype("uint8"))
-            plt.title(class_names[labels[i]])
-            plt.axis("off")
-        
-        plt.show()
 
 
 
 
-    #훈련 과정 그래프 표출 
-    acc = history.history['accuracy']
-    val_acc = history.history['val_accuracy']
+    # #훈련 과정 그래프 표출 
+    # acc = history.history['accuracy']
+    # val_acc = history.history['val_accuracy']
 
-    loss = history.history['loss']
-    val_loss = history.history['val_loss']
+    # loss = history.history['loss']
+    # val_loss = history.history['val_loss']
 
-    epochs_range = range(epochs)
+    # epochs_range = range(epochs)
 
-    plt.figure(figsize=(8, 8))
-    plt.subplot(1, 2, 1)
-    plt.plot(epochs_range, acc, label='Training Accuracy')
-    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-    plt.legend(loc='lower right')
-    plt.title('Training and Validation Accuracy')
+    # plt.figure(figsize=(8, 8))
+    # plt.subplot(1, 2, 1)
+    # plt.plot(epochs_range, acc, label='Training Accuracy')
+    # plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+    # plt.legend(loc='lower right')
+    # plt.title('Training and Validation Accuracy')
 
-    plt.subplot(1, 2, 2)
-    plt.plot(epochs_range, loss, label='Training Loss')
-    plt.plot(epochs_range, val_loss, label='Validation Loss')
-    plt.legend(loc='upper right')
-    plt.title('Training and Validation Loss')
-    plt.show()
+    # plt.subplot(1, 2, 2)
+    # plt.plot(epochs_range, loss, label='Training Loss')
+    # plt.plot(epochs_range, val_loss, label='Validation Loss')
+    # plt.legend(loc='upper right')
+    # plt.title('Training and Validation Loss')
+    # plt.show()
 
 
