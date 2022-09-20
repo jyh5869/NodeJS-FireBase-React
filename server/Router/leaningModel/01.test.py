@@ -60,7 +60,7 @@ end_dt          = ""
 
 data_dir = pathlib.Path(dataset_url)
 # 매개변수 정의
-batch_size = 66  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
+batch_size = 1000  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
 img_height = 180 # 이미지 높이
 img_width = 180  # 이미지 넓이
 
@@ -122,19 +122,24 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
 
     idx = np.argsort(train_labels)
     print(idx)
-    print(len(train_images))
-    print(len(train_labels))
+    
     train_images = train_images[idx]
     train_labels = train_labels[idx]
+
+    print(len(train_images))
+    print(train_labels)
+    print(len(train_labels))
+
+    
     # print(dix)
     # print(train_labels)
     # # labels = ["T-Shirt", "Trouser", "Pullover", "Dress", "Coat", 
     # #           "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
     # # train_ds = train_ds.label[idx]
-    # # print(train_labels)
+    # print(train_labels)
 
 
-    print(class_names)
+    # print(class_names)
     # class_names =  if aa == 0 else aa
     class_count = len(class_names)
     # idx = np.argsort(class_names)
@@ -142,52 +147,162 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
     label_mapping = dict(zip(range(class_count), class_names))
     # print(label_mapping)
 
+    #  라벨 배열을 통해 클레스별 이미지 갯수를 구함
+    counter = {}
+    for value in train_labels:
+        try: counter[value] += 1
+        except: counter[value ] = 1
+
+    print(counter)
+
+
     def get_data(mapping, classes):
-        X_train, X_test, y_train, y_test = [], [], [], []
+        x_train, y_train =  [], []
+
         for cls in classes:
+            print('------- '+ cls +' --------')
             bb = {v:k for k,v in mapping.items()} #// {'AA': '0', 'BB': '1', 'CC': '2'}
-            print(bb)
+            # print(bb)
             idx = bb.get(cls)
-            print(idx)
-            # idx = mapping[cls]
-            # idx = 0
-            start = idx*22
-            end = idx*22+22
+            # print(idx)
+
+            idxStr = sum(list(counter.values())[0:idx])    
+            idxCnt = counter.get(idx)
+            
+            start = idxStr
+            end = idxStr+idxCnt
             print(start)
             print(end)
-            X_train.append(train_images[start : end])
+            x_train.append(train_images[start : end])
             y_train.append(train_labels[start : end])
-        return X_train, y_train
 
-    X_train, y_train = get_data(label_mapping, classes=["na"])
+        return x_train, y_train
 
-    dataset1 = tf.data.Dataset.from_tensor_slices(({"image":X_train}, y_train))
-    # print(X_train)
-    # print(y_train)
-    print(len(X_train[0]))
-    print(len(y_train[0]))
+    x_train, y_train = get_data(label_mapping, classes=["cosmos", "sumfower"])
 
-    for images, labels in X_train[0]:
-    plt.imshow(images.astype("uint8"))
-    plt.axis("off")
-    plt.show()
 
-    for images, labels in dataset1.take(1):
-        print(len(images))
-        # plt.imshow(images[0].numpy().astype("uint8"))
-        # plt.axis("off")
-        # plt.show()
+    train_images = tf.ragged.constant(x_train)
+    train_labels = tf.ragged.constant(y_train)
 
-    # plt.figure(figsize=(10, 10))
-    # plt.imshow(X_train[1].numpy().astype("uint8"))
-    # plt.show()
-    # plt.figure(figsize=(10, 10))
-    # for images, labels in dataset1.take(1):
-    #     for i in range(9):
-    #         ax = plt.subplot(3, 3, i + 1)
-    #         plt.imshow(images[i].numpy().astype("uint8"))
-    #         plt.title(class_names[labels[i]])
+    AUTOTUNE = tf.data.AUTOTUNE
+    train_ds = tf.data.Dataset.from_tensor_slices(( train_images, train_labels))
+    train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(32)
+
+    data_augmentation = tf.keras.Sequential(
+        [
+            tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
+                                                        input_shape=(img_height, 
+                                                                    img_width,
+                                                                    3)),
+            tf.keras.layers.experimental.preprocessing.RandomRotation(0.1),
+            tf.keras.layers.experimental.preprocessing.RandomZoom(0.1),
+        ]
+    )
+
+
+
+    # 모델 훈련 및 레이어 적용
+    num_classes = 2
+    model = tf.keras.Sequential([
+        data_augmentation,
+        tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
+        tf.keras.layers.Conv2D(16, 3, activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Conv2D(32, 3, activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Conv2D(64, 3, activation='relu'),
+        tf.keras.layers.MaxPooling2D(),
+        tf.keras.layers.Dropout(0.2), # 과대적합 방지(정규화의 한 형태인 드롭아웃을 네트워크에 적용) 
+        tf.keras.layers.Flatten(),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(num_classes)
+    ])
+
+
+    model.compile(
+        optimizer='adam',
+        loss=tf.losses.SparseCategoricalCrossentropy(from_logits=True),
+        metrics=['accuracy']
+    )
+
+    # 모델 훈련 후 히스토리 축척
+    # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
+    #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
+    epochs = 2
+    history = model.fit(
+        train_ds,
+        validation_data=val_ds,
+        epochs=epochs,
+        verbose=0
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    print('--------------------------------------------------------')
+    print(len(y_train))
+    print(len(x_train[0]) + len(x_train[1]))
+    print(len(y_train[0]) + len(y_train[1]))
+    # print(len(x_train[0]) )
+    # print(len(x_train[1]) )
+
+
+    
+    # for images in x_train:
+    #     plt.figure(figsize=(10, 10))
+    #     for i in range(2):
+    #         plt.imshow(images[i].astype("uint8"))
     #         plt.axis("off")
-    #         plt.show()
+    #     plt.show()
+        
+
+    print('*******************************************************')
+    for images, labels in train_ds:
+        
+        for i in range(9):
+            ax = plt.subplot(3, 3, i + 1)
+            plt.imshow(images[i].numpy().astype("uint8"))
+            plt.title(class_names[labels[i]])
+            plt.axis("off")
+        
+        plt.show()
+
+
+
+
+    #훈련 과정 그래프 표출 
+    acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
+
+    loss = history.history['loss']
+    val_loss = history.history['val_loss']
+
+    epochs_range = range(epochs)
+
+    plt.figure(figsize=(8, 8))
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs_range, acc, label='Training Accuracy')
+    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
+
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs_range, loss, label='Training Loss')
+    plt.plot(epochs_range, val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.show()
 
 
