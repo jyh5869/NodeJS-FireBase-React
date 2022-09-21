@@ -239,8 +239,9 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
     
     # train_images = get_data(train_images)
 
-    # train_images = train_images.to_tensor()
-    # train_labels = train_labels.to_tensor()
+    ##★★★★★★★★★★★★★★★★★★★★★★★★여기서 이미지와 라벨을 하나로 합쳐보자.
+    train_images = train_images.to_tensor()
+    train_labels = train_labels.to_tensor()
 
     # tf.image.resize(train_labels, [180,180])
     #https://towardsdatascience.com/using-tensorflow-ragged-tensors-2af07849a7bd
