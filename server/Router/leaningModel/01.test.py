@@ -182,16 +182,23 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
 
         return x_train, y_train
 
-    x_train, y_train = get_data(label_mapping, classes=["da", "fu"])
+    x_train, y_train = get_data(label_mapping, classes=["cosmos", "napal"])
 
+    train_images = np.array(x_train)
+    train_labels = np.array(y_train)
     print('oooooooooooooooooooooooooooooo')
     print(train_images.shape)
     print(train_labels.shape)
-
+    print(type(train_images))
+    print(type(train_labels))
     print('oooooooooooooooooooooooooooooo')
+    
+    # train_images = tf.Tensor(np.array(x_train), shape=train_images.shape, dtype=tf.int64)
+    # train_labels = tf.Tensor(np.array(y_train), shape=train_labels.shape, dtype=tf.int64)
+    
     # https://stackoverflow.com/questions/59275102/how-to-resize-elements-in-a-ragged-tensor-in-tensorflow
-    # train_images = tf.ragged.constant(x_train)
-    # train_labels = tf.ragged.constant(y_train)
+    train_images = tf.ragged.constant(x_train)
+    train_labels = tf.ragged.constant(y_train)
     
     #https://towardsdatascience.com/using-tensorflow-ragged-tensors-2af07849a7bd
     # maxlen=2494
@@ -199,8 +206,11 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
     # train_labels = tf.keras.preprocessing.sequence.pad_sequences(y_train,maxlen=None, padding='post')
 
     # https://github.com/tensorflow/models/issues/9978
-    train_images = tf.convert_to_tensor(x_train,maxlen=None, padding='post')
-    train_labels = tf.keras.preprocessing.sequence.pad_sequences(y_train,maxlen=None, padding='post')
+    # train_images = tf.convert_to_tensor(train_images)
+    # train_labels = tf.convert_to_tensor(train_labels)
+
+    #train_images = tf.Variable(np.array(x_train, dtype=object ))
+    #train_labels = tf.Variable(np.array(y_train, dtype=object ))
 
     # resize_lambda = lambda x: tf.image.resize(x, (60,60))
     # train_images = tf.ragged.map_flat_values(resize_lambda, train_images)
@@ -218,7 +228,7 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
 
     AUTOTUNE = tf.data.AUTOTUNE
     train_ds = tf.data.Dataset.from_tensor_slices(( train_images, train_labels))
-    train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(32)
+    train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(66)
 
     print('oooooooooooooooooooooooooooooo')
     for image_batch, labels_batch in train_ds:
@@ -229,7 +239,7 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
     # data_augmentation = tf.keras.Sequential(
     #     [
     #         tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
-    #                                                     input_shape=(10000,img_height, 
+    #                                                     input_shape=(img_height, 
     #                                                                 img_width,
     #                                                                 3)),
     #         tf.keras.layers.experimental.preprocessing.RandomRotation(0.1),
@@ -243,7 +253,7 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
     # num_classes = 2
     # model = tf.keras.Sequential([
     #     data_augmentation,
-    #     tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(10000,img_height, img_width, 3)),
+    #     tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
     #     tf.keras.layers.Conv2D(16, 3, activation='relu'),
     #     tf.keras.layers.MaxPooling2D(),
     #     tf.keras.layers.Conv2D(32, 3, activation='relu'),
