@@ -180,62 +180,134 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
             x_train.append(train_images[start : end])
             y_train.append(train_labels[start : end])
 
+        
         return x_train, y_train
 
-    x_train, y_train = get_data(label_mapping, classes=["cosmos", "napal"])
+    x_train, y_train = get_data(label_mapping, classes=["fu", "na"])
 
-    train_images = np.array(x_train)
-    train_labels = np.array(y_train)
-    print('oooooooooooooooooooooooooooooo')
-    print(train_images.shape)
-    print(train_labels.shape)
-    print(type(train_images))
-    print(type(train_labels))
-    print('oooooooooooooooooooooooooooooo')
-    
-    # train_images = tf.Tensor(np.array(x_train), shape=train_images.shape, dtype=tf.int64)
-    # train_labels = tf.Tensor(np.array(y_train), shape=train_labels.shape, dtype=tf.int64)
+    # x_train = np.array([img for img in x_train])
+    # x_valid = np.array([img for img in x_valid])
+
+    # x_train = np.array(x_train)
+    # y_train = np.array(y_train)
+
+    # Reshape
+    # x_train = np.reshape(x_train, (180,180,3))
+    # x_train = np.reshape(y_train, (180,180,3))
+
+    # x_train = x_train[0] + x_train[1]
+    # y_train = y_train[0] + y_train[1]
+    # x_train = tf.image.resize(x_train, [180,180])
+
+    def get_data(data):
+        for image in data:
+            def synthetic_gen():
+                varShape = tf.random.uniform((), minval=1, maxval=12, dtype=tf.int32)
+                image = tf.random.normal((varShape, 180, 180, 3))
+                image = tf.RaggedTensor.from_tensor(image, ragged_rank=1)
+                yield image
+                
+            ds = tf.data.Dataset.from_generator(synthetic_gen, 
+                                                output_signature=(tf.RaggedTensorSpec(
+                                                    shape=(180, 180, 3), 
+                                                    dtype=tf.float32, ragged_rank=1
+                                                    )
+                                                )
+                                            )
+            # ds = ds.repeat().batch(32)
+            print(ds)
+            return ds
+
+    # x_train = get_data(x_train)
+    # y_train = get_data(y_train)
+
+    # train_images = x_train
+    # train_labels = y_train
+
+    # train_images = np.reshape(np.array(x_train), (180,180,3))
+    # train_labels = np.array(y_train)
+
+    # train_images = tf.Tensor(x_train, shape=train_images.shape, dtype=tf.int64)
+    # train_labels = tf.Tensor(y_train, shape=train_labels.shape, dtype=tf.int64)
     
     # https://stackoverflow.com/questions/59275102/how-to-resize-elements-in-a-ragged-tensor-in-tensorflow
+    
+
+    # https://stackoverflow.com/questions/60924624/is-there-a-way-to-normalize-a-ragged-tensor
     train_images = tf.ragged.constant(x_train)
     train_labels = tf.ragged.constant(y_train)
     
+    # train_images = get_data(train_images)
+
+    # train_images = train_images.to_tensor()
+    # train_labels = train_labels.to_tensor()
+
+    # tf.image.resize(train_labels, [180,180])
     #https://towardsdatascience.com/using-tensorflow-ragged-tensors-2af07849a7bd
     # maxlen=2494
-    # train_images = tf.keras.preprocessing.sequence.pad_sequences(x_train,maxlen=None, padding='post')
-    # train_labels = tf.keras.preprocessing.sequence.pad_sequences(y_train,maxlen=None, padding='post')
+    # train_images = tf.keras.preprocessing.sequence.pad_sequences(x_train, maxlen=None, padding='post')
+    # train_labels = tf.keras.preprocessing.sequence.pad_sequences(y_train, maxlen=None, padding='post')
 
     # https://github.com/tensorflow/models/issues/9978
-    # train_images = tf.convert_to_tensor(train_images)
-    # train_labels = tf.convert_to_tensor(train_labels)
+    # train_images = tf.convert_to_tensor(x_train, dtype=None, dtype_hint=None, name=None )
+    # train_labels = tf.convert_to_tensor(y_train, dtype=None, dtype_hint=None, name=None )
 
-    #train_images = tf.Variable(np.array(x_train, dtype=object ))
-    #train_labels = tf.Variable(np.array(y_train, dtype=object ))
+    # train_images = tf.Variable(x_train, dtype=None, dtype_hint=None, name=None )
+    # train_labels = tf.Variable(y_train, dtype=None, dtype_hint=None, name=None )
 
-    # resize_lambda = lambda x: tf.image.resize(x, (60,60))
-    # train_images = tf.ragged.map_flat_values(resize_lambda, train_images)
-
-
-    # train_images = tf.concat(
-    #     [tf.image.resize(train_images[i].to_tensor(), (180,180)) for i in tf.range(train_images.nrows())], 
-    #     axis=0
-    # )
+    # print('oooooooooooooooooooooooooooooo')
+    # print(train_images.shape)
+    # print(train_labels.shape)
+    # print('oooooooooooooooooooooooooooooo')
 
     print('oooooooooooooooooooooooooooooo')
-    print(train_images.shape)
-    print(train_labels.shape)
+    # print(train_images.shape)
+    # print(train_labels.shape)
+    print(type(train_images))
+    print(type(train_labels))
     print('oooooooooooooooooooooooooooooo')
 
     AUTOTUNE = tf.data.AUTOTUNE
     train_ds = tf.data.Dataset.from_tensor_slices(( train_images, train_labels))
-    train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(66)
+    # train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(32)
 
-    print('oooooooooooooooooooooooooooooo')
+    # train_ds = tf.data.Dataset.zip((train_images, train_labels))
+
+    # def resize_data(images, labels):
+    #         tf.print('Original shape -->', tf.shape(images))
+    #         SIZE = (180, 180)
+    #         return tf.image.resize(images, SIZE), labels
+
+
+    # train_ds = train_ds.map(resize_data)
+
+    # def resize_data(images):
+    #         tf.print('Original shape -->', tf.shape(images))
+    #         SIZE = (180, 180)
+    #         return tf.image.resize(images, SIZE)
+
+    print('ooooooooooooooo2222222222222222ooooooooooooooo')
+
+    
+
     for image_batch, labels_batch in train_ds:
+
+        # image_batch = resize_data(image_batch)
+        # image_batch =  tf.image.resize(image_batch, [180,180])
         print(image_batch.shape)
         print(labels_batch.shape)
-        break
-    print('oooooooooooooooooooooooooooooo')
+        
+        
+        # print(image_batch.shape)
+
+        # for image_batch in range(len(image_batch)):
+        # img = tf.io.read_file(image_batch)
+        # image_batch = tf.io.decode_image(img, channels=3, dtype=tf.dtypes.float32)
+        # print(image_batch.shape)
+        # print(labels_batch.shape)
+
+    
+    
     # data_augmentation = tf.keras.Sequential(
     #     [
     #         tf.keras.layers.experimental.preprocessing.RandomFlip("horizontal", 
