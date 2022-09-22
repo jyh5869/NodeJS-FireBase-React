@@ -2,10 +2,13 @@ import sys
 import re
 import base64 # 인코딩
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 import numpy as np
 import cv2
 import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 import PIL
 import PIL.Image
 import tensorflow as tf

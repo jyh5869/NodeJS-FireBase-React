@@ -47,18 +47,18 @@ var db = firebase.firestore();
 
 
 
-/*
+
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos_3';
 const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
 const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
-*/
 
+/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
 const reulstImgPath = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/'
 const saveModelUrl  = 'D:/Development/DeveloperKits/Tensorflow/model/'
-
+*/
 
 /*  영화 데이터 리스트 세팅  */
 router.get("/", (req, res) => {
@@ -1115,7 +1115,7 @@ const schedule = require('node-schedule');//스케줄러 사용을 위한 라이
 const app = express()
 app.listen(6000, (request, response, next) => {
     console.log('Example app listening on port 6000')
-    const trainingModelBatch = schedule.scheduleJob('1 10 * * * *', function(requestTime){
+    const trainingModelBatch = schedule.scheduleJob('1 10 1 * * *', function(requestTime){
         console.log(requestTime + ' 딥러닝 모델 훈련 배치 시작');
         const results = FlwDeepLearningNewClass(saveModelNm, datasetUrl, reulstImgPath, saveModelUrl)
         console.log(requestTime + ' 딥러닝 모델 훈련 배치 종료');
