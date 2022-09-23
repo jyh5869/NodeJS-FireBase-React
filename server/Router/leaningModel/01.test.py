@@ -67,7 +67,7 @@ img_width = 180  # 이미지 넓이
 # 트레이닝, 검증  데이터 생성 (검증 분할을 사용 이미지의 80%를 훈련에 사용하고 20%를 유효성 검사에 사용합니다.)
 train_ds  = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir,
-    validation_split=0.2, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
+    validation_split=0.8, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
     subset="training",
     seed=123,
     image_size=(img_height, img_width),
@@ -75,7 +75,7 @@ train_ds  = tf.keras.preprocessing.image_dataset_from_directory(
 )
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir,
-    validation_split=0.2, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
+    validation_split=0.8, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
     subset="validation",
     seed=123,
     image_size=(img_height, img_width),
@@ -135,19 +135,21 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
             print(end)
             x_train.append(train_images[start : end])
             y_train.append(train_labels[start : end])
+
         
         return x_train, y_train
 
     x_train, y_train = get_data(label_mapping, classes=label_name)
 
-    train_images = tf.ragged.constant(x_train)
-    train_labels = tf.ragged.constant(y_train)
-    
+    train_images = tf.ragged.constant(np.array(x_train))
+    train_labels = tf.ragged.constant(np.array(y_train))
+
     train_images = train_images.to_tensor()
     train_labels = train_labels.to_tensor()
 
+    print('train_labels', train_labels)
     AUTOTUNE = tf.data.AUTOTUNE
-    train_ds = tf.data.Dataset.from_tensor_slices(( train_images, train_labels))
+    train_ds = tf.data.Dataset.from_tensor_slices(( np.array(train_images), np.array(train_labels)))
     
     
     
@@ -217,12 +219,12 @@ for images, labels in val_ds.take(1):  # only take first element of dataset
             print(end)
             x_train.append(train_images[start : end])
             y_train.append(train_labels[start : end])
-        
+            
         return x_train, y_train
 
     x_train, y_train = get_data(label_mapping, classes=label_name)
 
-    train_images = tf.ragged.constant(x_train)
+    train_images = tf.ragged.constant(np.array(x_train))
     train_labels = tf.ragged.constant(y_train)
     
     train_images = train_images.to_tensor()
@@ -244,6 +246,10 @@ for images, labels in val_ds.take(1):  # only take first element of dataset
 train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
 val_ds   = val_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
 
+for images, labels in train_ds:
+    print(images)
+    print(labels)
+
 
 data_augmentation = tf.keras.Sequential(
     [
@@ -259,7 +265,7 @@ data_augmentation = tf.keras.Sequential(
 
 
 # 모델 훈련 및 레이어 적용
-num_classes = 2
+num_classes = 1
 model = tf.keras.Sequential([
     data_augmentation,
     tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
@@ -282,13 +288,15 @@ model.compile(
     metrics=['accuracy']
 )
 
+model.summary()
+
 # 모델 훈련 후 히스토리 축척
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
 epochs = 3
 history = model.fit(
     train_ds,
-    validation_data=val_ds,
+    # validation_data=val_ds,
     epochs=epochs,
     verbose=0
 )
@@ -361,27 +369,27 @@ for index, value in enumerate(img_url, start=0):
 
 
 
-#훈련 과정 그래프 표출 
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
+# #훈련 과정 그래프 표출 
+# acc = history.history['accuracy']
+# val_acc = history.history['val_accuracy']
 
-loss = history.history['loss']
-val_loss = history.history['val_loss']
+# loss = history.history['loss']
+# val_loss = history.history['val_loss']
 
-epochs_range = range(epochs)
+# epochs_range = range(epochs)
 
-plt.figure(figsize=(8, 8))
-plt.subplot(1, 2, 1)
-plt.plot(epochs_range, acc, label='Training Accuracy')
-plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
-plt.title('Training and Validation Accuracy')
+# plt.figure(figsize=(8, 8))
+# plt.subplot(1, 2, 1)
+# plt.plot(epochs_range, acc, label='Training Accuracy')
+# plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+# plt.legend(loc='lower right')
+# plt.title('Training and Validation Accuracy')
 
-plt.subplot(1, 2, 2)
-plt.plot(epochs_range, loss, label='Training Loss')
-plt.plot(epochs_range, val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.title('Training and Validation Loss')
-plt.show()
+# plt.subplot(1, 2, 2)
+# plt.plot(epochs_range, loss, label='Training Loss')
+# plt.plot(epochs_range, val_loss, label='Validation Loss')
+# plt.legend(loc='upper right')
+# plt.title('Training and Validation Loss')
+# plt.show()
 
 
