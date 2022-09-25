@@ -136,6 +136,13 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
             x_train.append(train_images[start : end])
             y_train.append(train_labels[start : end])
 
+            # x_train = [[item for sublist in x_train for item in sublist]]
+            # y_train = [[item for sublist in y_train for item in sublist]]
+
+
+            # https://www.tensorflow.org/tutorials/load_data/numpy?hl=ko
+
+
         
         return x_train, y_train
 
@@ -161,7 +168,6 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
         print('labels_dtype = ', labels_batch.dtype)
 
     
-
 
 
 
