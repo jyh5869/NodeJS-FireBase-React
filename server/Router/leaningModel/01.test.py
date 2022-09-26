@@ -3,7 +3,7 @@ import re
 import os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
+# https://machinelearningmastery.com/image-augmentation-with-keras-preprocessing-layers-and-tf-image/
 import json
 import cv2
 import PIL
@@ -41,7 +41,7 @@ db = firestore.client()
 # 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs          = 3                                       # 훈련반복 횟수 
+epochs          = 1                                       # 훈련반복 횟수 
 down_status     = str(sys.argv[5])                        # 이미지 크롤링 결과
 load_status     = ""                                      # 데이터 로드 결과 (Success / Fail -> error)
 training_status = ""                                      # 훈련 결과 (Success / Fail -> error)
@@ -60,30 +60,30 @@ end_dt          = ""
 
 data_dir = pathlib.Path(dataset_url)
 # 매개변수 정의
-batch_size = 32  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
+batch_size = 1000  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
 img_height = 180 # 이미지 높이
 img_width = 180  # 이미지 넓이
 
 # 트레이닝, 검증  데이터 생성 (검증 분할을 사용 이미지의 80%를 훈련에 사용하고 20%를 유효성 검사에 사용합니다.)
 train_ds  = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir,
-    validation_split=0.8, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
-    subset="training",
-    seed=123,
+    # validation_split=0.8, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
+    # subset="training",
+    # seed=123,
     image_size=(img_height, img_width),
     batch_size=batch_size,
 )
 val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir,
-    validation_split=0.8, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
-    subset="validation",
-    seed=123,
+    # validation_split=0.8, # validation_split = 0.2 - 데이터 셋중 80%를 훈련 20%를 검증에 사용
+    # subset="validation",
+    # seed=123,
     image_size=(img_height, img_width),
     batch_size=batch_size,
 )
 
 class_names = train_ds.class_names
-label_name = ["fu"]
+label_name = ["fu", "na"]
 
 for images, labels in train_ds.take(1):  # only take first element of dataset
 
@@ -104,7 +104,7 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
     train_labels = train_labels[idx]
 
     class_count = len(class_names)
-    # idx = np.argsort(class_names)
+    idx = np.argsort(class_names)
 
     label_mapping = dict(zip(range(class_count), class_names))
     # print(label_mapping)
@@ -135,126 +135,73 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
             print(end)
             x_train.append(train_images[start : end])
             y_train.append(train_labels[start : end])
+            print(y_train)
 
-            # x_train = [[item for sublist in x_train for item in sublist]]
-            # y_train = [[item for sublist in y_train for item in sublist]]
-
-
-            # https://www.tensorflow.org/tutorials/load_data/numpy?hl=ko
-
-
+        x_train = np.array(x_train)
+        y_train = np.array(y_train)
         
+        x_train = [item for sublist in x_train for item in sublist]
+        y_train = [item for sublist in y_train for item in sublist]
+        # https://www.tensorflow.org/tutorials/load_data/numpy?hl=ko
+
+        x_train = np.asarray(x_train)
+        y_train = np.asarray(y_train)
+    
         return x_train, y_train
 
     x_train, y_train = get_data(label_mapping, classes=label_name)
 
-    train_images = tf.ragged.constant(np.array(x_train))
-    train_labels = tf.ragged.constant(np.array(y_train))
+    # train_images = tf.ragged.constant(x_train, dtype=tf.float32)
+    # train_labels = tf.ragged.constant(y_train, dtype=tf.int32)
 
-    train_images = train_images.to_tensor()
-    train_labels = train_labels.to_tensor()
+    # train_images = x_train.to_tensor()
+    # train_labels = y_train.to_tensor()
+
+    train_images = tf.convert_to_tensor(x_train)
+    train_labels = tf.convert_to_tensor(y_train)
 
     print('train_labels', train_labels)
+    
     AUTOTUNE = tf.data.AUTOTUNE
-    train_ds = tf.data.Dataset.from_tensor_slices(( np.array(train_images), np.array(train_labels)))
+    train_ds = tf.data.Dataset.from_tensor_slices(( train_images, train_labels))
+    train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(32)
     
     
-    
-    for image_batch, labels_batch in train_ds:
-        print('oooooooooooooooooooooooooooooo')
-        print('image_batch  = ', image_batch.shape)
-        print('labels_batch = ', labels_batch.shape)
-        print('image_dtype  = ', image_batch.dtype)
-        print('labels_dtype = ', labels_batch.dtype)
-
-    
-
-
-
-
-
-
-
-for images, labels in val_ds.take(1):  # only take first element of dataset
-
+for image_batch, labels_batch in train_ds:
     print('oooooooooooooooooooooooooooooo')
-    print('images shape = ',images.shape)
-    print('labels shape = ',labels.shape)
-    print('images dtype = ',images.dtype)
-    print('labels dtype = ',labels.dtype)
-    print('oooooooooooooooooooooooooooooo')
-    
-    train_images = images.numpy()
-    train_labels = labels.numpy()
-
-    idx = np.argsort(train_labels)
-    # print(idx)
-    
-    train_images = train_images[idx]
-    train_labels = train_labels[idx]
-
-    class_count = len(class_names)
-    # idx = np.argsort(class_names)
-
-    label_mapping = dict(zip(range(class_count), class_names))
-    # print(label_mapping)
-
-    #  라벨 배열을 통해 클레스별 이미지 갯수를 구함
-    counter = {}
-    for value in train_labels:
-        try: counter[value] += 1
-        except: counter[value ] = 1
-
-    # print(counter)
-
-
-    def get_data(mapping, classes):
-        x_train, y_train =  [], []
-
-        for cls in classes:
-            print('------- '+ cls +' --------')
-            bb = {v:k for k,v in mapping.items()} #// {'AA': '0', 'BB': '1', 'CC': '2'}
-            idx = bb.get(cls)
-
-            idxStr = sum(list(counter.values())[0:idx])    
-            idxCnt = counter.get(idx)
-            
-            start = idxStr
-            end = idxStr+idxCnt
-            print(start)
-            print(end)
-            x_train.append(train_images[start : end])
-            y_train.append(train_labels[start : end])
-            
-        return x_train, y_train
-
-    x_train, y_train = get_data(label_mapping, classes=label_name)
-
-    train_images = tf.ragged.constant(np.array(x_train))
-    train_labels = tf.ragged.constant(y_train)
-    
-    train_images = train_images.to_tensor()
-    train_labels = train_labels.to_tensor()
-
-    AUTOTUNE = tf.data.AUTOTUNE
-    val_ds = tf.data.Dataset.from_tensor_slices(( train_images, train_labels))
-    
-    
-    for image_batch, labels_batch in val_ds:
-        print('oooooooooooooooooooooooooooooo')
-        print('image_batch  = ', image_batch.shape)
-        print('labels_batch = ', labels_batch.shape)
-        print('image_dtype  = ', image_batch.dtype)
-        print('labels_dtype = ', labels_batch.dtype)
+    print('image_batch  = ', image_batch.shape)
+    print('labels_batch = ', labels_batch.shape)
+    print('image_dtype  = ', image_batch.dtype)
+    print('labels_batch = ', labels_batch)
+    # print('image_batch  = ', image_batch)
 
 
 
-train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
-val_ds   = val_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+# for images, labels in train_ds:
+#     print(images)
+#     print(labels)
 
-for images, labels in train_ds:
-    print(images)
-    print(labels)
+
+
+# BATCH_SIZE = 32
+# SHUFFLE_BUFFER_SIZE = 1000
+
+# train_dataset = train_ds.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
+
+
+# model = tf.keras.Sequential([
+#     tf.keras.layers.Flatten(input_shape=(180, 180, 3)),
+#     tf.keras.layers.Dense(128, activation='relu'),
+#     tf.keras.layers.Dense(2)
+# ])
+
+# model.compile(optimizer=tf.keras.optimizers.RMSprop(),
+#               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
+#               metrics=['sparse_categorical_accuracy'])
+
+# model.fit(train_dataset, epochs=5)
+
+
 
 
 data_augmentation = tf.keras.Sequential(
@@ -271,7 +218,7 @@ data_augmentation = tf.keras.Sequential(
 
 
 # 모델 훈련 및 레이어 적용
-num_classes = 1
+num_classes = 2
 model = tf.keras.Sequential([
     data_augmentation,
     tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
@@ -294,12 +241,12 @@ model.compile(
     metrics=['accuracy']
 )
 
-model.summary()
+# model.summary()
 
-# 모델 훈련 후 히스토리 축척
-# epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
-#          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs = 3
+# # 모델 훈련 후 히스토리 축척
+# # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
+# #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
+# epochs = 3
 history = model.fit(
     train_ds,
     # validation_data=val_ds,
@@ -310,6 +257,7 @@ history = model.fit(
 
 img_url = [
   'C:/Users/all4land/Desktop/validatonImg6.jpg',
+  'C:/Users/all4land/Desktop/validatonImg9.jpg',
 ]
 for index, value in enumerate(img_url, start=0):
   print(index, value)
@@ -326,51 +274,24 @@ for index, value in enumerate(img_url, start=0):
 
   print(score)
   print(np.argmax(score))
-#   print(
-#       "1 This image most likely belongs to {} with a {:.2f} percent confidence."
-#       .format(label_name[np.argmax(score)], 100 * np.max(score))
-#   )
+  print(
+      "1 This image most likely belongs to {} with a {:.2f} percent confidence."
+      .format(label_name[np.argmax(score)], 100 * np.max(score))
+  )
 
 
 
 
-
-
-
-
-
-
-
-
-
+# print('*******************************************************')
+# for images, labels in train_ds:
     
-    # print('--------------------------------------------------------')
-    # print(len(y_train))
-    # print(len(x_train[0]) + len(x_train[1]))
-    # print(len(y_train[0]) + len(y_train[1]))
-    # # print(len(x_train[0]) )
-    # # print(len(x_train[1]) )
-
-
+#     for i in range(9):
+#         ax = plt.subplot(3, 3, i + 1)
+#         plt.imshow(images[i].numpy().astype("uint8"))
+#         plt.title(class_names[labels[i]])
+#         plt.axis("off")
     
-    # # for images in x_train:
-    # #     plt.figure(figsize=(10, 10))
-    # #     for i in range(2):
-    # #         plt.imshow(images[i].astype("uint8"))
-    # #         plt.axis("off")
-    # #     plt.show()
-        
-
-    # print('*******************************************************')
-    # for images, labels in train_ds:
-        
-    #     for i in range(9):
-    #         ax = plt.subplot(3, 3, i + 1)
-    #         plt.imshow(images[i].numpy().astype("uint8"))
-    #         plt.title(class_names[labels[i]])
-    #         plt.axis("off")
-        
-    #     plt.show()
+#     plt.show()
 
 
 
