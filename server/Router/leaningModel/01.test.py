@@ -41,7 +41,7 @@ db = firestore.client()
 # 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs          = 1                                       # 훈련반복 횟수 
+epochs          = 5                                       # 훈련반복 횟수 
 down_status     = str(sys.argv[5])                        # 이미지 크롤링 결과
 load_status     = ""                                      # 데이터 로드 결과 (Success / Fail -> error)
 training_status = ""                                      # 훈련 결과 (Success / Fail -> error)
@@ -60,7 +60,7 @@ end_dt          = ""
 
 data_dir = pathlib.Path(dataset_url)
 # 매개변수 정의
-batch_size = 1000  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
+batch_size = 10000  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
 img_height = 180 # 이미지 높이
 img_width = 180  # 이미지 넓이
 
@@ -85,14 +85,15 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
 class_names = train_ds.class_names
 label_name = ["fu", "na"]
 
+print(class_names)
 for images, labels in train_ds.take(1):  # only take first element of dataset
 
-    print('oooooooooooooooooooooooooooooo')
-    print('images shape = ',images.shape)
-    print('labels shape = ',labels.shape)
-    print('images dtype = ',images.dtype)
-    print('labels dtype = ',labels.dtype)
-    print('oooooooooooooooooooooooooooooo')
+    # print('oooooooooooooooooooooooooooooo')
+    # print('images shape = ',images.shape)
+    # print('labels shape = ',labels.shape)
+    # print('images dtype = ',images.dtype)
+    # print('labels dtype = ',labels.dtype)
+    # print('oooooooooooooooooooooooooooooo')
     
     train_images = images.numpy()
     train_labels = labels.numpy()
@@ -137,6 +138,20 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
             y_train.append(train_labels[start : end])
             print(y_train)
 
+        
+
+
+        label_train = []
+        for index, value in enumerate(y_train, start=0):
+            print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',value[0])
+            label_train.append(class_names[int(value[0])]) 
+            for indexJ, valueJ in enumerate(value, start=0):
+                y_train[index][indexJ] = index
+
+        
+        print('SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',label_train)
+
+
         x_train = np.array(x_train)
         y_train = np.array(y_train)
         
@@ -167,13 +182,13 @@ for images, labels in train_ds.take(1):  # only take first element of dataset
     train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(32)
     
     
-for image_batch, labels_batch in train_ds:
-    print('oooooooooooooooooooooooooooooo')
-    print('image_batch  = ', image_batch.shape)
-    print('labels_batch = ', labels_batch.shape)
-    print('image_dtype  = ', image_batch.dtype)
-    print('labels_batch = ', labels_batch)
-    # print('image_batch  = ', image_batch)
+# for image_batch, labels_batch in train_ds:
+#     print('oooooooooooooooooooooooooooooo')
+#     print('image_batch  = ', image_batch.shape)
+#     print('labels_batch = ', labels_batch.shape)
+#     print('image_dtype  = ', image_batch.dtype)
+#     print('labels_batch = ', labels_batch)
+#     # print('image_batch  = ', image_batch)
 
 
 
@@ -256,8 +271,9 @@ history = model.fit(
 
 
 img_url = [
-  'C:/Users/all4land/Desktop/validatonImg6.jpg',
-  'C:/Users/all4land/Desktop/validatonImg9.jpg',
+    'D:/Development/DeveloperKits/Tensorflow/testImg/napal.jpg',
+    'D:/Development/DeveloperKits/Tensorflow/testImg/fusia.jpg',
+    
 ]
 for index, value in enumerate(img_url, start=0):
   print(index, value)
