@@ -38,6 +38,15 @@ db = firestore.client()
 # 텐서플로 사용 초기 세팅
 
 
+class_list_ref    = db.collection("model_class_list")
+
+# 데이터 조회 1 (조회하고자 하는 영화 데이터 존재 유무 파악)
+class_list_query  = class_list_ref.where('use_yn', '==', 'Y').where('train_dt', '!=', '')  # 개봉일 기준 limit의 레코드 호출 쿼리 작성
+class_list_docs   = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
+class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
+
+print(class_list_dict)
+
 # 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
@@ -56,7 +65,7 @@ result_img_path = str(sys.argv[3])                        # 훈련과정 이미�
 save_model_url  = str(sys.argv[4])                        # 모델 저장 경로
 start_dt        = ""
 end_dt          = ""
-
+label_name      = ["fu", "na"]
 
 data_dir = pathlib.Path(dataset_url)
 # 매개변수 정의
@@ -83,7 +92,7 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
 )
 
 class_names = train_ds.class_names
-label_name = ["fu", "na"]
+
 
 print(class_names)
 for images, labels in train_ds.take(1):  # only take first element of dataset
@@ -270,30 +279,30 @@ history = model.fit(
 )
 
 
-img_url = [
-    'D:/Development/DeveloperKits/Tensorflow/testImg/napal.jpg',
-    'D:/Development/DeveloperKits/Tensorflow/testImg/fusia.jpg',
+# img_url = [
+#     'D:/Development/DeveloperKits/Tensorflow/testImg/napal.jpg',
+#     'D:/Development/DeveloperKits/Tensorflow/testImg/fusia.jpg',
     
-]
-for index, value in enumerate(img_url, start=0):
-  print(index, value)
+# ]
+# for index, value in enumerate(img_url, start=0):
+#   print(index, value)
 
-  img = tf.keras.preprocessing.image.load_img(
-    value, target_size=(img_height, img_width)
-  )
-  img_array = tf.keras.preprocessing.image.img_to_array(img)
-  img_array = tf.expand_dims(img_array, 0) # Create a batch
+#   img = tf.keras.preprocessing.image.load_img(
+#     value, target_size=(img_height, img_width)
+#   )
+#   img_array = tf.keras.preprocessing.image.img_to_array(img)
+#   img_array = tf.expand_dims(img_array, 0) # Create a batch
 
-  predictions = model.predict(img_array)
+#   predictions = model.predict(img_array)
 
-  score = tf.nn.softmax(predictions[0])
+#   score = tf.nn.softmax(predictions[0])
 
-  print(score)
-  print(np.argmax(score))
-  print(
-      "1 This image most likely belongs to {} with a {:.2f} percent confidence."
-      .format(label_name[np.argmax(score)], 100 * np.max(score))
-  )
+#   print(score)
+#   print(np.argmax(score))
+#   print(
+#       "1 This image most likely belongs to {} with a {:.2f} percent confidence."
+#       .format(label_name[np.argmax(score)], 100 * np.max(score))
+#   )
 
 
 
