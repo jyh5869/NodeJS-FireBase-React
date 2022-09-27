@@ -45,7 +45,9 @@ class_list_query  = class_list_ref.where('use_yn', '==', 'Y').where('train_dt', 
 class_list_docs   = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
 class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
 
-print(class_list_dict)
+for index, value in enumerate(class_list_dict, start=0):
+    print(value['class_kor_nm'])
+    print(value['class_eng_nm'])
 
 # 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
