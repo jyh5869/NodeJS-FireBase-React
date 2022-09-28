@@ -11,12 +11,30 @@ import io
 import PIL
 import PIL.Image
 import pathlib
+import firebase_admin
 import numpy               as np
 import tensorflow          as tf
 import tensorflow_datasets as tfds
 import matplotlib.pyplot   as plt # 이미지 표출을 위한 LIB
 
+from time           import localtime
+from time           import strptime
+from selenium       import webdriver
+from firebase_admin import credentials
+from firebase_admin import firestore
 
+# Firebase 연계 초기 세팅
+cred = credentials.Certificate('Router/firebase_appKey_Movies.json') # server\Router\firebase_appKey_Movies.json
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
+
+# 데이터 조회 1 - (학습된 클레스 리스트 호출)
+class_list_ref    = db.collection("model_class_list")
+class_list_query  = class_list_ref.where('use_yn', '==', 'Y').where('train_dt', '!=', '')
+class_list_docs   = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
+class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
 
 
 
@@ -39,27 +57,22 @@ img_np[0:50, 0:50] = 0
 # convert bytes 후 다시 byte형태를 담은 list로 바꾸어준다.
 _, imen = cv2.imencode('.jpg', img_np)
 imenb = bytes(imen)
-imnb = list(imenb)
+imnb  = list(imenb)
  
 # 실제 이미지 분석을 위한 바이트 변수 생성
 anaImg = io.BytesIO(imenb)
 
 
-############################################################
+###############################################################
 
 
-# 저장된 분석모델을 호출
-IMG_SIZE = 180
 
-# label_name_eng = ['dandelion','daisy','tulips','sunflowers','roses']
-# label_name_kor = ['민들레','데이지','튤립','해바라기','장미']
+IMG_SIZE     = 180 # 분석할 이미지 리사이즈 
+saveModelUrl = str(sys.argv[1])  # 모델 저장 경로 
 
-label_name_eng = ['cosmos', 'daisy', 'dandelion', 'forsythia', 'myosotis', 'roses', 'sunflowers', 'tulips']
-label_name_kor = ['코스모스', '데이지', '민들레', '개나리', '물망초', '장미', '해바라기속', '튤립']
 
-# 저장 모델 로드 하기 
-# model = tf.keras.models.load_model('model.h5.flower1')
-model = tf.keras.models.load_model(str(sys.argv[1]) + 'model_flw.h5')
+# 저장된 분석 모델 로드 하기 
+model = tf.keras.models.load_model(saveModelUrl + 'model_flw.h5')
 
 model.compile(loss='binary_crossentropy',
              optimizer='rmsprop',
@@ -72,21 +85,19 @@ img_url = [ anaImg ]
 # 분석
 for index, value in enumerate(img_url, start=0):
 
-  img = tf.keras.preprocessing.image.load_img(
-    value, target_size=(IMG_SIZE, IMG_SIZE)
-  )
-  img_array = tf.keras.preprocessing.image.img_to_array(img)
-  img_array = tf.expand_dims(img_array, 0) # Create a batch
- 
-  predictions = model.predict(img_array, verbose = 0)
+    img = tf.keras.preprocessing.image.load_img(
+      value, target_size=(IMG_SIZE, IMG_SIZE)
+    )
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array = tf.expand_dims(img_array, 0) # Create a batch
 
-  score = tf.nn.softmax(predictions[0])
+    predictions = model.predict(img_array, verbose = 0)
+
+    score = tf.nn.softmax(predictions[0])
 
 
-# 결과 데이터 생성후 리턴
+# 분석 결과 데이터 생성후 리턴
 print(json.dumps({
-  'result': {'korNm': label_name_kor[np.argmax(score)] ,'endNm' : label_name_eng[np.argmax(score)]},
-  'img'   : imnb
+    'result': {'korNm': class_list_dict[np.argmax(score)]['class_kor_nm'] ,'endNm' : class_list_dict[np.argmax(score)]['class_eng_nm']},
+    'img'   : imnb
 }))
-  
-

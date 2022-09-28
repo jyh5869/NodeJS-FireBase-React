@@ -49,7 +49,7 @@ var db = firebase.firestore();
 
 
 const saveModelNm   = 'model_flw';
-const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos_3';
+const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos_2';
 const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
 const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
 
@@ -386,18 +386,18 @@ router.get("/flwNewClass", async (req, res) => {
             snapshot.forEach((doc) => {
                 var childData = doc.data();
                 //새로운 게시물(하루전), 업데이트된(하루전) 게시물 세팅
-                const today       = new Date();
-                const regDate    = new Date(childData.reg_dt);
-                const traingDate     = new Date(childData.train_dt);
+                const today      = new Date();
+                const regDate    = new Date(Number(childData.reg_dt));
+                const traingDate = new Date(Number(childData.train_dt));
 
                 const refNewDate = new Date(regDate.getFullYear(), regDate.getMonth(), regDate.getDate() +1 ,regDate.getHours(), regDate.getMinutes(), regDate.getSeconds(), regDate.getMilliseconds() );
                 const refUpdDate = new Date(traingDate.getFullYear(), traingDate.getMonth(), traingDate.getDate() +1 ,traingDate.getHours(), traingDate.getMinutes(), traingDate.getSeconds(), traingDate.getMilliseconds());
 
                 childData.newRegYn    = today <= refNewDate ? "Y" : "N";
-                childData.newtrainYn  = today <= refUpdDate ? "Y" : "N";
+                childData.newtrainYn  = today >= refUpdDate ? "Y" : "N";
 
-                childData.train_dt  = dateFormat(childData.train_dt ,"yyyy-mm-dd hh:MM:ss");
-                childData.reg_dt    = dateFormat(childData.reg_dt   ,"yyyy-mm-dd hh:MM:ss");
+                childData.train_dt  = dateFormat(traingDate ,"yyyy-mm-dd hh:MM:ss");
+                childData.reg_dt    = dateFormat(regDate   ,"yyyy-mm-dd hh:MM:ss");
 
                 rows.push(childData);
             });
@@ -1115,7 +1115,7 @@ const schedule = require('node-schedule');//스케줄러 사용을 위한 라이
 const app = express()
 app.listen(6000, (request, response, next) => {
     console.log('Example app listening on port 6000')
-    const trainingModelBatch = schedule.scheduleJob('1 10 1 * * *', function(requestTime){
+    const trainingModelBatch = schedule.scheduleJob('1 23 1 * * *', function(requestTime){
         console.log(requestTime + ' 딥러닝 모델 훈련 배치 시작');
         const results = FlwDeepLearningNewClass(saveModelNm, datasetUrl, reulstImgPath, saveModelUrl)
         console.log(requestTime + ' 딥러닝 모델 훈련 배치 종료');

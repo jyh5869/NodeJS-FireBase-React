@@ -45,9 +45,6 @@ class_list_query  = class_list_ref.where('use_yn', '==', 'Y').where('train_dt', 
 class_list_docs   = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
 class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
 
-for index, value in enumerate(class_list_dict, start=0):
-    print(value['class_kor_nm'])
-    print(value['class_eng_nm'])
 
 # 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
@@ -67,9 +64,15 @@ result_img_path = str(sys.argv[3])                        # 훈련과정 이미�
 save_model_url  = str(sys.argv[4])                        # 모델 저장 경로
 start_dt        = ""
 end_dt          = ""
-label_name      = ["fu", "na"]
+label_name      = []
 
 data_dir = pathlib.Path(dataset_url)
+
+for index, value in enumerate(class_list_dict, start=0):
+    label_name.append(value['class_kor_nm'])
+
+if len(label_name) == 0 : quit()
+
 # 매개변수 정의
 batch_size = 10000  # 몇 개의 샘플로 가중치를 갱신할 것인지 설정합니다.
 img_height = 180 # 이미지 높이
@@ -94,138 +97,93 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
 )
 
 class_names = train_ds.class_names
+class_count = len(class_names)
 
+AUTOTUNE = tf.data.AUTOTUNE
+def get_data(mapping, classes, counter, train_images, train_labels):
+    x_train, y_train =  [], []
 
-print(class_names)
-for images, labels in train_ds.take(1):  # only take first element of dataset
+    for cls in classes:
+        print('------- '+ cls +' --------')
+        bb = {v:k for k,v in mapping.items()} #// {'AA': '0', 'BB': '1', 'CC': '2'}
+        idx = bb.get(cls)
 
-    # print('oooooooooooooooooooooooooooooo')
-    # print('images shape = ',images.shape)
-    # print('labels shape = ',labels.shape)
-    # print('images dtype = ',images.dtype)
-    # print('labels dtype = ',labels.dtype)
-    # print('oooooooooooooooooooooooooooooo')
-    
-    train_images = images.numpy()
-    train_labels = labels.numpy()
-
-    idx = np.argsort(train_labels)
-    # print(idx)
-    
-    train_images = train_images[idx]
-    train_labels = train_labels[idx]
-
-    class_count = len(class_names)
-    idx = np.argsort(class_names)
-
-    label_mapping = dict(zip(range(class_count), class_names))
-    # print(label_mapping)
-
-    #  라벨 배열을 통해 클레스별 이미지 갯수를 구함
-    counter = {}
-    for value in train_labels:
-        try: counter[value] += 1
-        except: counter[value ] = 1
-
-    # print(counter)
-
-
-    def get_data(mapping, classes):
-        x_train, y_train =  [], []
-
-        for cls in classes:
-            print('------- '+ cls +' --------')
-            bb = {v:k for k,v in mapping.items()} #// {'AA': '0', 'BB': '1', 'CC': '2'}
-            idx = bb.get(cls)
-
-            idxStr = sum(list(counter.values())[0:idx])    
-            idxCnt = counter.get(idx)
-            
-            start = idxStr
-            end = idxStr+idxCnt
-            print(start)
-            print(end)
-            x_train.append(train_images[start : end])
-            y_train.append(train_labels[start : end])
-            print(y_train)
-
+        idxStr = sum(list(counter.values())[0:idx])    
+        idxCnt = counter.get(idx)
         
+        start = idxStr
+        end = idxStr+idxCnt
+        print(start)
+        print(end)
+        x_train.append(train_images[start : end])
+        y_train.append(train_labels[start : end])
+        print(y_train)
+
+    label_train = []
+    for index, value in enumerate(y_train, start=0):
+        print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',value[0])
+        label_train.append(class_names[int(value[0])]) 
+        for indexJ, valueJ in enumerate(value, start=0):
+            y_train[index][indexJ] = index
+
+    
+    print('SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',label_train)
 
 
-        label_train = []
-        for index, value in enumerate(y_train, start=0):
-            print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',value[0])
-            label_train.append(class_names[int(value[0])]) 
-            for indexJ, valueJ in enumerate(value, start=0):
-                y_train[index][indexJ] = index
+    x_train = np.array(x_train)
+    y_train = np.array(y_train)
+    
+    x_train = [item for sublist in x_train for item in sublist]
+    y_train = [item for sublist in y_train for item in sublist]
 
+    x_train = np.asarray(x_train)
+    y_train = np.asarray(y_train)
+
+    return x_train, y_train
+
+
+def setDataset(train_ds):
+
+    for images, labels in train_ds.take(1):  # only take first element of dataset
         
-        print('SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS',label_train)
+        train_images = images.numpy()
+        train_labels = labels.numpy()
 
-
-        x_train = np.array(x_train)
-        y_train = np.array(y_train)
+        idx = np.argsort(train_labels)
+        # print(idx)
         
-        x_train = [item for sublist in x_train for item in sublist]
-        y_train = [item for sublist in y_train for item in sublist]
-        # https://www.tensorflow.org/tutorials/load_data/numpy?hl=ko
+        train_images = train_images[idx]
+        train_labels = train_labels[idx]
 
-        x_train = np.asarray(x_train)
-        y_train = np.asarray(y_train)
+        class_count = len(class_names)
+        idx = np.argsort(class_names)
+
+        label_mapping = dict(zip(range(class_count), class_names))
+        # print(label_mapping)
+
+        #  라벨 배열을 통해 클레스별 이미지 갯수를 구함
+        counter = {}
+        for value in train_labels:
+            try: counter[value] += 1
+            except: counter[value ] = 1
+
+        # print(counter)
+
+        x_train, y_train = get_data(mapping=label_mapping, classes=label_name, counter=counter, train_images=train_images, train_labels=train_labels)
+
+        x_train = tf.convert_to_tensor(x_train)
+        y_train = tf.convert_to_tensor(y_train)
+
+        print('train_labels', train_labels)
+        
+        train_ds = tf.data.Dataset.from_tensor_slices(( x_train, y_train))
+
     
-        return x_train, y_train
-
-    x_train, y_train = get_data(label_mapping, classes=label_name)
-
-    # train_images = tf.ragged.constant(x_train, dtype=tf.float32)
-    # train_labels = tf.ragged.constant(y_train, dtype=tf.int32)
-
-    # train_images = x_train.to_tensor()
-    # train_labels = y_train.to_tensor()
-
-    train_images = tf.convert_to_tensor(x_train)
-    train_labels = tf.convert_to_tensor(y_train)
-
-    print('train_labels', train_labels)
-    
-    AUTOTUNE = tf.data.AUTOTUNE
-    train_ds = tf.data.Dataset.from_tensor_slices(( train_images, train_labels))
-    train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(32)
-    
-    
-# for image_batch, labels_batch in train_ds:
-#     print('oooooooooooooooooooooooooooooo')
-#     print('image_batch  = ', image_batch.shape)
-#     print('labels_batch = ', labels_batch.shape)
-#     print('image_dtype  = ', image_batch.dtype)
-#     print('labels_batch = ', labels_batch)
-#     # print('image_batch  = ', image_batch)
+    return train_ds
 
 
-
-# for images, labels in train_ds:
-#     print(images)
-#     print(labels)
-
-
-
-# BATCH_SIZE = 32
-# SHUFFLE_BUFFER_SIZE = 1000
-
-# train_dataset = train_ds.shuffle(SHUFFLE_BUFFER_SIZE).batch(BATCH_SIZE)
-
-
-# model = tf.keras.Sequential([
-#     tf.keras.layers.Flatten(input_shape=(180, 180, 3)),
-#     tf.keras.layers.Dense(128, activation='relu'),
-#     tf.keras.layers.Dense(2)
-# ])
-
-# model.compile(optimizer=tf.keras.optimizers.RMSprop(),
-#               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-#               metrics=['sparse_categorical_accuracy'])
-
-# model.fit(train_dataset, epochs=5)
+train_ds = setDataset(train_ds).cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(32)
+val_ds   = setDataset(val_ds).cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE).batch(32)
 
 
 
@@ -244,7 +202,7 @@ data_augmentation = tf.keras.Sequential(
 
 
 # 모델 훈련 및 레이어 적용
-num_classes = 2
+num_classes = len(label_name)
 model = tf.keras.Sequential([
     data_augmentation,
     tf.keras.layers.experimental.preprocessing.Rescaling(1./255, input_shape=(img_height, img_width, 3)),
@@ -269,81 +227,66 @@ model.compile(
 
 # model.summary()
 
-# # 모델 훈련 후 히스토리 축척
-# # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
-# #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-# epochs = 3
+# 모델 훈련 후 히스토리 축척
+# epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
+#          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
 history = model.fit(
     train_ds,
-    # validation_data=val_ds,
+    validation_data=val_ds,
     epochs=epochs,
     verbose=0
 )
 
 
-# img_url = [
-#     'D:/Development/DeveloperKits/Tensorflow/testImg/napal.jpg',
-#     'D:/Development/DeveloperKits/Tensorflow/testImg/fusia.jpg',
-    
-# ]
-# for index, value in enumerate(img_url, start=0):
-#   print(index, value)
+img_url = [
+    # 'D:/Development/DeveloperKits/Tensorflow/testImg/napal.jpg',
+    # 'D:/Development/DeveloperKits/Tensorflow/testImg/fusia.jpg',
+    'C:/Users/all4land/Desktop/validatonImg.jpg',
+    'C:/Users/all4land/Desktop/validatonImg8.jpg'
+]
+for index, value in enumerate(img_url, start=0):
+    print(index, value)
 
-#   img = tf.keras.preprocessing.image.load_img(
-#     value, target_size=(img_height, img_width)
-#   )
-#   img_array = tf.keras.preprocessing.image.img_to_array(img)
-#   img_array = tf.expand_dims(img_array, 0) # Create a batch
+    img = tf.keras.preprocessing.image.load_img(
+        value, target_size=(img_height, img_width)
+    )
+    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    img_array = tf.expand_dims(img_array, 0) # Create a batch
 
-#   predictions = model.predict(img_array)
+    predictions = model.predict(img_array)
 
-#   score = tf.nn.softmax(predictions[0])
+    score = tf.nn.softmax(predictions[0])
 
-#   print(score)
-#   print(np.argmax(score))
-#   print(
-#       "1 This image most likely belongs to {} with a {:.2f} percent confidence."
-#       .format(label_name[np.argmax(score)], 100 * np.max(score))
-#   )
-
-
-
-
-# print('*******************************************************')
-# for images, labels in train_ds:
-    
-#     for i in range(9):
-#         ax = plt.subplot(3, 3, i + 1)
-#         plt.imshow(images[i].numpy().astype("uint8"))
-#         plt.title(class_names[labels[i]])
-#         plt.axis("off")
-    
-#     plt.show()
+    print(score)
+    print(np.argmax(score))
+    print(
+        "1 This image most likely belongs to {} with a {:.2f} percent confidence."
+        .format(label_name[np.argmax(score)], 100 * np.max(score))
+    )
 
 
 
+# 훈련 과정 그래프 표출 
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
 
-# #훈련 과정 그래프 표출 
-# acc = history.history['accuracy']
-# val_acc = history.history['val_accuracy']
+loss = history.history['loss']
+val_loss = history.history['val_loss']
 
-# loss = history.history['loss']
-# val_loss = history.history['val_loss']
+epochs_range = range(epochs)
 
-# epochs_range = range(epochs)
+plt.figure(figsize=(8, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs_range, acc, label='Training Accuracy')
+plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.title('Training and Validation Accuracy')
 
-# plt.figure(figsize=(8, 8))
-# plt.subplot(1, 2, 1)
-# plt.plot(epochs_range, acc, label='Training Accuracy')
-# plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-# plt.legend(loc='lower right')
-# plt.title('Training and Validation Accuracy')
-
-# plt.subplot(1, 2, 2)
-# plt.plot(epochs_range, loss, label='Training Loss')
-# plt.plot(epochs_range, val_loss, label='Validation Loss')
-# plt.legend(loc='upper right')
-# plt.title('Training and Validation Loss')
-# plt.show()
+plt.subplot(1, 2, 2)
+plt.plot(epochs_range, loss, label='Training Loss')
+plt.plot(epochs_range, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.title('Training and Validation Loss')
+plt.show()
 
 
