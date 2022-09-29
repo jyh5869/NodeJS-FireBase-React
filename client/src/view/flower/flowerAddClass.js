@@ -4,8 +4,8 @@ import { Link, useParams } from 'react-router-dom';
 import { Card, CardGroup, Table, Form, Button } from 'react-bootstrap';
 import axios               from 'axios';
 
-//import { name1, name2 } from './data';
-import Data from '../../data';
+import AddClass from '../flower/action/addClass';
+import Data     from '../../data';
 
 
 function List() {
@@ -105,6 +105,7 @@ function List() {
         
         <div className="row">
             <h1>분류 가능 클래스 </h1>
+            <AddClass status={'open'} loading={true} />
             <Table striped bordered hover className="text-center">
                 <thead>
                 <tr>

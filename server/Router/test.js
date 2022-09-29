@@ -363,19 +363,17 @@ router.get("/flwNewClass", async (req, res) => {
     let callType = req.query.callType;
 
     if(callType == 'insert'){
-        await label_name_eng.forEach( (doc, index) =>  {
-            var modelClassDoc = db.collection("model_class_list").doc();
-                var postData = {
-                    id            : modelClassDoc.id,
-                    model_nm      : 'flower',
-                    class_eng_nm  : label_name_eng[index],
-                    class_kor_nm  : label_name_kor[index], 
-                    use_yn        : "Y",
-                    train_dt      : "",
-                    reg_dt        : Date.now(),
-                };
-                modelClassDoc.set(postData);
-        }); 
+        var modelClassDoc = db.collection("model_class_list").doc();
+        var postData = {
+            id            : modelClassDoc.id,
+            model_nm      : req.query.modelNm,
+            class_eng_nm  : req.query.engNm,
+            class_kor_nm  : req.query.korNm,
+            use_yn        : "Y",
+            train_dt      : "",
+            reg_dt        : Date.now(),
+        };
+        modelClassDoc.set(postData);
         res.send({rows: "등록완료"});
     }
     else if(callType == 'select'){
@@ -394,10 +392,10 @@ router.get("/flwNewClass", async (req, res) => {
                 const refUpdDate = new Date(traingDate.getFullYear(), traingDate.getMonth(), traingDate.getDate() +1 ,traingDate.getHours(), traingDate.getMinutes(), traingDate.getSeconds(), traingDate.getMilliseconds());
 
                 childData.newRegYn    = today <= refNewDate ? "Y" : "N";
-                childData.newtrainYn  = today >= refUpdDate ? "Y" : "N";
+                childData.newtrainYn  = today >= refUpdDate && childData.train_dt != "" ? "Y" : "N";
 
-                childData.train_dt  = dateFormat(traingDate ,"yyyy-mm-dd hh:MM:ss");
-                childData.reg_dt    = dateFormat(regDate   ,"yyyy-mm-dd hh:MM:ss");
+                childData.train_dt  = dateFormat(traingDate , "yyyy-mm-dd hh:MM:ss");
+                childData.reg_dt    = dateFormat(regDate    , "yyyy-mm-dd hh:MM:ss");
 
                 rows.push(childData);
             });
@@ -461,7 +459,20 @@ router.get("/flwNewClass", async (req, res) => {
         res.send({results: returnStr});
     }
     else{
-        res.send({results: 'error'});
+        // await label_name_eng.forEach( (doc, index) =>  {
+        //     var modelClassDoc = db.collection("model_class_list").doc();
+        //         var postData = {
+        //             id            : modelClassDoc.id,
+        //             model_nm      : 'flower',
+        //             class_eng_nm  : label_name_eng[index],
+        //             class_kor_nm  : label_name_kor[index], 
+        //             use_yn        : "Y",
+        //             train_dt      : "",
+        //             reg_dt        : Date.now(),
+        //         };
+        //         modelClassDoc.set(postData);
+        // }); 
+        res.send({rows: "등록완료"});
     }
     
 });
