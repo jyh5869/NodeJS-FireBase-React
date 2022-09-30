@@ -5,6 +5,7 @@ import json
 import os, time, random
 import firebase_admin # 파이어베이스 클라우드 연동 라이브러리
 import urllib.request
+import imghdr
 
 from selenium                          import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -15,6 +16,8 @@ from selenium.webdriver.common.keys    import Keys
 from bs4                               import BeautifulSoup
 from firebase_admin                    import credentials
 from firebase_admin                    import firestore
+from pathlib                           import Path
+
 
 # Firebase 연계 초기 세팅
 cred = credentials.Certificate('Router/firebase_appKey_Movies.json') # server\Router\firebase_appKey_Movies.json
@@ -182,3 +185,23 @@ for key in class_list_dict:
     class_list_ref.document(key['id']).set({
         u'train_dt': train_dt
     }, merge = True)
+
+
+
+
+
+
+# 이미지 정제 (텐서플로로 학습 불가능한 확장자의 이미지를 삭제)
+data_dir = save_path
+image_extensions = [".png", ".jpg"]  # add there all your images file extensions
+
+img_type_accepted_by_tf = ["bmp", "gif", "jpeg", "png"]
+for filepath in Path(data_dir).rglob("*"):
+    if filepath.suffix.lower() in image_extensions:
+        img_type = imghdr.what(filepath)
+        if img_type is None:
+            os.remove(filepath)
+            print(f"{filepath} is not an image")
+        elif img_type not in img_type_accepted_by_tf:
+            os.remove(filepath)
+            print(f"{filepath} is a {img_type}, not accepted by TensorFlow")

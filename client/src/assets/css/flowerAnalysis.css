@@ -1,5 +1,4 @@
-#flowerAnalysis img{vertical-align: middle; border: solid lightsteelblue 3px; border-radius: 25px;} 
-
+#flowerAnalysis .preview img{vertical-align: middle; border: solid lightsteelblue 3px; border-radius: 25px;} 
 #flowerAnalysis .preview{text-align: center;} 
 #flowerAnalysis .wrap_imgInput{display: inline; width: 80%;}
 #flowerAnalysis .btn_type1{display: inline;width: 20%;}

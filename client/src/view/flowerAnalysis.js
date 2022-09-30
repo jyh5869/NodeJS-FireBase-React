@@ -3,6 +3,7 @@ import { Card, Button,Table,Form  }   from 'react-bootstrap';
 import axios                          from 'axios';
 
 import Loader from '../view/common/loader';
+import Slider from '../view/common/slider';
 
 import '../assets/css/flowerAnalysis.css';
 
@@ -18,6 +19,9 @@ function FlowerAnalysis() {
     const [flwInfo , setFlwInfo] = useState([]);//해당꽃에대한 검색결과 리스트
     const [flwGrwInfo , setFlwGrwInfo] = useState([]);//해당꽃에대한 검색결과 리스트
     const color = [];
+    const sliderImgArr = ['/images/slider_tulip.jpg', '/images/slider_daisy.jpg', '/images/slider_fortusia.jpg']
+    const sliderTitArr = ['튤립', '데이지', '개나리']
+    const sliderSubArr = ['사랑의 시작과 영원한 사랑을 의미하는 사랑의 큐피드', '명랑함과 아름다움을 의미하는 개란후라이꽃', ' 가장 먼저 봄이 왔음을 알리는 봄의 전령사']
 
     //이미지가 등록 될시 미리보기 기능 제공
     const encodeFileToBase64 = (e) => {
@@ -166,11 +170,15 @@ function FlowerAnalysis() {
     //JSX 식으로 리스트 파싱
     return (
         <React.Fragment>
-            {/* <h1>Our new Products</h1> */}        
+            {/* <h1>Our new Products</h1> */}    
+            <div>    
+                <Slider sliderImgArr={sliderImgArr} sliderTitArr={sliderTitArr} sliderSubArr={sliderSubArr}/>
+            </div>    
             <div className="contents my-5 mx-1" id="flowerAnalysis">
             <Form >
                 <Form.Group controlId="formFileMultiple" className="my-5" >
                     <div className="title">
+                        
                         <Form.Label>종류를 알고 싶은 꽃 이미지를 업로드 해주세요.</Form.Label>
                     </div>
                     <div className="content_2">
