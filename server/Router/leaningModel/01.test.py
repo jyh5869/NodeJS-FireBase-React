@@ -239,10 +239,10 @@ history = model.fit(
 
 
 img_url = [
-    # 'D:/Development/DeveloperKits/Tensorflow/testImg/napal.jpg',
-    # 'D:/Development/DeveloperKits/Tensorflow/testImg/fusia.jpg',
-    'C:/Users/all4land/Desktop/validatonImg.jpg',
-    'C:/Users/all4land/Desktop/validatonImg8.jpg'
+    'D:/Development/DeveloperKits/Tensorflow/testImg/napal.jpg',
+    'D:/Development/DeveloperKits/Tensorflow/testImg/fusia.jpg',
+    # 'C:/Users/all4land/Desktop/validatonImg.jpg',
+    # 'C:/Users/all4land/Desktop/validatonImg8.jpg'
 ]
 for index, value in enumerate(img_url, start=0):
     print(index, value)

@@ -1,11 +1,28 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
+import { Alert } from 'react-bootstrap';
 import axios               from 'axios';
+
 export default function AddClass(props) {
     const [show, setShow] = useState(false);
+
+    const [toastStatus, setToastStatus] = useState(false);
+    const [toastMsg, setToastMsg] = useState({
+        title    : "",
+        message  : "",
+    }); // 토스트에 표시할 메세지
+
+    const handleToast = (title, message) => {
+        setToastStatus(true);
+        setToastMsg({
+            ...toastMsg,
+            title   : title,
+            message : message,
+        });
+    };
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
@@ -29,28 +46,54 @@ export default function AddClass(props) {
         
         if(flag){
 
-            let response = await axios({
-                method: 'get',
-                url: '/api/flwNewClass',
-                params: {
-                    callType : classInfo.callType,
-                    modelNm  : classInfo.modelNm,
-                    korNm    : classInfo.korNm,
-                    engNm    : classInfo.engNm
-                },
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            })
+            // let response = await axios({
+            //     method: 'get',
+            //     url: '/api/flwNewClass',
+            //     params: {
+            //         callType : classInfo.callType,
+            //         modelNm  : classInfo.modelNm,
+            //         korNm    : classInfo.korNm,
+            //         engNm    : classInfo.engNm
+            //     },
+            //     headers: {
+            //         'Content-Type': 'multipart/form-data',
+            //     },
+            // })
+            
+            setShow(false)//클래스 추가 창 닫기
+            handleToast("성공", "클래스 추가가 정상적으로 완료 되었습니다.")//추가 완료 토스트 띄우기
         }
     };
+
+    function ShowAlert(props) {
+
+        const toastTile = props.toastMsg.title
+        const toastMsg = props.toastMsg.message
+     
+        return (
+          <Alert variant="info"  onClose={() => setToastStatus(false)} dismissible>
+            <Alert.Heading>{toastTile}</Alert.Heading>
+            <p>
+              {toastMsg}
+            </p>
+          </Alert>
+        );
+   }
+
+    useEffect(() => {
+      if (toastStatus) {
+          setTimeout(() => {
+              setToastMsg(""); 
+              setToastStatus(false); 
+          }, 2000);
+      }
+    },[toastStatus]);
 
     return (
         <>
       <Button variant="success" onClick={handleShow}>
       클래스 추가
-      </Button>
-
+      </Button>      
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>클래스 추가하기</Modal.Title>
@@ -93,7 +136,15 @@ export default function AddClass(props) {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {toastStatus && (
+        <>
+          <ShowAlert toastMsg={toastMsg}/>
+        </>
+      )}
     </>
    
    )
 }
+
+
