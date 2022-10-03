@@ -72,7 +72,7 @@ def collect_image(search_word, extract_img_count):
 
     createDirectory(file_path + '/' + search_word)
 
-    file_save_dir = file_path + today_time + '_' + search_word
+    # file_save_dir = file_path + today_time + '_' + search_word
     # print(file_save_dir)
 
     driver = chromeWebdriver()
@@ -179,7 +179,7 @@ for key in class_list_dict:
     train_dt = int(str(time.time()).replace('.','')[0:13])
 
     # 크롤링 진행
-    collect_image(key['class_kor_nm'], 50)
+    collect_image(key['class_kor_nm'], 200)
     
     # 트레이닝 날짜 업데이트
     class_list_ref.document(key['id']).set({
