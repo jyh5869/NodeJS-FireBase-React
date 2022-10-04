@@ -51,6 +51,7 @@ table tr td{ vertical-align: middle;}
   
 .failure { display: none;}
 
+
 @media screen and (max-width: 991px) {
     nav{padding:0;}
 

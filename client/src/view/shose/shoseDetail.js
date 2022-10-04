@@ -3,9 +3,9 @@ import React,  { useState } from 'react';
 import { useParams }        from 'react-router-dom';
 import { Card, Button }     from 'react-bootstrap';
 
-import Data from '../data';
+import Data from '../../data';
 
-function Detail(props) {
+function ShoseDetail(props) {
 
     let [shoes, shoeState] = useState(Data);
 
@@ -32,4 +32,4 @@ function Detail(props) {
     )
 }
 
-export default Detail 
+export default ShoseDetail 

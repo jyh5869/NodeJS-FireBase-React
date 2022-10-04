@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Card, Button,Table,Form  }   from 'react-bootstrap';
 import axios                          from 'axios';
 
-import Loader from '../view/common/loader';
-import Slider from '../view/common/slider';
+import Loader from '../common/loader';
+import Slider from '../common/slider';
 
-import '../assets/css/flowerAnalysis.css';
+import '../../assets/css/flowerAnalysis.css';
 
 
 const formData = new FormData();//이미지 데이터 저장 Form

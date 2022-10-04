@@ -4,9 +4,9 @@ import { Link, useParams } from 'react-router-dom';
 import { Card, CardGroup } from 'react-bootstrap';
 
 //import { name1, name2 } from './data';
-import Data from '../data';
+import Data from '../../data';
 
-function List() {
+function ShoseList() {
 
     let [shoes, shoeState] = useState(Data);
     
@@ -58,4 +58,4 @@ function List() {
     }
 }
 
-export default List 
+export default ShoseList 

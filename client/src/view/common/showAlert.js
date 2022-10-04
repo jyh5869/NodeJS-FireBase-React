@@ -4,20 +4,20 @@ import Button from 'react-bootstrap/Button';
 
 export default function ShowAlert(props) {
 
-   //alert("하이하이" + props.showAlert);
-   const msg = props.msg
-   //const [show, setShow] = useState(props.showAlert);
-   //onClose={() => setToastStatus(false)}
-   //if (flag ) {
-     return (
-       <Alert variant="info"  dismissible>
-         <Alert.Heading>성공!</Alert.Heading>
-         <p>
-           클래스 추가가 완료 되었습니다.
-         </p>
-       </Alert>
-     );
-   //}
-   //return null;
+    const toastTile = props.toastInfo.title
+    const toastMsg  = props.toastInfo.message
+    const showState = props.toastInfo.showState
+
+    const showAlert_wrap = { position: "absolute", width: "100%", left :"0", right : "0", top : "25%"}
+    const showAlert = { width: "fit-content", margin: "0 auto"}
+    //onClose={() => setToastStatus(false)}
+    return (
+        <div style={showAlert_wrap} >
+            <Alert variant="info" show={showState} style={showAlert}  dismissible>
+                <Alert.Heading>{toastTile}</Alert.Heading>
+                <p>{toastMsg}</p>
+            </Alert>
+        </div>
+    );
 }
 

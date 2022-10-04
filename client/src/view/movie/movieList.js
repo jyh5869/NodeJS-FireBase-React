@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import axios from 'axios';
 
-function ProdList() {
+function MovieList() {
 
     const [list, setList] = useState([]);
     var color = [ "danger", "warning", "info", "primary", "secondary", "success" ];
@@ -49,4 +49,4 @@ function ProdList() {
     )
 }
 
-export default ProdList;
+export default MovieList;
