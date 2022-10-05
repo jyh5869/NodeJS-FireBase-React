@@ -5,6 +5,10 @@ import { Card, Button,Table  }        from 'react-bootstrap';
 
 import axios from 'axios';
 
+/**
+ * 영화 상세보기 페이지
+ * @returns
+*/
 function MovieDetail(props) {
    
     let {id} = useParams();
@@ -62,11 +66,9 @@ function MovieDetail(props) {
             <Card className="text-center  mx-5 my-5" >
                 <Card.Header className="bg-info" as="h5">MOVIE DETAIL</Card.Header>
                 <Card.Body className="warning">
-                    {/*<Card.Img variant="top" className='m-4' src={list[id].img} /> */}
                     <Card.Title as="h3">
                         {obj.title} 
                     </Card.Title>
-                    {/* <img  className="movie detail my-3" src={"https://source.unsplash.com/random/200x200?sig=1"} alt ="not exist" /> */}
                     <Card.Text as="h5" >
                         {obj.title} ({obj.original_language})
                     </Card.Text>
@@ -93,9 +95,7 @@ function MovieDetail(props) {
                             </tr>                   
                         </tbody>
                     </Table>
-                    {/* <Button variant="primary m-5">Watch Now</Button> */}
                 </Card.Body>
-                {/* <Card.Footer className="text-muted bg-info"></Card.Footer> */}
             </Card>
             
             <h1 className="text-center p-3">유사 내용 영화 추천</h1>      
@@ -120,7 +120,8 @@ function MovieDetail(props) {
                                 <td className="text-center">{list.vote_average}</td>
                             </tr>                   
                         ))
-                    : <tr><td colSpan={4} className="text-center" >추천 데이터가 존재하지 않습니다.</td></tr>
+                    : 
+                        <tr><td colSpan={4} className="text-center" >추천 데이터가 존재하지 않습니다.</td></tr>
                     }
                 </tbody>
             </Table>
@@ -147,7 +148,8 @@ function MovieDetail(props) {
                                 <td className="text-center">{list.vote_average}</td>
                             </tr>                   
                         ))
-                    : <tr><td colSpan={4} className="text-center" >추천데이터가 존재하지 않습니다.</td></tr>
+                    : 
+                        <tr><td colSpan={4} className="text-center" >추천데이터가 존재하지 않습니다.</td></tr>
                     }
                 </tbody>
             </Table>              

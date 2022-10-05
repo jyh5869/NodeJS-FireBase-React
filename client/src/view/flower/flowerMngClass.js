@@ -1,24 +1,26 @@
-
 import React,  {useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Alert, Modal, Card, CardGroup, Table, Form, Button } from 'react-bootstrap';
-import axios               from 'axios';
+import axios from 'axios';
 
 import ShowAlert from '../common/showAlert';
-import Data     from '../../data';
+import Data      from '../../data';
 
-
+/**
+ * 분석가능 클레스 리스트 페이지
+ * @returns
+*/
 function FlowerMngClass() {
 
     let [shoes, shoeState] = useState(Data);
     let [list, setList]    = useState([])
 
     const [toastStatus, setToastStatus] = useState(false);
-    const [toastInfo, setToastInfo] = useState({
-        title    : "",
-        message  : "",
-        showState: false,
-    }); // 토스트에 표시할 메세지
+    const [toastInfo  , setToastInfo  ] = useState({
+        title     : "",
+        message   : "",
+        showState : false,
+    }); // 토스트 정보
 
     const handleToast = (title, message, showState) => {
         setToastStatus(true);
@@ -35,13 +37,16 @@ function FlowerMngClass() {
         let response = await axios({
             method: 'get',
             url: '/api/flwNewClass',
-            params: {'callType' : callType},
+            params: {
+                'callType' : callType
+            },
             headers: {
-              'Content-Type': 'multipart/form-data',
+              'Content-Type': 'multipart/form-data'
             },
         })
+
         var datas =  response.data.rows
-        
+
         setList(datas)
     }
 
@@ -50,27 +55,25 @@ function FlowerMngClass() {
     },  []);
 
     
-    return (
-        
+    return ( 
         <div className="row">
             <h1>분류 가능 클래스 </h1>
             <AddClass status={'open'} loading={true} />
             <ShowAlert toastInfo={toastInfo}/>
             <Table striped bordered hover className="text-center">
                 <thead>
-                <tr>
-                    <th>순번</th>
-                    <th>모델명</th>
-                    <th>클래스명(국문)</th>
-                    <th>클래스명(영문)</th>
-                    <th>등록 날짜</th>
-                    <th>사용여부</th>
-                    <th>훈련 가능여부</th>
-                    <th>삭제</th>
-                </tr>
+                    <tr>
+                        <th>순번</th>
+                        <th>모델명</th>
+                        <th>클래스명(국문)</th>
+                        <th>클래스명(영문)</th>
+                        <th>등록 날짜</th>
+                        <th>사용여부</th>
+                        <th>훈련 가능여부</th>
+                        <th>삭제</th>
+                    </tr>
                 </thead>
                 <tbody>
-                    {/* 반복문 */}
                     {list.map((num, index) => {
                         return <SetClassList list={num} index={index+1} key={index} />;
                     })}
@@ -94,21 +97,20 @@ function FlowerMngClass() {
         const SelectBox = (props) => {
     
             const modifyAction = async  (params, e) => {
-    
+
                 let response = await axios({
                     method: 'get',
                     url: params.targetUrl,
                     params: {
-                        'callType'    : params.callType
-                        , 'targetId'  : params.targetId
-                        , 'targetVal' : e.target.value
-                    
+                        'callType'  : params.callType,
+                        'targetId'  : params.targetId,
+                        'targetVal' : e.target.value
                     },
                     headers: {
-                      'Content-Type': 'multipart/form-data',
+                        'Content-Type' : 'multipart/form-data'
                     },
                 });
-                //console.log(response.data.results);
+
                 e.target.value = e.target.value
             };
         
@@ -116,8 +118,8 @@ function FlowerMngClass() {
                 <Form.Select key={props.useParams.targetId} onChange={(e)=>{modifyAction({ callType : props.useParams.callType, targetUrl : props.targetUrl, targetId : props.useParams.targetId}, e)}} defaultValue={props.defaultValue}>
                     {props.options.map((option) => (
                         <option 
-                            key= {option.value}
-                            value={option.value}
+                            key  = {option.value}
+                            value= {option.value}
                         >
                             {option.name}
                         </option>
@@ -127,12 +129,11 @@ function FlowerMngClass() {
         };
     
         const deleteClass = async (useParams, e) => {
-    
+
             let flag  = window.confirm('해당 클래스를 분류 클래스에서 제외하시겠습니까\n익일 AM 1:00에 제외된 채로 색인 되어 모델에 적용됩니다.');
-            // console.log(useParams.targetId)
-            // console.log(useParams.callType)
+
             if(flag){
-    
+
                 let response = await axios({
                     method: 'get',
                     url: '/api/flwNewClass',
@@ -144,8 +145,9 @@ function FlowerMngClass() {
                         'Content-Type': 'multipart/form-data',
                     },
                 })
+
+                //삭제 후 리스트 재호출
                 getFlowerGrwResult('select');
-                
             }
         };
     
@@ -161,7 +163,6 @@ function FlowerMngClass() {
                 </td>
                 <td>
                     <div className='td_div_50'>
-                        {/* { props.list.newRegYn } */} 
                         { props.list.newtrainYn }   
                     </div>
                 </td>
@@ -176,12 +177,12 @@ function FlowerMngClass() {
 
 
     function AddClass(props) {
+
         const [show, setShow] = useState(false);
     
-        
-    
         const handleClose = () => setShow(false);
-        const handleShow = () => setShow(true);
+        const handleShow  = () => setShow(true);
+        
         const [classInfo, setClassInfo] = useState({
             callType : "insert",
             korNm    : "",
@@ -201,7 +202,6 @@ function FlowerMngClass() {
             let flag  = window.confirm('해당 분류 모델에 새 클래스를 추가 하시겠습니까?\n익일 AM 1:00에 제외된 채로 색인 되어 모델에 적용됩니다.');
             
             if(flag){
-    
                 let response = await axios({
                     method: 'get',
                     url: '/api/flwNewClass',
@@ -219,61 +219,52 @@ function FlowerMngClass() {
                 setShow(false)//클래스 추가 창 닫기
                 getFlowerGrwResult('select')//클래스 리스트 호출
 
-                setTimeout(() => { handleToast("성공", "클래스 추가가 정상적으로 완료 되었습니다.", true)}, 0);//토스트 호출
-                setTimeout(() => { handleToast("성공", "클래스 추가가 정상적으로 완료 되었습니다.", false)}, 2500);//토스트창 감춤
+                setTimeout(() => { handleToast("성공", "클래스 추가가 정상적으로 완료 되었습니다.", true)} , 0);   //토스트 호출
+                setTimeout(() => { handleToast("성공", "클래스 추가가 정상적으로 완료 되었습니다.", false)}, 2500);//토스트 숨김
             }
         };
     
         return (
-          <>
-          
-          <Button variant="success" onClick={handleShow}>
-          클래스 추가
-          </Button>      
-          <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-              <Modal.Title>클래스 추가하기</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              <Form>
-                <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                  <Form.Label>모델명</Form.Label>
-                  <Form.Select defaultValue={'model_flw'} name='modelNm' onChange={onChangeClassInfo}>
-                        <option 
-                            key= {'0'}
-                            value={'model_flw'}
-                        >
-                            {'flower'}
-                        </option>
-                        <option 
-                            key= {'1'}
-                            value={'model_flw'}
-                        >
-                            {'animal'}
-                        </option>
-                </Form.Select>
-                </Form.Group>
-                <Form.Group className="mb-3"  controlId="exampleForm.ControlInput1">
-                  <Form.Label>클래스 한글명</Form.Label>
-                  <Form.Control type="text" name='korNm' placeholder="장미" autoFocus onChange={onChangeClassInfo}/>
-                </Form.Group>
-                <Form.Group className="mb-3"  controlId="exampleForm.ControlInput2">
-                  <Form.Label>클래스 영문명</Form.Label>
-                  <Form.Control type="text" name='engNm' placeholder="Rose" autoFocus onChange={onChangeClassInfo}/>
-                </Form.Group>
-              </Form>
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={handleClose}>
-                취소하기
-              </Button>
-              <Button variant="success" onClick={addClassActon}>
-                추가하기
-              </Button>
-            </Modal.Footer>
-          </Modal>
+        <>
+            <Button variant="success" onClick={handleShow}>클래스 추가</Button>      
+            <Modal show={show} onHide={handleClose}>
+                <Modal.Header closeButton>
+                    <Modal.Title>클래스 추가하기</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <Form>
+                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Label>모델명</Form.Label>
+                            <Form.Select defaultValue={'model_flw'} name='modelNm' onChange={onChangeClassInfo}>
+                                    <option key= {'0'} value={'model_flw'}>
+                                        {'flower'}
+                                    </option>
+                                    <option key= {'1'} value={'model_flw'}>
+                                        {'animal'}
+                                    </option>
+                            </Form.Select>
+                        </Form.Group>
+                        <Form.Group className="mb-3"  controlId="exampleForm.ControlInput1">
+                            <Form.Label>클래스 한글명</Form.Label>
+                            <Form.Control type="text" name='korNm' placeholder="장미" autoFocus onChange={onChangeClassInfo}/>
+                        </Form.Group>
+                        <Form.Group className="mb-3"  controlId="exampleForm.ControlInput2">
+                            <Form.Label>클래스 영문명</Form.Label>
+                            <Form.Control type="text" name='engNm' placeholder="Rose" autoFocus onChange={onChangeClassInfo}/>
+                        </Form.Group>
+                    </Form>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleClose}>
+                        취소하기
+                    </Button>
+                    <Button variant="success" onClick={addClassActon}>
+                        추가하기
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </>
-       )
+        )
     }
 }
 

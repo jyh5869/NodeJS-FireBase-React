@@ -1,5 +1,9 @@
 import ClipLoader from "react-spinners/ClipLoader";
 
+/**
+ * 로딩 스피너 표출 페이지
+ * @returns
+*/
 export default function Loader(props) {
 
     return (
@@ -11,6 +15,5 @@ export default function Loader(props) {
                 </div>
             </div>
         </>
-   
    )
 }

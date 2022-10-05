@@ -4,10 +4,12 @@ import { Link, useParams } from 'react-router-dom';
 import { Card, CardGroup, Table, Form, Button } from 'react-bootstrap';
 import axios               from 'axios';
 
-//import { name1, name2 } from './data';
 import Data from '../../data';
 
-
+/**
+ * 모델 훈련결과 리스트 페이지
+ * @returns
+*/
 function List() {
 
     let [shoes, shoeState] = useState(Data);

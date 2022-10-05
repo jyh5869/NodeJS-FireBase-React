@@ -3,9 +3,12 @@ import React, { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Card, CardGroup } from 'react-bootstrap';
 
-//import { name1, name2 } from './data';
 import Data from '../../data';
 
+/**
+ * 신발정보 리스트 페이지
+ * @returns
+*/
 function ShoseList() {
 
     let [shoes, shoeState] = useState(Data);
@@ -13,19 +16,9 @@ function ShoseList() {
     return (
         
         <div className="row">
-            {/* <h1>{name1} + {name2} </h1> -> 파라메터 파싱 방법 */}
-            
-            {/* 반복문 */}
             {shoes.map((num, i) => {
                 return <Cards shoes={num} i={i} key={i} />;
             })}
-            
-            {
-            /* 비 반복문
-                <Card shoes={shoes[0]} />
-                <Card shoes={shoes[1]} />
-                <Card shoes={shoes[2]} />
-            */}
         </div>
     )
 

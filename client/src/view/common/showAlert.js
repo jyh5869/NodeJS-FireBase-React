@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import Alert from 'react-bootstrap/Alert';
-import Button from 'react-bootstrap/Button';
 
+/**
+ * 토스트 창 표출 페이지
+ * @returns
+*/
 export default function ShowAlert(props) {
 
     const toastTile = props.toastInfo.title

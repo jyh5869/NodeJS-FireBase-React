@@ -5,6 +5,10 @@ import { Card, Button }     from 'react-bootstrap';
 
 import Data from '../../data';
 
+/**
+ * 신발정보 상세보기 페이지
+ * @returns
+*/
 function ShoseDetail(props) {
 
     let [shoes, shoeState] = useState(Data);
