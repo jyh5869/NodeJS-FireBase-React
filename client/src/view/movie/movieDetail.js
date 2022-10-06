@@ -65,7 +65,7 @@ function MovieDetail(props) {
         <React.Fragment> 
             <h1>영화 상세정보</h1> 
             <Card className="text-center  mx-1 my-3" >
-                <Card.Header className="bg-info" as="h5">MOVIE DETAIL</Card.Header>
+                <Card.Header className="bg-info" as="h5">영화 상세정보</Card.Header>
                 <Card.Body className="warning">
                     <Card.Title as="h3">
                         {obj.title} 

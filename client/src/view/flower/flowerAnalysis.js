@@ -187,11 +187,11 @@ function FlowerAnalysis() {
     return (
         <React.Fragment>
             <h1>꽃 종류 분석</h1>    
-            <div className="row mx-1 my-3">
+            <div className="row my-3">
                 <div>    
                     <Slider sliderImgArr={sliderImgArr} sliderTitArr={sliderTitArr} sliderSubArr={sliderSubArr}/>
                 </div>    
-                <div className="contents my-5 mx-1" id="flowerAnalysis">
+                <div className="contents mt-4 mx-1" id="flowerAnalysis">
                     <Form >
                         <Form.Group controlId="formFileMultiple" className="my-5" >
                             <div className="title">

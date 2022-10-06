@@ -23,7 +23,7 @@ function App() {
             <header>
                 <Navbar bg="light" expand="lg" >
                     <Navbar.Brand href="#home">{' '}
-                        <img alt=""src={logo} width="40" height="40" className="d-inline-block align-top mt-n1"/>React Bootstrap</Navbar.Brand>
+                        <img alt=""src={logo} width="40" height="40" className="d-inline-block align-top mt-n1"/>Deep Learning World</Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="ml-auto">
