@@ -17,7 +17,7 @@ from firebase_admin                  import firestore
 
 
 # Firebase 연계 초기 세팅
-cred = credentials.Certificate('Router/firebase_appKey_Movies.json') # server\Router\firebase_appKey_Movies.json
+cred = credentials.Certificate('Config/firebase_appKey_Movies.json') # server\Router\firebase_appKey_Movies.json
 firebase_admin.initialize_app(cred)
 
 db = firestore.client()

@@ -186,76 +186,78 @@ function FlowerAnalysis() {
     //JSX 식으로 리스트 파싱
     return (
         <React.Fragment>
-            {/* <h1>Our new Products</h1> */}    
-            <div>    
-                <Slider sliderImgArr={sliderImgArr} sliderTitArr={sliderTitArr} sliderSubArr={sliderSubArr}/>
-            </div>    
-            <div className="contents my-5 mx-1" id="flowerAnalysis">
-                <Form >
-                    <Form.Group controlId="formFileMultiple" className="my-5" >
-                        <div className="title">
-                            <Form.Label>종류를 알고 싶은 꽃 이미지를 업로드 해주세요.</Form.Label>
-                        </div>
-                        <div className="content_2">
-                            <span>
-                                <Form.Control  type="file" className="wrap_imgInput" onChange={(e) => { encodeFileToBase64(e);}}  multiple />
-                            </span>
-                            <span>
-                                <Button variant="outline-danger" className="btn_type1" onClick={handleSubmit} >Start Analysis</Button>{' '}
-                            </span>
-                        </div>
-                    </Form.Group>
-                </Form>
-                <div className="preview">
-                    {imageSrc && <img src={imageSrc} alt="preview-img" />}
-                </div>
-                <div id="analysisResult" className="content_1">
-                    {obj}
-                </div>
-            </div>    
+            <h1>꽃 종류 분석</h1>    
+            <div className="row mx-1 my-3">
+                <div>    
+                    <Slider sliderImgArr={sliderImgArr} sliderTitArr={sliderTitArr} sliderSubArr={sliderSubArr}/>
+                </div>    
+                <div className="contents my-5 mx-1" id="flowerAnalysis">
+                    <Form >
+                        <Form.Group controlId="formFileMultiple" className="my-5" >
+                            <div className="title">
+                                <Form.Label>종류를 알고 싶은 꽃 이미지를 업로드 해주세요.</Form.Label>
+                            </div>
+                            <div className="content_2">
+                                <span>
+                                    <Form.Control  type="file" className="wrap_imgInput" onChange={(e) => { encodeFileToBase64(e);}}  multiple />
+                                </span>
+                                <span>
+                                    <Button variant="outline-danger" className="btn_type1" onClick={handleSubmit} >Start Analysis</Button>{' '}
+                                </span>
+                            </div>
+                        </Form.Group>
+                    </Form>
+                    <div className="preview">
+                        {imageSrc && <img src={imageSrc} alt="preview-img" />}
+                    </div>
+                    <div id="analysisResult" className="content_1">
+                        {obj}
+                    </div>
+                </div>    
 
-            {/* 스피너 */}
-            <Loader loading={loading} color={color} onClick={setLoading}/>
-            
-            {/* 분석된 대상 정보 표출 */}
-            <Table bordered className="form2">
-                <tbody>
-                    {flwInfo.map((list, index) => (
-                        index != flwInfo.length -1
-                        ? (
-                            <tr key={index}>
-                                <td colSpan={2} className='text-center'>
-                                    {list}
+                {/* 스피너 */}
+                <Loader loading={loading} color={color} onClick={setLoading}/>
+                
+                {/* 분석된 대상 정보 표출 */}
+                <Table bordered className="form2">
+                    <tbody>
+                        {flwInfo.map((list, index) => (
+                            index != flwInfo.length -1
+                            ? (
+                                <tr key={index}>
+                                    <td colSpan={2} className='text-center'>
+                                        {list}
+                                    </td>
+                                </tr>
+                            )
+                            : ( 
+                                <>
+                                    {Object.values(JSON.parse(list)).map((list2, index) => (
+                                        <tr key={index+'@'}>
+                                            <th className='text-center' >{Object.keys(JSON.parse(list))[index]}</th>
+                                            <td>
+                                                <a>{list2}</a> 
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </>
+                            )
+                        ))}
+                    </tbody>
+                </Table>    
+                <Table hover className="form2">
+                    <tbody>
+                        {flwGrwInfo.map((list, index) => (
+                            <tr key={index} >
+                                <td className="py-4 px-2">
+                                    <h5><a href={list.url} target='_blank'>{list.title}</a></h5>
+                                    <div>{list.contents}</div>
                                 </td>
                             </tr>
-                        )
-                        : ( 
-                            <>
-                                {Object.values(JSON.parse(list)).map((list2, index) => (
-                                    <tr key={index+'@'}>
-                                        <th className='text-center' >{Object.keys(JSON.parse(list))[index]}</th>
-                                        <td>
-                                            <a>{list2}</a> 
-                                        </td>
-                                    </tr>
-                                ))}
-                            </>
-                        )
-                    ))}
-                </tbody>
-            </Table>    
-            <Table hover className="form2">
-                <tbody>
-                    {flwGrwInfo.map((list, index) => (
-                        <tr key={index} >
-                            <td className="py-4 px-2">
-                                <h5><a href={list.url} target='_blank'>{list.title}</a></h5>
-                                <div>{list.contents}</div>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </Table>      
+                        ))}
+                    </tbody>
+                </Table>
+            </div>  
         </React.Fragment>
     )
 }

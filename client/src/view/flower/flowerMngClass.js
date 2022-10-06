@@ -55,31 +55,33 @@ function FlowerMngClass() {
     },  []);
 
     
-    return ( 
-        <div className="row">
+    return (
+        <React.Fragment>
             <h1>분류 가능 클래스 </h1>
-            <AddClass status={'open'} loading={true} />
-            <ShowAlert toastInfo={toastInfo}/>
-            <Table striped bordered hover className="text-center">
-                <thead>
-                    <tr>
-                        <th>순번</th>
-                        <th>모델명</th>
-                        <th>클래스명(국문)</th>
-                        <th>클래스명(영문)</th>
-                        <th>등록 날짜</th>
-                        <th>사용여부</th>
-                        <th>훈련 가능여부</th>
-                        <th>삭제</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {list.map((num, index) => {
-                        return <SetClassList list={num} index={index+1} key={index} />;
-                    })}
-                </tbody>
-            </Table>
-        </div>
+            <div className="row mx-1 my-3">
+                <AddClass status={'open'} loading={true} />
+                <ShowAlert toastInfo={toastInfo}/>
+                <Table striped bordered hover className="text-center">
+                    <thead>
+                        <tr>
+                            <th>순번</th>
+                            <th>모델명</th>
+                            <th>클래스명(국문)</th>
+                            <th>클래스명(영문)</th>
+                            <th>등록 날짜</th>
+                            <th>사용여부</th>
+                            <th>훈련 가능여부</th>
+                            <th>삭제</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {list.map((num, index) => {
+                            return <SetClassList list={num} index={index+1} key={index} />;
+                        })}
+                    </tbody>
+                </Table>
+            </div>
+        </React.Fragment>
     )
 
     

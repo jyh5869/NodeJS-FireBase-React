@@ -80,29 +80,30 @@ function List() {
     
     //JSX식 작성
     return (
-        
-        <div className="row">
+        <React.Fragment>
             <h1>분류 가능 클래스 </h1>
-            <Table bordered hover className="text-center">
-                <thead>
-                <tr>
-                    <th>순번</th>
-                    <th>모델명</th>
-                    <th>데이터 다운</th>
-                    <th>데이터 로드</th>
-                    <th>모델 훈련</th>
-                    <th>훈련일자</th>
-                    <th>더보기/삭제</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {/* 반복문 */}
-                    {list.map((num, index) => {
-                        return <Cards list={num} index={index+1} key={index} />;
-                    })}
-                </tbody>
-            </Table>
-        </div>
+            <div className="row mx-1 my-3">
+                <Table bordered hover className="text-center">
+                    <thead>
+                    <tr>
+                        <th>순번</th>
+                        <th>모델명</th>
+                        <th>데이터 다운</th>
+                        <th>데이터 로드</th>
+                        <th>모델 훈련</th>
+                        <th>훈련일자</th>
+                        <th>더보기/삭제</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {/* 반복문 */}
+                        {list.map((num, index) => {
+                            return <Cards list={num} index={index+1} key={index} />;
+                        })}
+                    </tbody>
+                </Table>
+            </div>
+        </React.Fragment>
     )
     function ClassList(props){
         let style = {padding : '5px'}

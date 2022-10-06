@@ -28,8 +28,8 @@ function MovieList() {
     //JSX 식으로 리스트 파싱
     return (
         <React.Fragment  >
-            {/* <h1>Our new Products</h1> */}        
-            <div className="my-5 mx-1">
+            <h1>영화 리스트</h1>        
+            <div className="mx-0 my-3">
                 {list.map((list, index) => ( 
                     <a href={url + list.id} key={list.id} className="text-center" >    
                         <div className={"cardWrap card border-"+ color[Number(index%6)] +" col-md-5 m-2"} >
