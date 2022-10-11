@@ -5,7 +5,7 @@ import axios                          from 'axios';
 import Loader from '../common/loader';
 import Slider from '../common/slider';
 
-import '../../assets/css/flowerAnalysis.css';
+import '../../assets/css/flower.css';
 
 const formData = new FormData();//이미지 데이터 저장 Form
 
@@ -16,7 +16,7 @@ const formData = new FormData();//이미지 데이터 저장 Form
 function FlowerAnalysis() {
 
     const [list , setList] = useState([]);//해당꽃에대한 검색결과 리스트
-    const [obj  , setObj ] = useState([]);//업로드 이미지 분석 결과 객체
+    const [obj  , setObj ] = useState();//업로드 이미지 분석 결과 객체
     const [loading, setLoading] = useState(false);//로딩 스피너
     const [imageSrc, setImageSrc] = useState('');//아마자 태그 변경시 실시간 미리보기
     const [flwInfo , setFlwInfo] = useState([]);//해당꽃에대한 검색결과 리스트
@@ -72,7 +72,7 @@ function FlowerAnalysis() {
         getFlowerInfoResult(analysisRes);//분류된 카테코리 정보 크롤링1
         getFlowerGrwResult(analysisRes);//분류된 카테코리 정보 크롤링2
 
-        setObj("이 꽃은 '" + analysisRes + "' 입니다.");
+        setObj(analysisRes);
     }
 
     /* 분석결과에 따른 크롤링 (정보1 - 백과사전) */
@@ -187,11 +187,11 @@ function FlowerAnalysis() {
     return (
         <React.Fragment>
             <h1>꽃 종류 분석</h1>    
-            <div className="row my-3">
+            <div className="my-3">
                 <div>    
                     <Slider sliderImgArr={sliderImgArr} sliderTitArr={sliderTitArr} sliderSubArr={sliderSubArr}/>
                 </div>    
-                <div className="contents mt-4 mx-1" id="flowerAnalysis">
+                <div className="contents mt-4" id="flowerAnalysis">
                     <Form >
                         <Form.Group controlId="formFileMultiple" className="my-5" >
                             <div className="title">
@@ -202,7 +202,7 @@ function FlowerAnalysis() {
                                     <Form.Control  type="file" className="wrap_imgInput" onChange={(e) => { encodeFileToBase64(e);}}  multiple />
                                 </span>
                                 <span>
-                                    <Button variant="outline-danger" className="btn_type1" onClick={handleSubmit} >Start Analysis</Button>{' '}
+                                    <Button variant="outline-danger" className="btn_type1" onClick={handleSubmit} >분석하기</Button>{' '}
                                 </span>
                             </div>
                         </Form.Group>
@@ -210,8 +210,8 @@ function FlowerAnalysis() {
                     <div className="preview">
                         {imageSrc && <img src={imageSrc} alt="preview-img" />}
                     </div>
-                    <div id="analysisResult" className="content_1">
-                        {obj}
+                    <div id="analysisResult" className="content_1" style={{display:obj != null ?'block':'none'}}>
+                        이 꽃은 <span className="innerText">{"'" + obj + "'"}</span> 입니다.
                     </div>
                 </div>    
 

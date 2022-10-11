@@ -21,7 +21,7 @@ function Slider(props) {
     },  []);
 
     return (
-        <div>
+        <div className='slider_wrap'>
             <Carousel fade>
                 {sliderImgArr.map((list, index) => (
                     <Carousel.Item key={ index }>

@@ -4,8 +4,8 @@ import {BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown, Form, Button, FormControl } from 'react-bootstrap';
 
 
-import ShoseDetail          from './view/shose/shoseDetail';
-import ShoseList            from './view/shose/shoseList';
+import ShoseDetail     from './view/shose/shoseDetail';
+import ShoseList       from './view/shose/shoseList';
 import MovieList       from './view/movie/movieList';
 import MovieDetail     from './view/movie/movieDetail';
 import FlowerAnalysis  from './view/flower/flowerAnalysis';
@@ -29,7 +29,7 @@ function App() {
                         <Nav className="ml-auto">
                             {/* <Nav.Link href="/view/list">Shoes</Nav.Link> */}
                             <Nav.Link href="/view/movieList">Movie</Nav.Link>
-                            <NavDropdown title="flower" id="basic-nav-dropdown">
+                            <NavDropdown title="Flower" id="basic-nav-dropdown">
                                 <NavDropdown.Item href="/view/flower/flowerAnalysis">flower Analysis</NavDropdown.Item>
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item href="/view/flower/flowerTrainHist">model Training schedules</NavDropdown.Item>
@@ -38,8 +38,8 @@ function App() {
                         </Nav>
                     </Navbar.Collapse>
                     <Form className="form1" >
-                        <FormControl type="text" placeholder="Search" className="mr-sm-2" />
-                        <Button variant="outline-success" >Search</Button>
+                        <FormControl type="text" placeholder="검색어를 입력하세요." className="mr-sm-2" />
+                        <Button variant="outline-success" >검색</Button>
                     </Form>
                 </Navbar>
             </header>

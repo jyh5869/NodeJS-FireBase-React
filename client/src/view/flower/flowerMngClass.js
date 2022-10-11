@@ -4,7 +4,6 @@ import { Alert, Modal, Card, CardGroup, Table, Form, Button } from 'react-bootst
 import axios from 'axios';
 
 import ShowAlert from '../common/showAlert';
-import Data      from '../../data';
 
 /**
  * 분석가능 클레스 리스트 페이지
@@ -12,7 +11,6 @@ import Data      from '../../data';
 */
 function FlowerMngClass() {
 
-    let [shoes, shoeState] = useState(Data);
     let [list, setList]    = useState([])
 
     const [toastStatus, setToastStatus] = useState(false);
@@ -58,10 +56,10 @@ function FlowerMngClass() {
     return (
         <React.Fragment>
             <h1>분류 가능 클래스 </h1>
-            <div className="row mx-1 my-3">
+            <div className="mx-1 my-3">
                 <AddClass status={'open'} loading={true} />
                 <ShowAlert toastInfo={toastInfo}/>
-                <Table striped bordered hover className="text-center">
+                <Table striped bordered hover responsive  className="text-center px-1" >
                     <thead>
                         <tr>
                             <th>순번</th>
@@ -170,7 +168,7 @@ function FlowerMngClass() {
                 </td>
                 <td>
                     <div className='td_div_50'>
-                        <Button variant="success" onClick={(e)=>{deleteClass({ callType : 'delete', targetId : props.list.id}, e)}} >Delete</Button>
+                        <Button variant="success" onClick={(e)=>{deleteClass({ callType : 'delete', targetId : props.list.id}, e)}} >삭제</Button>
                     </div>
                 </td>
             </tr> 
@@ -228,7 +226,7 @@ function FlowerMngClass() {
     
         return (
         <>
-            <Button variant="success" onClick={handleShow}>클래스 추가</Button>      
+            <Button variant="success" className='btn_type1' onClick={handleShow}>클래스 추가</Button>      
             <Modal show={show} onHide={handleClose}>
                 <Modal.Header closeButton>
                     <Modal.Title>클래스 추가하기</Modal.Title>

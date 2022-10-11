@@ -100,7 +100,7 @@ function MovieDetail(props) {
             </Card>
             
             <h1 className="text-center p-3">유사 내용 영화 추천</h1>      
-            <Table  responsive="sm">
+            <Table hover responsive="sm">
                 <thead>
                     <tr>
                     <th className="text-center">순번</th>
@@ -128,7 +128,7 @@ function MovieDetail(props) {
             </Table>
             
             <h1 className="text-center p-3">유사 장르, 감독, 배우별 영화 추천</h1>
-            <Table striped bordered hover size="sm">
+            <Table hover size="mm">
                 <thead>
                     <tr>
                     <th className="text-center">순번</th>

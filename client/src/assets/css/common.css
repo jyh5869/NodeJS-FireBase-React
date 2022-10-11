@@ -1,59 +1,58 @@
 /*
-
     style 소스의 type = text를 제어하는 css로
     
     a:link : 클릭하지 않은 링크
     a:visited : 한번 클릭했던 혹은 다녀갔던 링크
     a:hover : 링크를 클릭하려고 마우스를 가져갔을 때
-    
+    a:active : 링크부분에서 마우스를 누르고 있는 동안의 상태
     
     text-decoration ->  밑줄
     - none : 없는 상태
     - underline : 있는 상태
-
-    a:active : 링크부분에서 마우스를 누르고 있는 동안의 상태
-
 */
 
+header nav{ padding: 10px 7%;}
+header .navbar-brand { line-height: 2; white-space: normal;}
+header .form-control {width: fit-content;}
 a:link { color: black; text-decoration: none;}  
 a:visited { color: black; text-decoration: none;}
 a:hover { color: darkslategray;}
 
-nav{ padding: 10px 7%;}
+h1 { font-size: 30px;}
 
-table tr .td_div_50{ width: 50%; display: inline;}
-table tr .td_div_50 button{ margin: 0px 10px;}
-table tr td{ vertical-align: middle;}
+table tr .td_div_50 { width: 50%; display: inline;}
+table tr .td_div_50 button { margin: 0px 10px;}
+table tr td { vertical-align: middle;}
 
-.card img{ width: 100%; padding-bottom: 10px;}
-.card img.movie.detail{ width: 50%; padding-bottom: 10px;}
-.card-header { --bs-bg-opacity: 0.7;}
-.card-footer { --bs-bg-opacity: 0.3;}
-.card[class*='border']{display: inline-block; width: 46%;}
-.cardWrap{vertical-align: top;}
+.card img { width: 100%; padding-bottom: 10px;}
+.card img.movie.detail { width: 50%; padding-bottom: 10px;}
+.card .card-header { --bs-bg-opacity: 0.85; color: #fff;}
+.card .card-footer{ --bs-bg-opacity: 0.3;}
+.card[class*='border'] { display: inline-block; width: 46%;}
+.card.cardWrap { vertical-align: top;}
 
 .form1 { display: inherit; float: right; width: auto;}
 .form2 { margin: 2% 7%; width: -webkit-fill-available}
 
-.btn_type1{ width: -webkit-fill-available;}
+.btn_type1 { width: -webkit-fill-available;}
 
-.contents .title{ margin: 30px 0px; text-align: center; }
-.contents .content_1{ margin: 15px 0px; text-align: center;}
+.contents .title { margin: 30px 0px; text-align: center; }
+.contents .content_1 { margin: 15px 0px; text-align: center;}
 
-.axios-loading { left: 0; top: 0; width: 100%; height: 100%; z-index: 999; overflow: auto; display: block; position: fixed !important; background-color: rgba(0, 0, 0, 0.300);}
-.axios-loading-indicator { top: 45%; left: calc(50% - 75px); position: fixed;}
+.loading_wrap .axios-loading { left: 0; top: 0; width: 100%; height: 100%; z-index: 999; overflow: auto; display: block; position: fixed !important; background-color: rgba(0, 0, 0, 0.300);}
+.loading_wrap .axios-loading-indicator { top: 45%; left: calc(50% - 75px); position: fixed;}
+.loading_wrap .loding-text { left: 0; top: 54%; width: 100%; z-index: 9999; overflow: auto; position: fixed !important; text-align: center; color: blanchedalmond;}
 
-.loding-text { left: 0; top: 54%; width: 100%; z-index: 9999; overflow: auto; position: fixed !important; text-align: center; color: blanchedalmond;}
-
-.slideImg{ width: 100%; height: 250px; opacity: 0.9;}
+.slider_wrap .slideImg{ width: 100%; height: 250px}
 
 .success { display: '';}
-  
 .failure { display: none;}
 
 
 @media screen and (max-width: 991px) {
-    nav{padding:0;}
+    header nav { padding:0;}
+    header #basic-navbar-nav a{ padding: 10px 15px;}
+    header .navbar{padding-top: 0;}
 
     .container{ margin: 0px auto; max-width:none;} 
 
@@ -68,7 +67,7 @@ table tr td{ vertical-align: middle;}
 @media screen and (max-width: 450px) {
     .container{ margin: -5px auto;}
     
-    .card[class*='border']{width: 100%;}
+    .card[class*='border']{width: -webkit-fill-available;}
 
     .form2 {width: 100%;}
 }

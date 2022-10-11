@@ -27,13 +27,13 @@ function MovieList() {
     
     //JSX 식으로 리스트 파싱
     return (
-        <React.Fragment  >
+        <React.Fragment>
             <h1>영화 리스트</h1>        
             <div className="mx-0 my-3">
                 {list.map((list, index) => ( 
                     <a href={url + list.id} key={list.id} className="text-center" >    
                         <div className={"cardWrap card border-"+ color[Number(index%6)] +" col-md-5 m-2"} >
-                            <div className={"card-header bg-"+ color[Number(index%6)]}>{list.original_title} (개봉: {list.release_date})   {list.id} </div>
+                            <div className={"card-header bg-"+ color[Number(index%6)]}>{list.original_title}</div>
                             <div className={"card-body text-" + color[Number(index%6)]} >
                                 {/* 
                                     랜덤 이미지 링크 1, 2

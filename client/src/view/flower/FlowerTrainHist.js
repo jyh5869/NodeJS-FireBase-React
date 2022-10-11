@@ -4,15 +4,12 @@ import { Link, useParams } from 'react-router-dom';
 import { Card, CardGroup, Table, Form, Button } from 'react-bootstrap';
 import axios               from 'axios';
 
-import Data from '../../data';
-
 /**
  * 모델 훈련결과 리스트 페이지
  * @returns
 */
 function List() {
 
-    let [shoes, shoeState] = useState(Data);
     let [list, setList]    = useState([])
 
     const getFlowerGrwResult = async (callType) => {
@@ -63,12 +60,12 @@ function List() {
         if(toggletarget[0].classList.contains('failure')){
             toggletarget[0].classList.remove('failure');
             toggletarget[0].classList.add('success');
-            toggleBtn[0].textContent = 'Close'
+            toggleBtn[0].textContent = '요약'
         }
         else{
             toggletarget[0].classList.remove('success');
             toggletarget[0].classList.add('failure');
-            toggleBtn[0].textContent = 'More';
+            toggleBtn[0].textContent = '상세';
         }
         
         
@@ -82,8 +79,8 @@ function List() {
     return (
         <React.Fragment>
             <h1>분류 가능 클래스 </h1>
-            <div className="row mx-1 my-3">
-                <Table bordered hover className="text-center">
+            <div className="mx-1 my-3">
+                <Table responsive bordered hover className="text-center">
                     <thead>
                     <tr>
                         <th>순번</th>
@@ -128,8 +125,8 @@ function List() {
                     <td>{ props.list.reg_dt2}</td>
                     <td>
                         <div className='td_div_50'>
-                            <Button variant="success" className={'more_'+props.index} onClick={(e)=>{showDetail({ 'index' : props.index}, e)}} >More</Button>
-                            <Button variant="danger" onClick={(e)=>{deleteClass({ callType : 'delete', targetId : props.list.id}, e)}} >Delete</Button>
+                            <Button variant="success" className={'more_'+props.index} onClick={(e)=>{showDetail({ 'index' : props.index}, e)}} >상세</Button>
+                            <Button variant="danger" onClick={(e)=>{deleteClass({ callType : 'delete', targetId : props.list.id}, e)}} >삭제</Button>
                         </div>
                     </td>
                 </tr>
