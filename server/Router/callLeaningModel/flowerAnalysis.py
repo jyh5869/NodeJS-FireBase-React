@@ -31,10 +31,10 @@ db = firestore.client()
 
 
 # 데이터 조회 1 - (학습된 클레스 리스트 호출)
-class_list_ref    = db.collection("model_class_list")
-class_list_query  = class_list_ref.where('use_yn', '==', 'Y').where('train_dt', '!=', '')
-class_list_docs   = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
-class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
+class_list_ref   = db.collection("model_class_list")
+class_list_query = class_list_ref.where('use_yn', '==', 'Y').where('train_dt', '!=', '')
+class_list_docs  = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
+class_list_dict  = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
 
 
 
@@ -51,8 +51,8 @@ binary_np = np.array(binary_arry, dtype=np.uint8)
 # data cv2 np convert
 img_np = cv2.imdecode(binary_np, cv2.IMREAD_ANYCOLOR)
  
-# 좌측 끝상단에 검은색 네모를 칠한다.
-img_np[0:50, 0:50] = 0
+# 좌측 끝상단에 검은색 네모를 칠한다. 2.8.0
+# img_np[0:50, 0:50] = 0
  
 # convert bytes 후 다시 byte형태를 담은 list로 바꾸어준다.
 _, imen = cv2.imencode('.jpg', img_np)
@@ -86,7 +86,7 @@ img_url = [ anaImg ]
 for index, value in enumerate(img_url, start=0):
 
     img = tf.keras.preprocessing.image.load_img(
-      value, target_size=(IMG_SIZE, IMG_SIZE)
+        value, target_size=(IMG_SIZE, IMG_SIZE)
     )
     img_array = tf.keras.preprocessing.image.img_to_array(img)
     img_array = tf.expand_dims(img_array, 0) # Create a batch

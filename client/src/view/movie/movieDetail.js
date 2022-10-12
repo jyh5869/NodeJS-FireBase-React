@@ -6,6 +6,7 @@ import { Card, Button,Table  }        from 'react-bootstrap';
 import axios from 'axios';
 
 import Loader from '../common/loader';
+
 /**
  * 영화 상세보기 페이지
  * @returns
@@ -15,10 +16,11 @@ function MovieDetail(props) {
     let {id} = useParams();
     var color = [ "danger", "warning", "info", "primary", "secondary", "success" ];
 
-    const [list1  , setMovieReco1] = useState([]);
-    const [list2  , setMovieReco2] = useState([]);
-    const [obj    , setMovieInfo ] = useState([]);
-    const [lodeYn , setLoadYn    ] = useState();
+    const [list1   , setMovieReco1 ] = useState([]);
+    const [list2   , setMovieReco2 ] = useState([]);
+    const [obj     , setMovieInfo  ] = useState([]);
+    const [lodeYn  , setLoadYn     ] = useState(true);
+    const [lodeTxt , setLoadTxt    ] = useState("추천데이터를 로드 중입니다.");
 
     const getMovieInfo = async () => {
 
@@ -37,21 +39,33 @@ function MovieDetail(props) {
 
     //추천 상품 리스트 호출 머신러닝
     const getMovieRecommended = async () => {
-        setLoadYn("추천데이터를 로드 중입니다.")
+
         let response = await axios.get('/api/movieRecommended',{
             params: {
                 id: id
             }
         });
         
-        //배열을 특정 문자로 나눈 문자열로 반환 ( 문자 : ㄴ/ )
+        //배열을 특정 문자로 나눈 문자열로 반환 ( 문자 : / )
         for(var i = 0 ; i < response.data.recommArr1.length; i++){
             response.data.recommArr1[i].genres = arrToString(response.data.recommArr1[i].genres, " / ")
+
+            
         }
         for(var i = 0 ; i < response.data.recommArr2.length; i++){
             response.data.recommArr2[i].genres = arrToString(response.data.recommArr2[i].genres, " / ")
+            
         }
-        setLoadYn("추천 데이터가 존재하지 않습니다.")
+        
+        if(response.data.recommArr1.length == 0 || response.data.recommArr2.length == 0){
+            setLoadTxt("추천 데이터가 존재하지 않습니다.")
+            setLoadYn(false)
+        }
+        else{
+            setLoadTxt("")
+            setLoadYn(false)
+        }
+
         setMovieReco1(response.data.recommArr1)
         setMovieReco2(response.data.recommArr2)
     }
@@ -67,7 +81,7 @@ function MovieDetail(props) {
         <React.Fragment> 
             <h1>영화 상세정보</h1> 
             <Card className="text-center  mx-1 my-3" >
-                <Card.Header className="bg-info" as="h5">영화 상세정보</Card.Header>
+                <Card.Header className="bg-success" as="h5">영화 상세정보</Card.Header>
                 <Card.Body className="warning">
                     <Card.Title as="h3">
                         {obj.title} 
@@ -101,7 +115,7 @@ function MovieDetail(props) {
                 </Card.Body>
             </Card>
             
-            <h1 className="text-center p-3">유사 내용 영화 추천</h1>      
+            <h4 className="text-center pt-3 pb-1">유사 내용 영화 추천</h4>      
             <Table hover responsive="sm">
                 <thead>
                     <tr>
@@ -126,19 +140,14 @@ function MovieDetail(props) {
                     : 
                         <tr>
                             <td colSpan={4} className="text-center" >
-                                <Loader loading={true} color={'red'} type={"small"} size={30} text={lodeYn} />
+                                <Loader loading={lodeYn} color={'black'} type={"small"} borderWidth={"1px"} size={30}  text={lodeTxt} />
                             </td>
                         </tr>
                     }
-                    <tr>
-                            <td colSpan={4} className="text-center" >
-                                <Loader loading={true} color={'black'} type={"small"} borderWidth={"1px"} size={30}  text={lodeYn} />
-                            </td>
-                        </tr>
                 </tbody>
             </Table>
             
-            <h1 className="text-center p-3">유사 장르, 감독, 배우별 영화 추천</h1>
+            <h4 className="text-center pt-3 pb-1">유사 장르, 감독, 배우별 영화 추천</h4>
             <Table hover size="mm">
                 <thead>
                     <tr>
@@ -163,7 +172,7 @@ function MovieDetail(props) {
                     : 
                         <tr>
                             <td colSpan={4} className="text-center" >
-                                <Loader loading={true} color={'red'} type={"small"} size={30} text={lodeYn} />
+                                <Loader loading={lodeYn} color={'black'} type={"small"} borderWidth={"1px"} size={30}  text={lodeTxt} />
                             </td>
                         </tr>
                     }

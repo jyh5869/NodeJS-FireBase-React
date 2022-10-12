@@ -195,7 +195,7 @@ function FlowerAnalysis() {
                     <Form >
                         <Form.Group controlId="formFileMultiple" className="my-5" >
                             <div className="title">
-                                <Form.Label>종류를 알고 싶은 꽃 이미지를 업로드 해주세요.</Form.Label>
+                                <Form.Label><h4>종류를 알고싶은 꽃 이미지를 업로드해 주세요.</h4></Form.Label>
                             </div>
                             <div className="content_2">
                                 <span>
@@ -216,8 +216,8 @@ function FlowerAnalysis() {
                 </div>    
 
                 {/* 스피너 */}
-                <Loader loading={loading} color={color} onClick={setLoading}/>
-                
+                <Loader loading={loading} color={color} type={"normal"} text={"분석중"} size={150} onClick={setLoading}/>
+
                 {/* 분석된 대상 정보 표출 */}
                 <Table bordered className="form2">
                     <tbody>

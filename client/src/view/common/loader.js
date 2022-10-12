@@ -7,13 +7,13 @@ import ClipLoader from "react-spinners/ClipLoader";
 export default function Loader(props) {
 
     let size = props.size != null ? props.size : 150 ;
-
+    //alert(props.text)
     return (
         <div className={'loading_wrap'}>
-            <div className={'loding-text-' + props.type}  style={{display:props.loading===true?'block':'none'}}>{props.text}</div>
-            <div className={'axios-loading-' + props.type} style={{display:props.loading===true?'block':'none'}}>
-                <div className={'axios-loading-indicator-' + props.type}>
-                    <ClipLoader color={props.color} loading={props.loading} size={size} style={{borderWidth:props.borderWidth != null? props.borderWidth:"2px"}} />
+            <div className={'loding-text-'+ props.type}  style={{display:props.text != "" && props.loading === true ? 'block' : 'none'}}>{props.text}</div>
+            <div className={'axios-loading-'+ props.type} style={{display:props.loading === true ? 'block' : 'none'}}>
+                <div className={'axios-loading-indicator-'+ props.type}>
+                    <ClipLoader className={"loadingbar-"+ props.type} color={props.color} loading={props.loading} size={size} />
                 </div>
             </div>
         </div>

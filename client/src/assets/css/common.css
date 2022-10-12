@@ -41,11 +41,13 @@ table tr td { vertical-align: middle;}
 
 .loading_wrap .axios-loading-indicator-normal { top: 45%; left: calc(50% - 75px); position: fixed;}
 .loading_wrap .axios-loading-normal { left: 0; top: 0; width: 100%; height: 100%; z-index: 999; overflow: auto; display: block; position: fixed !important; background-color: rgba(0, 0, 0, 0.300);}
-.loading_wrap .loding-text-normal { left: 0; top: 54%; width: 100%; z-index: 9999; overflow: auto; position: fixed !important; text-align: center; color: blanchedalmond;}
-
+.loading_wrap .loding-text-normal { left: 0; top: 52%; width: 100%; z-index: 9999; overflow: auto; position: fixed !important; text-align: center; color: aliceblue;}
+.loading_wrap .loadingbar-normal { border-width:1px !important}
+.loading_wrap .loadingbar-small { border-width:2px !important}
+.loading_wrap .axios-loading-indicator-small { margin-top: 10px;}
 .loading_wrap .axios-loading-small { left: 0; top: 0; width: 100%; height: 100%; z-index: 999; overflow: auto; display: block; position : inherit;}
-.loading_wrap .axios-loading-indicator-small {}
-.loading_wrap .loding-text-small { left: 0; top: 54%; width: 100%; z-index: 9999; overflow: auto; position: inherit !important; text-align: center;}
+.loading_wrap .loding-text-small { left: 0; width: 100%; z-index: 9999; overflow: auto; position: inherit !important; text-align: center;}
+.loading_wrap .loadingbar-small { border-width:1px !important; top:5px !important}
 
 .slider_wrap .slideImg{ width: 100%; height: 250px}
 

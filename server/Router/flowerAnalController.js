@@ -52,18 +52,18 @@ else {
 }
 var db = firebase.firestore();
 
-
+/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos';
 const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
 const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
+*/
 
-/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
 const reulstImgPath = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/'
 const saveModelUrl  = 'D:/Development/DeveloperKits/Tensorflow/model/'
-*/
+
 
 
 /*  이미지 학습에제1  */
