@@ -5,6 +5,7 @@ import { Card, Button,Table  }        from 'react-bootstrap';
 
 import axios from 'axios';
 
+import Loader from '../common/loader';
 /**
  * 영화 상세보기 페이지
  * @returns
@@ -14,9 +15,10 @@ function MovieDetail(props) {
     let {id} = useParams();
     var color = [ "danger", "warning", "info", "primary", "secondary", "success" ];
 
-    const [list1, setMovieReco1] = useState([]);
-    const [list2, setMovieReco2] = useState([]);
-    const [obj  , setMovieInfo ] = useState([]);
+    const [list1  , setMovieReco1] = useState([]);
+    const [list2  , setMovieReco2] = useState([]);
+    const [obj    , setMovieInfo ] = useState([]);
+    const [lodeYn , setLoadYn    ] = useState();
 
     const getMovieInfo = async () => {
 
@@ -35,7 +37,7 @@ function MovieDetail(props) {
 
     //추천 상품 리스트 호출 머신러닝
     const getMovieRecommended = async () => {
-
+        setLoadYn("추천데이터를 로드 중입니다.")
         let response = await axios.get('/api/movieRecommended',{
             params: {
                 id: id
@@ -49,7 +51,7 @@ function MovieDetail(props) {
         for(var i = 0 ; i < response.data.recommArr2.length; i++){
             response.data.recommArr2[i].genres = arrToString(response.data.recommArr2[i].genres, " / ")
         }
-
+        setLoadYn("추천 데이터가 존재하지 않습니다.")
         setMovieReco1(response.data.recommArr1)
         setMovieReco2(response.data.recommArr2)
     }
@@ -122,8 +124,17 @@ function MovieDetail(props) {
                             </tr>                   
                         ))
                     : 
-                        <tr><td colSpan={4} className="text-center" >추천 데이터가 존재하지 않습니다.</td></tr>
+                        <tr>
+                            <td colSpan={4} className="text-center" >
+                                <Loader loading={true} color={'red'} type={"small"} size={30} text={lodeYn} />
+                            </td>
+                        </tr>
                     }
+                    <tr>
+                            <td colSpan={4} className="text-center" >
+                                <Loader loading={true} color={'black'} type={"small"} borderWidth={"1px"} size={30}  text={lodeYn} />
+                            </td>
+                        </tr>
                 </tbody>
             </Table>
             
@@ -150,7 +161,11 @@ function MovieDetail(props) {
                             </tr>                   
                         ))
                     : 
-                        <tr><td colSpan={4} className="text-center" >추천데이터가 존재하지 않습니다.</td></tr>
+                        <tr>
+                            <td colSpan={4} className="text-center" >
+                                <Loader loading={true} color={'red'} type={"small"} size={30} text={lodeYn} />
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </Table>              
