@@ -57,16 +57,23 @@ var db = firebase.firestore();
 
 
 /*  영화 데이터 리스트 호출 컨트롤러  */
-router.get("/", (req, res) => {
+router.get("/", async  (req, res) => {
+
+    var docId = req.query.doc_id
+    console.log(docId)
+    console.log("★★★★★★")
+    const docRef = db.collection('movies').doc('00EqnpbmjNbjWa38DVzh');
+    const snapshot = await docRef.get();
     
-    db.collection('movies').orderBy("id",'asc').limit(10).get()
+    db.collection('movies').orderBy("id",'asc').startAt(snapshot).limit(10).get()
     .then((snapshot) => {
         var rows = [];
 
         snapshot.forEach((doc) => {
             var childData = doc.data();
+            
             childData.release_date = dateFormat(childData.release_date,"yyyy-mm-dd");
-
+            childData.doc_id = doc.id 
             rows.push(childData);
              
         });
@@ -83,7 +90,7 @@ router.get("/", (req, res) => {
 router.get("/movieDetail", (req, res) => {
 
     var id = req.query.id
-
+    
     db.collection('movies').where('id', '==', id).get()
     .then((doc) => {
         doc.forEach(element => {

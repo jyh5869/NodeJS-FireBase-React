@@ -8,19 +8,29 @@ import axios from 'axios';
 */
 function MovieList() {
 
-    const [list, setList] = useState([]);
+    const [list     , setList]     = useState([]);
+    const [targetId , setTargetId] = useState();
     var color = [ "danger", "warning", "info", "primary", "secondary", "success" ];
 
     //리스트 가져오기
-    const getHeroes = async () => {
+    const getMovieList = async (doc_id) => {
 
-        let response = await axios.get('/api');
-
+        let response = await axios({
+            method  : 'get',
+            url     : '/api/',
+            params  : {
+                'doc_id' : doc_id
+            },
+            headers : {
+                'Content-Type' : 'multipart/form-data'
+            },
+        })
+        console.log(response.data)
         setList(response.data.rows);
     }
 
     useEffect(() => {
-        getHeroes();
+        getMovieList();
     },  []);
 
     const url = '/view/movieDetail/'
@@ -45,6 +55,7 @@ function MovieList() {
                         </div>
                     </a>    
                 ))}
+                <button onclick={getMovieList(targetId)}>next</button>
             </div>                
         </React.Fragment>
     )

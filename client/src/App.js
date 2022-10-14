@@ -22,7 +22,7 @@ function App() {
         <div>
             <header>
                 <Navbar bg="light" expand="lg" >
-                    <Navbar.Brand href="#home">{' '}
+                    <Navbar.Brand href="/view/flower/flowerAnalysis">{' '}
                         <img alt=""src={logo} width="40" height="40" className="d-inline-block align-top mt-n1"/>Deep Learning World</Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
