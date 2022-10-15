@@ -53,36 +53,44 @@ else {
 var db = firebase.firestore();
 
 
-
+function snapshotCall(doc_id){
+    return new Promise(function (resolve, reject) {
+        let snapshot = db.collection('movies').doc(doc_id).get();
+        resolve(snapshot).catch(null)
+    });
+}
 
 
 /*  영화 데이터 리스트 호출 컨트롤러  */
-router.get("/", async  (req, res) => {
+let nextTarget = "00EqnpbmjNbjWa38DVzh";
+let prevTarget = "00EqnpbmjNbjWa38DVzh";
+router.get("/", (req, res) => {
 
-    var docId = req.query.doc_id
-    console.log(docId)
+    var doc_id = req.query.doc_id
+    console.log(doc_id)
     console.log("★★★★★★")
-    const docRef = db.collection('movies').doc('00EqnpbmjNbjWa38DVzh');
-    const snapshot = await docRef.get();
     
-    db.collection('movies').orderBy("id",'asc').startAt(snapshot).limit(10).get()
-    .then((snapshot) => {
+    snapshotCall(doc_id).then(function(snapshot){
         var rows = [];
-
-        snapshot.forEach((doc) => {
-            var childData = doc.data();
+        db.collection('movies').orderBy("id",'asc').startAt(snapshot).limit(10).get()
+            .then((snapshot) => {
             
-            childData.release_date = dateFormat(childData.release_date,"yyyy-mm-dd");
-            childData.doc_id = doc.id 
-            rows.push(childData);
-             
-        });
-
-        res.send( {rows: rows}); 
-    })
-    .catch((err) => {
-        console.log('Error getting documents', err);
+                snapshot.forEach((doc) => {
+                    var childData = doc.data();
+                    
+                    childData.release_date = dateFormat(childData.release_date,"yyyy-mm-dd");
+                    childData.doc_id = doc.id 
+                    rows.push(childData);
+                    
+                });
+                console.log("＠＠＠＠＠＠＠＠＠")
+                res.send( {rows: rows}); 
+            })
+            .catch((err) => {
+                console.log('Error getting documents', err);
+            });
     });
+    
 });
 
 

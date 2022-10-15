@@ -13,13 +13,14 @@ function MovieList() {
     var color = [ "danger", "warning", "info", "primary", "secondary", "success" ];
 
     //리스트 가져오기
-    const getMovieList = async (doc_id) => {
-
+    const getMovieList = async (useParams, e) => {
+        let callType = useParams.callType == undefined ? '' : useParams.callType 
         let response = await axios({
             method  : 'get',
-            url     : '/api/',
+            url     : '/api',
             params  : {
-                'doc_id' : doc_id
+                'doc_id' : "00EqnpbmjNbjWa38DVzh" ,
+                'type'   : callType
             },
             headers : {
                 'Content-Type' : 'multipart/form-data'
@@ -30,7 +31,7 @@ function MovieList() {
     }
 
     useEffect(() => {
-        getMovieList();
+        getMovieList({});
     },  []);
 
     const url = '/view/movieDetail/'
@@ -55,7 +56,8 @@ function MovieList() {
                         </div>
                     </a>    
                 ))}
-                <button onclick={getMovieList(targetId)}>next</button>
+                <button onClick={(e)=>{getMovieList({ callType : 'prev'}, e)}} > ◁ prev </button>
+                <button onClick={(e)=>{getMovieList({ callType : 'next'}, e)}} > next ▷ </button>
             </div>                
         </React.Fragment>
     )
