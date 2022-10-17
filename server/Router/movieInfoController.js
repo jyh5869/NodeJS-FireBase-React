@@ -98,7 +98,7 @@ router.get("/", (req, res) => {
                 movieRef = db.collection('movies').orderBy("id",'asc').startAt(snapshot)
             }
 
-            movieRef.limit(10).get()
+            movieRef.limit(10).get() 
                 .then((snapshot) => {
                     snapshot.forEach((doc) => {
                         
