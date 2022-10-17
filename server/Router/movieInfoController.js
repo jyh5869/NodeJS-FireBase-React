@@ -76,25 +76,18 @@ router.get("/", (req, res) => {
 
     var doc_id = req.query.doc_id
     var type   = req.query.type
-    console.log(doc_id)
-    console.log(type)
-    console.log("★★★★★★")
-    
     var rows = [];
     var movieRef;
+    
     snapshotCall(doc_id)
         .then(function(snapshot){
-            console.log("모야")
             if(type == ""){
-                console.log("하위하위111")
                 movieRef = db.collection('movies').orderBy("id",'asc')
             }
             else if(type == "next"){
-                console.log("하위하위22")
                 movieRef = db.collection('movies').orderBy("id",'asc').startAfter(snapshot)
             }
             else if(type == "prev"){
-                console.log("하위하위333")
                 movieRef = db.collection('movies').orderBy("id",'asc').startAt(snapshot)
             }
 
