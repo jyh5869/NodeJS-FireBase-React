@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from "react";
+import Pagination from 'react-bootstrap/Pagination';
 import axios from 'axios';
 
 /**
@@ -111,8 +112,12 @@ function MovieList() {
                         </div>
                     </a>    
                 ))}
-                <button onClick={(e)=>{getMovieList({ type : 'prev'}, e)}} > ◁ prev </button>
-                <button onClick={(e)=>{getMovieList({ type : 'next'}, e)}} > next ▷ </button>
+                <div className="pagination_wrap">
+                    <Pagination >
+                        <Pagination.Prev onClick={(e)=>{getMovieList({ type : 'prev'}, e)}} />
+                        <Pagination.Next onClick={(e)=>{getMovieList({ type : 'next'}, e)}} />
+                    </Pagination>
+                </div>
             </div>                
         </React.Fragment>
     )
