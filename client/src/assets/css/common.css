@@ -28,7 +28,7 @@ table tr td { vertical-align: middle;}
 .card img.movie.detail { width: 50%; padding-bottom: 10px;}
 .card .card-header { --bs-bg-opacity: 0.85; color: #fff;}
 .card .card-footer{ --bs-bg-opacity: 0.3;}
-.card[class*='border'] { display: inline-block; width: 46%;}
+.card[class*='border'] { display: inline-block; width: 48.55%;}
 .card.cardWrap { vertical-align: top;}
 
 .form1 { display: inherit; float: right; width: auto;}
@@ -51,17 +51,22 @@ table tr td { vertical-align: middle;}
 
 .slider_wrap .slideImg{ width: 100%; height: 250px}
 
-.pagination_wrap  {justify-content : center;}
-.pagination{width : fit-content; margin: 0 auto; }
-.pagination li {outline: none;}
+.pagination_wrap  {justify-content : center; margin: 25px 0px; }
+.pagination_wrap .pagination  {width : fit-content; margin: 0 auto; }
+.pagination_wrap .pagination li {outline: none;}
+
 .success { display: '';}
 .failure { display: none;}
 
-
+@media screen and (max-width: 1200px) {
+    .card[class*='border'] { width: 48%;}
+}
 @media screen and (max-width: 991px) {
     header nav { padding:0;}
     header #basic-navbar-nav a{ padding: 10px 15px;}
     header .navbar{padding-top: 0;}
+
+    .card[class*='border'] { width: 47%;}
 
     .container{ margin: 0px auto; max-width:none;} 
 
@@ -70,6 +75,8 @@ table tr td { vertical-align: middle;}
 }
 @media screen and (max-width: 600px) {
     .container{ margin: 0px auto;}
+
+    .card[class*='border']{width: -webkit-fill-available;}
     
     .form2 {width: 95%;}
 }

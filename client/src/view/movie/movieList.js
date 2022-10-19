@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from "react";
-import Pagination from 'react-bootstrap/Pagination';
+import ToggleButton from 'react-bootstrap/ToggleButton';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import axios from 'axios';
 
 /**
@@ -18,6 +19,11 @@ function MovieList() {
     let   [next     , setNext]     = useState("");
     let   [prev     , setPrev]     = useState("");
     
+    const radios = [
+        { name: 'Active', value: '1' },
+        { name: 'Radio', value: '3' },
+      ];
+
     var color = [ "danger", "warning", "info", "primary", "secondary", "success" ];
     
     //리스트 가져오기
@@ -113,10 +119,10 @@ function MovieList() {
                     </a>    
                 ))}
                 <div className="pagination_wrap">
-                    <Pagination >
-                        <Pagination.Prev onClick={(e)=>{getMovieList({ type : 'prev'}, e)}} />
-                        <Pagination.Next onClick={(e)=>{getMovieList({ type : 'next'}, e)}} />
-                    </Pagination>
+                    <ButtonGroup className="pagination">
+                        <ToggleButton onClick={(e)=>{getMovieList({ type : 'prev'}, e)}} type="radio"variant={'outline-success'} name="radio"> &larr; 이전 </ToggleButton>
+                        <ToggleButton onClick={(e)=>{getMovieList({ type : 'next'}, e)}} type="radio"variant={'outline-primary'} name="radio"> 다음 &rarr; </ToggleButton>
+                    </ButtonGroup>
                 </div>
             </div>                
         </React.Fragment>
