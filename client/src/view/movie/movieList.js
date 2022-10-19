@@ -68,7 +68,7 @@ function MovieList() {
         }
 
         //다음페이지 눌렸을때 게시물 수가 countPerPage 이하힐때 마지막페이지로 간주
-        if(type == "next" && data.length < 10){ 
+        if(type == "next" && data.length < 10){  
             nextDoc = data[0].doc_id
             prevDoc = type == "" ? docList[0] : docList[docList.length - (prevTarget + 2)]
         }
