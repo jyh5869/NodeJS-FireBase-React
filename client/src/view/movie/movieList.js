@@ -56,6 +56,15 @@ function MovieList() {
         setDocList(pagingArr[2])
         setPrevTarget(pagingArr[3])
         setList(data);
+
+        return (
+            <div className="pagination_wrap">      
+                <ButtonGroup className="pagination">
+                    <ToggleButton onClick={(e)=>{getMovieList({ type : 'prev', docId : prev, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-success'} name="radio"> &larr; 이전 </ToggleButton>
+                    <ToggleButton onClick={(e)=>{getMovieList({ type : 'next', docId : next, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-primary'} name="radio"> 다음 &rarr; </ToggleButton>
+                </ButtonGroup>  
+            </div>
+        )
     }
 
     useEffect(() => {
@@ -83,12 +92,14 @@ function MovieList() {
                         </div>
                     </a>    
                 ))}
-                <div className="pagination_wrap">      
-                    <ButtonGroup className="pagination">
-                        <ToggleButton onClick={(e)=>{getMovieList({ type : 'prev', docId : prev, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-success'} name="radio"> &larr; 이전 </ToggleButton>
-                        <ToggleButton onClick={(e)=>{getMovieList({ type : 'next', docId : next, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-primary'} name="radio"> 다음 &rarr; </ToggleButton>
-                    </ButtonGroup>  
-                </div>
+                {list.length != 0 ? 
+                    <div className="pagination_wrap">      
+                        <ButtonGroup className="pagination">
+                            <ToggleButton onClick={(e)=>{this.getMovieList({ type : 'prev', docId : prev, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-success'} name="radio"> &larr; 이전 </ToggleButton>
+                            <ToggleButton onClick={(e)=>{this.getMovieList({ type : 'next', docId : next, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-primary'} name="radio"> 다음 &rarr; </ToggleButton>
+                        </ButtonGroup>  
+                    </div>
+                : "" }
             </div>                
         </React.Fragment>
     )
