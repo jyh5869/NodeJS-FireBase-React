@@ -58,39 +58,63 @@ var db = firebase.firestore();
  *   @param collectionNm 컬렉션 명
  */
  function getSnapshot(docId, collectionNm, type, countPerPage){
-    
+    /*
+    if(docId != ""){
+        return new Promise(function (resolve, reject) {
+            let snapshot = db.collection(collectionNm).doc(docId).get();
+            resolve(snapshot).catch(null)
+        });
+    }
+    else{
+        return new Promise(function (resolve, reject) {
+            let snapshot = db.collection(collectionNm).orderBy("id",'asc').limit(1).get();
+            resolve(snapshot).catch(null)
+        });
+    }
+    */
     
     return new Promise(function (resolve, reject) {
-
-        const docRef   = null;
-        const snapShot = null;
+        
+        let docRef  ;
+        let snapShot ;
         console.log(docId);
         console.log(collectionNm);
         console.log(type);
         console.log(countPerPage);
 
         if(docId != undefined){
-            console.log("11111111111111");
+            console.log("11111111111111%%%%%%%%%%%%%%%%5");
             snapshot = db.collection(collectionNm).doc(docId).get();
-            resolve(snapShot).catch(null);
-        }
-        else{
-            console.log("222222222222");
-            snapshot = db.collection(collectionNm).orderBy("id", 'asc').limit(1).get();
-            console.log(snapshot);
-            resolve(snapShot).catch(null);
             
         }
+        else{
+            console.log("222222222222 type = " + type + "     countPerPage = " + countPerPage );
+            db.collection(collectionNm).orderBy("id", 'desc').limit(1).get()
+                .then(function(snapshot){
 
-        // if(type == ""){
-        //     docRef = db.collection(collectionNm).orderBy("id", 'asc').limit(countPerPage).get()
-        // }
-        // else if(type == "next"){
-        //     docRef = db.collection(collectionNm).orderBy("id", 'asc').startAfter(snapshot).limit(countPerPage).get()
-        // }
-        // else if(type == "prev"){
-        //     docRef = db.collection(collectionNm).orderBy("id", 'asc').startAt(snapshot).limit(countPerPage).get()
-        // }
+                    if(type == undefined){
+                        docRef = db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage)).get()
+                        console.log("1111111");
+                        resolve(docRef);
+                    }
+                    else if(type == "next"){
+                        docRef = db.collection(collectionNm).orderBy("id", 'desc').startAfter(snapshot).limit(Number(countPerPage)).get()
+                        console.log("2222222");
+                        resolve(docRef);
+                    }
+                    else if(type == "prev"){
+                        docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage)).get()
+                        console.log("33333");
+                        resolve(docRef);
+                        
+                    }
+
+                    
+            });
+            
+        }
+        
+        
 
        
     });
@@ -98,11 +122,21 @@ var db = firebase.firestore();
 }
 
 module.exports = {
-    getTargetSnaphot: function (docId, collectionNm, type, countPerPage) {
-        console.log("함수는 진입해땅")
-        let snapshot = getSnapshot(docId, collectionNm, type, countPerPage);
-        console.log(snapshot)
+    getTargetSnaphot: async function (docId, collectionNm, type, countPerPage) {
+        console.log("1.함수 진입")
+        const snapshot = await getSnapshot(docId, collectionNm, type, countPerPage)
+
+        snapshot.forEach((doc) => {
+            var childData = doc.data();
+            const regDate    = new Date(Number(childData.id));
+            console.log(childData);
+
+        });
+
+
+        console.log("3.리턴");
         return snapshot;
+        
     },
     getFunction: function () {
 
