@@ -15,7 +15,7 @@ const tf  = require("@tensorflow/tfjs");//느리다... @tensorflow/tfjs_node로 
 //파이썬 사용을 위한 라이브러리
 const PythonShell = require("python-shell");
 
-const commonController = require("./common.js");
+const commonUtil = require("./common.js");
 
 //파일 업로드를 위한 multer, stream 세팅 
 const multer = require("multer")
@@ -396,16 +396,17 @@ router.get("/flwNewClass", async (req, res) => {
 /* 모델 훈련결과 리스트 호출 및 변경 컨트롤러 */
 router.get("/getTrainingHist", async (req, res) => {
     
-    let callType = req.query.callType;
-    var doc_id = req.query.doc_id
+    let callType     = req.query.callType;
+    let type         = req.query.type
+    let docId        = req.query.doc_id
+    let collectionNm = "model_class_list"
 
-    commonController.foo(doc_id, "model_class_list")
+    commonUtil.getTargetSnaphot(docId, collectionNm, type, 10)
         .then(function(snapshot){
             console.log(snapshot)
         });        
     
     if(callType == 'select'){
-
         await db.collection('model_trn_hist').orderBy('id', "desc").get()
         .then((snapshot) => {
             var rows = [];

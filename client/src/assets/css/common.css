@@ -61,6 +61,7 @@ table tr td { vertical-align: middle;}
 @media screen and (max-width: 1200px) {
     .card[class*='border'] { width: 48%;}
 }
+
 @media screen and (max-width: 991px) {
     header nav { padding:0;}
     header #basic-navbar-nav a{ padding: 10px 15px;}
@@ -73,6 +74,7 @@ table tr td { vertical-align: middle;}
     .form1 { display: grid; float: none; padding-left: inherit; width: 100%;}
     .form2 { margin: 0 auto; width: 85%;}
 }
+
 @media screen and (max-width: 600px) {
     .container{ margin: 0px auto;}
 
@@ -80,6 +82,7 @@ table tr td { vertical-align: middle;}
     
     .form2 {width: 95%;}
 }
+
 @media screen and (max-width: 450px) {
     .container{ margin: -5px auto;}
     

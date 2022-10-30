@@ -15,8 +15,6 @@ const tf  = require("@tensorflow/tfjs");//느리다... @tensorflow/tfjs_node로 
 //파이썬 사용을 위한 라이브러리
 const PythonShell = require("python-shell");
 
-const commonController = require("./common.js");
-
 //파일 업로드를 위한 multer, stream 세팅 
 const multer = require("multer")
 const storage = multer.diskStorage({
@@ -55,34 +53,58 @@ else {
 var db = firebase.firestore();
 
 /** 
- *   배열과 파일명을 파라메터로 받아 엘셀파일로 추출하는 함수
- *   @param rows    데이터 배열 
- *   @param fileNum 파일명 체번
+ *   @author 파이어베이스 문서 ID와 컬렉션명을 받아 스넵샷으로 리턴 (해당스냅샷 기준으로 페이징 처리)
+ *   @param docId 문서ID
+ *   @param collectionNm 컬렉션 명
  */
- function snapshotCall(doc_id, collectionNm){
+ function getSnapshot(docId, collectionNm, type, countPerPage){
     
-    if(doc_id != ""){
-        return new Promise(function (resolve, reject) {
-            let snapshot = db.collection(collectionNm).doc(doc_id).get();
-            resolve(snapshot).catch(null)
-        });
-    }
-    else{
-        return new Promise(function (resolve, reject) {
-            let snapshot = db.collection(collectionNm).orderBy("id",'asc').limit(1).get();
-            resolve(snapshot).catch(null)
-        });
-    }
+    
+    return new Promise(function (resolve, reject) {
+
+        const docRef   = null;
+        const snapShot = null;
+        console.log(docId);
+        console.log(collectionNm);
+        console.log(type);
+        console.log(countPerPage);
+
+        if(docId != undefined){
+            console.log("11111111111111");
+            snapshot = db.collection(collectionNm).doc(docId).get();
+            resolve(snapShot).catch(null);
+        }
+        else{
+            console.log("222222222222");
+            snapshot = db.collection(collectionNm).orderBy("id", 'asc').limit(1).get();
+            console.log(snapshot);
+            resolve(snapShot).catch(null);
+            
+        }
+
+        // if(type == ""){
+        //     docRef = db.collection(collectionNm).orderBy("id", 'asc').limit(countPerPage).get()
+        // }
+        // else if(type == "next"){
+        //     docRef = db.collection(collectionNm).orderBy("id", 'asc').startAfter(snapshot).limit(countPerPage).get()
+        // }
+        // else if(type == "prev"){
+        //     docRef = db.collection(collectionNm).orderBy("id", 'asc').startAt(snapshot).limit(countPerPage).get()
+        // }
+
+       
+    });
+
 }
 
 module.exports = {
-    foo: function (docid, collectionNm) {
-
-        let snapshot = snapshotCall(docid, collectionNm);
-        
+    getTargetSnaphot: function (docId, collectionNm, type, countPerPage) {
+        console.log("함수는 진입해땅")
+        let snapshot = getSnapshot(docId, collectionNm, type, countPerPage);
+        console.log(snapshot)
         return snapshot;
     },
-    bar: function () {
-      // whatever
+    getFunction: function () {
+
     }
 };
