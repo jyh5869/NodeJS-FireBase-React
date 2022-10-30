@@ -58,20 +58,6 @@ var db = firebase.firestore();
  *   @param collectionNm 컬렉션 명
  */
  function getSnapshot(docId, collectionNm, type, countPerPage){
-    /*
-    if(docId != ""){
-        return new Promise(function (resolve, reject) {
-            let snapshot = db.collection(collectionNm).doc(docId).get();
-            resolve(snapshot).catch(null)
-        });
-    }
-    else{
-        return new Promise(function (resolve, reject) {
-            let snapshot = db.collection(collectionNm).orderBy("id",'asc').limit(1).get();
-            resolve(snapshot).catch(null)
-        });
-    }
-    */
     
     return new Promise(function (resolve, reject) {
         
@@ -89,34 +75,20 @@ var db = firebase.firestore();
         }
         else{
             console.log("222222222222 type = " + type + "     countPerPage = " + countPerPage );
-            db.collection(collectionNm).orderBy("id", 'desc').limit(1).get()
-                .then(function(snapshot){
+            var snapshot = db.collection(collectionNm).orderBy("id", 'desc').limit(1).get()
 
-                    if(type == undefined){
-                        docRef = db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage)).get()
-                        console.log("1111111");
-                        resolve(docRef);
-                    }
-                    else if(type == "next"){
-                        docRef = db.collection(collectionNm).orderBy("id", 'desc').startAfter(snapshot).limit(Number(countPerPage)).get()
-                        console.log("2222222");
-                        resolve(docRef);
-                    }
-                    else if(type == "prev"){
-                        docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage)).get()
-                        console.log("33333");
-                        resolve(docRef);
-                        
-                    }
-
+                if(type == undefined){
+                    docRef = db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage)).get()         
+                }
+                else if(type == "next"){
+                    docRef = db.collection(collectionNm).orderBy("id", 'desc').startAfter(snapshot).limit(Number(countPerPage)).get()
+                }
+                else if(type == "prev"){
+                    docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage)).get()
                     
-            });
-            
-        }
-        
-        
-
-       
+                }    
+                resolve(docRef);
+        }    
     });
 
 }
@@ -126,12 +98,12 @@ module.exports = {
         console.log("1.함수 진입")
         const snapshot = await getSnapshot(docId, collectionNm, type, countPerPage)
 
-        snapshot.forEach((doc) => {
-            var childData = doc.data();
-            const regDate    = new Date(Number(childData.id));
-            console.log(childData);
+        // snapshot.forEach((doc) => {
+        //     var childData = doc.data();
+        //     const regDate    = new Date(Number(childData.id));
+        //     console.log(childData);
 
-        });
+        // });
 
 
         console.log("3.리턴");

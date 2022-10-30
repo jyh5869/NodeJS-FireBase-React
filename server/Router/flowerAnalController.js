@@ -402,7 +402,7 @@ router.get("/getTrainingHist", async (req, res) => {
     let collectionNm = "model_trn_hist"  
     
     if(callType == 'select'){
-        await commonUtil.getTargetSnaphot(docId, collectionNm, type, 10)
+        await commonUtil.getTargetSnaphot(docId, collectionNm, type, 3)
         .then((snapshot) => {
             var rows = [];
             snapshot.forEach((doc) => {
