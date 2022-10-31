@@ -4,27 +4,52 @@ import { Link, useParams } from 'react-router-dom';
 import { Card, CardGroup, Table, Form, Button } from 'react-bootstrap';
 import axios               from 'axios';
 
+import ToggleButton from 'react-bootstrap/ToggleButton';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+
+import Pagination from '../common/pagination';
+
 /**
  * 모델 훈련결과 리스트 페이지
  * @returns
 */
 function List() {
 
-    let [list, setList]    = useState([])
+    const [list, setList] = useState([]);
+    const [docList   , setDocList   ] = useState();
+    let [prevTarget, setPrevTarget] = useState("");
+    let [next      , setNext      ] = useState("");
+    let [prev      , setPrev      ] = useState("");
 
-    const getFlowerGrwResult = async (callType) => {
+    const getFlowerGrwResult = async (useParams, e) => {
 
+        let type       = useParams.type       == undefined ? '' : useParams.type 
+        let docList    = useParams.docList    == undefined ? [] : useParams.docList
+        let prevTarget = useParams.prevTarget == undefined ? 0  : useParams.prevTarget;
+        let docId      = useParams.docId;
+        alert(docId);
         let response = await axios({
             method: 'get',
             url: '/api/getTrainingHist',
-            params: {'callType' : callType},
+            params: {
+                'callType' : 'select',
+                'doc_id'   : docId ,
+                'type'     : type
+            },
             headers: {
               'Content-Type': 'multipart/form-data',
             },
         })
-        var datas =  response.data.rows
-        
-        setList(datas)
+
+        var data =  response.data.rows
+
+        var pagingArr = Pagination(data, type, docList, prevTarget);
+        console.log(pagingArr);
+        setPrev(pagingArr[0])
+        setNext(pagingArr[1])
+        setDocList(pagingArr[2])
+        setPrevTarget(pagingArr[3])
+        setList(data);
     }
 
 
@@ -66,9 +91,7 @@ function List() {
             toggletarget[0].classList.remove('success');
             toggletarget[0].classList.add('failure');
             toggleBtn[0].textContent = '상세';
-        }
-        
-        
+        }        
     }
 
     useEffect(() => {
@@ -99,9 +122,18 @@ function List() {
                         })}
                     </tbody>
                 </Table>
+                {list.length != 0 ? 
+                    <div className="pagination_wrap">      
+                        <ButtonGroup className="pagination">
+                            <ToggleButton onClick={(e)=>{getFlowerGrwResult({ type : 'prev', docId : prev, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-success'} name="radio"> &larr; 이전 </ToggleButton>
+                            <ToggleButton onClick={(e)=>{getFlowerGrwResult({ type : 'next', docId : next, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-primary'} name="radio"> 다음 &rarr; </ToggleButton>
+                        </ButtonGroup>  
+                    </div>
+                : "" }
             </div>
         </React.Fragment>
     )
+
     function ClassList(props){
         let style = {padding : '5px'}
         return (

@@ -12,6 +12,8 @@ export default function Pagination (data, type, docList, prevTarget ) {
     let prevDoc;
     let nextDoc;
     
+    ;
+
     //이전 페이지를 호출 할 경우
     if(type == "prev"){
         prevTarget++//이전페이지 카운트 증가
@@ -42,7 +44,13 @@ export default function Pagination (data, type, docList, prevTarget ) {
         nextDoc = data[Number(data.length-1)].doc_id
         prevDoc = type == "" ? docList[0] : docList[docList.length - (prevTarget + 2)]
     }
-    
+
+    console.log(data);
+    console.log(type);
+    console.log(docList);
+    console.log(prevTarget)
+    console.log(nextDoc)
+    console.log(prevDoc)
     let pagingArr = [prevDoc, nextDoc, docList, prevTarget]
 
     return pagingArr;

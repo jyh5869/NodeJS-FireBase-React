@@ -72,12 +72,23 @@ var db = firebase.firestore();
             console.log("11111111111111%%%%%%%%%%%%%%%%5");
             snapshot = db.collection(collectionNm).doc(docId).get();
             
+            if(type == undefined){
+                docRef = db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage)).get()         
+            }
+            else if(type == "next"){
+                docRef = db.collection(collectionNm).orderBy("id", 'desc').startAfter(snapshot).limit(Number(countPerPage)).get()
+            }
+            else if(type == "prev"){
+                docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage)).get()
+                
+            }    
+            resolve(docRef);
         }
         else{
             console.log("222222222222 type = " + type + "     countPerPage = " + countPerPage );
             var snapshot = db.collection(collectionNm).orderBy("id", 'desc').limit(1).get()
 
-                if(type == undefined){
+                if(type == undefined || type == ""){
                     docRef = db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage)).get()         
                 }
                 else if(type == "next"){
@@ -96,15 +107,7 @@ var db = firebase.firestore();
 module.exports = {
     getTargetSnaphot: async function (docId, collectionNm, type, countPerPage) {
         console.log("1.함수 진입")
-        const snapshot = await getSnapshot(docId, collectionNm, type, countPerPage)
-
-        // snapshot.forEach((doc) => {
-        //     var childData = doc.data();
-        //     const regDate    = new Date(Number(childData.id));
-        //     console.log(childData);
-
-        // });
-
+        const snapshot = await getSnapshot(docId, collectionNm, type, countPerPage);
 
         console.log("3.리턴");
         return snapshot;

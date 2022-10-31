@@ -398,11 +398,11 @@ router.get("/getTrainingHist", async (req, res) => {
     
     let callType     = req.query.callType;
     let type         = req.query.type
-    let docId        = req.query.doc_id
+    let docId        = req.query.docId
     let collectionNm = "model_trn_hist"  
     
     if(callType == 'select'){
-        await commonUtil.getTargetSnaphot(docId, collectionNm, type, 3)
+        await commonUtil.getTargetSnaphot(docId, collectionNm, type, 10)
         .then((snapshot) => {
             var rows = [];
             snapshot.forEach((doc) => {
