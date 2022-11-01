@@ -67,7 +67,6 @@ function snapshotCall(doc_id){
             resolve(snapshot).catch(null)
         });
     }
-    
 }
 
 
@@ -91,7 +90,7 @@ router.get("/", (req, res) => {
                 movieRef = db.collection('movies').orderBy("id",'asc').startAt(snapshot)
             }
 
-            movieRef.limit(10).get() 
+            movieRef.limit(11).get() 
                 .then((snapshot) => {
                     snapshot.forEach((doc) => {
                         

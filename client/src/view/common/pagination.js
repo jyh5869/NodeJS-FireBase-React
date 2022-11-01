@@ -1,21 +1,22 @@
-
 /**
  * @author 공통 페이징 처리 함수
- * @returns 받은 파라메터를 그대로 [prevDoc, nextDoc, docList, prevTarget]
+ * @returns 받은 파라메터를 그대로 [prevDoc, nextDoc, docList, prevTarget, data]
  * @param data
  * @param type
  * @param docList
  * @param prevTarget 
 */
-export default function Pagination (data, type, docList, prevTarget ) {
+export default function Pagination (data, type, docList, prevTarget) {
 
-    let prevDoc;
-    let nextDoc;
-    
-    ;
+    var type       = type       == undefined ? '' : type
+    var docList    = docList    == undefined ? [] : docList
+    var prevTarget = prevTarget == undefined ? 0  : prevTarget;
+    var prevDoc;
+    var nextDoc;
 
     //이전 페이지를 호출 할 경우
     if(type == "prev"){
+
         prevTarget++//이전페이지 카운트 증가
 
         //첫페이지에서 이전 페이지 호출(이전페이지 카운트가 저장 리스트의 길이와 같을 경우)
@@ -25,6 +26,7 @@ export default function Pagination (data, type, docList, prevTarget ) {
 
     }//다음 페이지를 호출 할 경우
     else if(type == "next" || type == ""){
+
         docList.push(data[0].doc_id)//호출한 페이지의 문서 아이디값 추가
 
         //배열 중복 제거(만약 다음 페이지가 이전페이지 호출등의 이유로 이미 호출 했을 경우 배열에 쌓지 않기 위함)
@@ -35,23 +37,23 @@ export default function Pagination (data, type, docList, prevTarget ) {
             prevTarget-- //이전페이지 카운트 감소
         }
     }
+
     //다음페이지 눌렸을때 게시물 수가 countPerPage 이하힐때 마지막페이지로 간주
     if(type == "next" && data.length < 10){  
         nextDoc = data[0].doc_id
         prevDoc = type == "" ? docList[0] : docList[docList.length - (prevTarget + 2)]
     }
     else{//마지막 페이지가 아닐때
+
         nextDoc = data[Number(data.length-1)].doc_id
         prevDoc = type == "" ? docList[0] : docList[docList.length - (prevTarget + 2)]
     }
-
     console.log(data);
-    console.log(type);
-    console.log(docList);
-    console.log(prevTarget)
-    console.log(nextDoc)
-    console.log(prevDoc)
-    let pagingArr = [prevDoc, nextDoc, docList, prevTarget]
+    //원활한 페이징 처리를 위해 보여지는 갯수보다 하나 더 많이 들고오는 부분을 처리 (countPerPage + 1 -> countPerpage ) 
+    data.splice(data.length - 1);
+    console.log(data);
+    //리터 파라메터를 배열로 작성
+    let pagingArr = [prevDoc, nextDoc, docList, prevTarget, data]
 
     return pagingArr;
 

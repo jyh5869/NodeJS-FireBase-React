@@ -62,56 +62,39 @@ var db = firebase.firestore();
     return new Promise(function (resolve, reject) {
         
         let docRef  ;
-        let snapShot ;
+
         console.log(docId);
         console.log(collectionNm);
         console.log(type);
         console.log(countPerPage);
 
         if(docId != undefined){
-            console.log("11111111111111%%%%%%%%%%%%%%%%5");
-            snapshot = db.collection(collectionNm).doc(docId).get();
             
-            if(type == undefined){
-                docRef = db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage)).get()         
-            }
-            else if(type == "next"){
-                docRef = db.collection(collectionNm).orderBy("id", 'desc').startAfter(snapshot).limit(Number(countPerPage)).get()
-            }
-            else if(type == "prev"){
-                docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage)).get()
+            db.collection(collectionNm).doc(String(docId)).get().then(function(snapshot){
                 
-            }    
-            resolve(docRef);
-        }
-        else{
-            console.log("222222222222 type = " + type + "     countPerPage = " + countPerPage );
-            var snapshot = db.collection(collectionNm).orderBy("id", 'desc').limit(1).get()
-
-                if(type == undefined || type == ""){
-                    docRef = db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage)).get()         
-                }
-                else if(type == "next"){
-                    docRef = db.collection(collectionNm).orderBy("id", 'desc').startAfter(snapshot).limit(Number(countPerPage)).get()
+                if(type == "next"){
+                    docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
                 }
                 else if(type == "prev"){
-                    docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage)).get()
-                    
+                    docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
                 }    
                 resolve(docRef);
+            });
+        }
+        else{
+            db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage+1)).get().then(function(docRef){
+                resolve(docRef);
+            })        
         }    
     });
-
 }
 
 module.exports = {
     getTargetSnaphot: async function (docId, collectionNm, type, countPerPage) {
-        console.log("1.함수 진입")
+
         const snapshot = await getSnapshot(docId, collectionNm, type, countPerPage);
 
-        console.log("3.리턴");
         return snapshot;
-        
     },
     getFunction: function () {
 

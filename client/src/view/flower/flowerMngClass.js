@@ -1,9 +1,9 @@
-import React,  {useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Alert, Modal, Card, CardGroup, Table, Form, Button } from 'react-bootstrap';
+import React,  {useEffect, useState, useParams } from 'react';
+import { Modal, Table, Form, Button, ToggleButton, ButtonGroup } from 'react-bootstrap';
 import axios from 'axios';
 
 import ShowAlert from '../common/showAlert';
+import Pagination from '../common/pagination';
 
 /**
  * 분석가능 클레스 리스트 페이지
@@ -11,7 +11,11 @@ import ShowAlert from '../common/showAlert';
 */
 function FlowerMngClass() {
 
-    let [list, setList]    = useState([])
+    const [list, setList]    = useState([])
+    const [docList   , setDocList   ] = useState();
+    const [prevTarget, setPrevTarget] = useState("");
+    const [next      , setNext      ] = useState("");
+    const [prev      , setPrev      ] = useState("");
 
     const [toastStatus, setToastStatus] = useState(false);
     const [toastInfo  , setToastInfo  ] = useState({
@@ -30,22 +34,33 @@ function FlowerMngClass() {
         });
     };
 
-    const getFlowerGrwResult = async (callType) => {
+    const getFlowerGrwResult = async (useParams, e) => {
+
+        let type       = useParams.type;       
+        let docList    = useParams.docList;   
+        let prevTarget = useParams.prevTarget; 
+        let docId      = useParams.docId;
 
         let response = await axios({
             method: 'get',
             url: '/api/flwNewClass',
             params: {
-                'callType' : callType
+                'callType' : 'select',
+                'docId'    : docId ,
+                'type'     : type
             },
             headers: {
               'Content-Type': 'multipart/form-data'
             },
         })
 
-        var datas =  response.data.rows
+        var pagingArr = Pagination(response.data.rows, type, docList, prevTarget);
 
-        setList(datas)
+        setPrev(pagingArr[0])
+        setNext(pagingArr[1])
+        setDocList(pagingArr[2])
+        setPrevTarget(pagingArr[3])
+        setList(pagingArr[4]);
     }
 
     useEffect(() => {
@@ -78,6 +93,14 @@ function FlowerMngClass() {
                         })}
                     </tbody>
                 </Table>
+                {list.length != 0 ? 
+                    <div className="pagination_wrap">      
+                        <ButtonGroup className="pagination">
+                            <ToggleButton onClick={(e)=>{getFlowerGrwResult({ type : 'prev', docId : prev, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-success'} name="radio"> &larr; 이전 </ToggleButton>
+                            <ToggleButton onClick={(e)=>{getFlowerGrwResult({ type : 'next', docId : next, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-primary'} name="radio"> 다음 &rarr; </ToggleButton>
+                        </ButtonGroup>  
+                    </div>
+                : "" }
             </div>
         </React.Fragment>
     )

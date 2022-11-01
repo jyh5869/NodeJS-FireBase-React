@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, Component} from "react";
+import React, { useEffect, useState } from "react";
 import axios from 'axios';
 
 import ToggleButton from 'react-bootstrap/ToggleButton';

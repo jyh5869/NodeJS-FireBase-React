@@ -1,11 +1,7 @@
 
 import React,  {useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { Card, CardGroup, Table, Form, Button } from 'react-bootstrap';
-import axios               from 'axios';
-
-import ToggleButton from 'react-bootstrap/ToggleButton';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import {Table, Button, ToggleButton, ButtonGroup } from 'react-bootstrap';
+import axios from 'axios';
 
 import Pagination from '../common/pagination';
 
@@ -17,23 +13,23 @@ function List() {
 
     const [list, setList] = useState([]);
     const [docList   , setDocList   ] = useState();
-    let [prevTarget, setPrevTarget] = useState("");
-    let [next      , setNext      ] = useState("");
-    let [prev      , setPrev      ] = useState("");
+    const [prevTarget, setPrevTarget] = useState("");
+    const [next      , setNext      ] = useState("");
+    const [prev      , setPrev      ] = useState("");
 
     const getFlowerGrwResult = async (useParams, e) => {
-
-        let type       = useParams.type       == undefined ? '' : useParams.type 
-        let docList    = useParams.docList    == undefined ? [] : useParams.docList
-        let prevTarget = useParams.prevTarget == undefined ? 0  : useParams.prevTarget;
+        
+        let type       = useParams.type;       
+        let docList    = useParams.docList;   
+        let prevTarget = useParams.prevTarget; 
         let docId      = useParams.docId;
-        alert(docId);
+
         let response = await axios({
             method: 'get',
             url: '/api/getTrainingHist',
             params: {
                 'callType' : 'select',
-                'doc_id'   : docId ,
+                'docId'    : docId ,
                 'type'     : type
             },
             headers: {
@@ -41,15 +37,13 @@ function List() {
             },
         })
 
-        var data =  response.data.rows
+        var pagingArr = Pagination(response.data.rows, type, docList, prevTarget);
 
-        var pagingArr = Pagination(data, type, docList, prevTarget);
-        console.log(pagingArr);
         setPrev(pagingArr[0])
         setNext(pagingArr[1])
         setDocList(pagingArr[2])
         setPrevTarget(pagingArr[3])
-        setList(data);
+        setList(pagingArr[4]);
     }
 
 
@@ -70,7 +64,6 @@ function List() {
                     'Content-Type': 'multipart/form-data',
                 },
             })
-            alert(response.data.results);
 
             getFlowerGrwResult('select');
         }
@@ -85,7 +78,7 @@ function List() {
         if(toggletarget[0].classList.contains('failure')){
             toggletarget[0].classList.remove('failure');
             toggletarget[0].classList.add('success');
-            toggleBtn[0].textContent = '요약'
+            toggleBtn[0].textContent = '요약';
         }
         else{
             toggletarget[0].classList.remove('success');

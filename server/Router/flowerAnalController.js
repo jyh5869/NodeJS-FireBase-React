@@ -292,12 +292,16 @@ router.get("/flwNewClass", async (req, res) => {
     }
     else if(callType == 'select'){
 
+        let docId        = req.query.docId;
+        let collectionNm = "model_class_list"; 
+        let type         = req.query.type; 
+
         //리스트 호출 전 클래스별 훈련데이터 존재 유무를 파악 하여 없을 경우 훈련 일자를 초기화 함(구동 환경에 구애 받지않기 위함) 
         await db.collection('model_class_list').orderBy('reg_dt', "desc").get()
         .then((snapshot) => {
             snapshot.forEach((doc) => {
                 var childData = doc.data();
-                
+
                 fs.exists(datasetUrl+"/"+childData.class_kor_nm, function(exists) {
                     if(!exists){
                         boardDoc = db.collection("model_class_list").doc(childData.id);
@@ -310,7 +314,7 @@ router.get("/flwNewClass", async (req, res) => {
             console.log('Error getting documents', err);
         });
 
-        await db.collection('model_class_list').orderBy('reg_dt', "desc").get()
+        await commonUtil.getTargetSnaphot(docId, collectionNm, type, 10)
         .then((snapshot) => {
             var rows = [];
             snapshot.forEach((doc) => {
@@ -328,6 +332,8 @@ router.get("/flwNewClass", async (req, res) => {
 
                 childData.train_dt  = dateFormat(traingDate , "yyyy-mm-dd hh:MM:ss");
                 childData.reg_dt    = dateFormat(regDate    , "yyyy-mm-dd hh:MM:ss");
+
+                childData.doc_id = childData.id;//페이징 처리를 위함 
 
                 rows.push(childData);
             });
@@ -426,6 +432,8 @@ router.get("/getTrainingHist", async (req, res) => {
                 childData.down_status_summary = childData.down_status == 'Success' ? 'Success' : 'Fail' 
                 childData.load_status_summary = childData.load_status == 'Success' ? 'Success' : 'Fail' 
                 childData.training_status_summary = childData.training_status == 'Success' ? 'Success' : 'Fail' 
+
+                childData.doc_id = childData.id;//페이징 처리를 위함 
 
                 rows.push(childData);
             });
