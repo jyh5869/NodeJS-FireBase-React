@@ -58,12 +58,14 @@ baseline_model.compile(optimizer='adam',
 
 baseline_model.summary()
 
-baseline_history = baseline_model.fit(train_data,
-                                      train_labels,
-                                      epochs=20,
-                                      batch_size=512,
-                                      validation_data=(test_data, test_labels),
-                                      verbose=2)
+baseline_history = baseline_model.fit(
+    train_data,
+    train_labels,
+    epochs=20,
+    batch_size=512,
+    validation_data=(test_data, test_labels),
+    verbose=2
+)
 
 
 
