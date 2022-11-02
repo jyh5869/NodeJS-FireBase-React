@@ -1,14 +1,15 @@
-
 import React,  {useEffect, useState } from 'react';
 import {Table, Button, ToggleButton, ButtonGroup } from 'react-bootstrap';
+
 import axios from 'axios';
 
 import Pagination from '../common/pagination';
 
+
 /**
- * 모델 훈련결과 리스트 페이지
- * @returns
-*/
+ * @author 모델 훈련결과 리스트 컴포넌트
+ * @returns 모델 훈련결과 리스트 HTML
+**/
 function List() {
 
     const [list, setList] = useState([]);

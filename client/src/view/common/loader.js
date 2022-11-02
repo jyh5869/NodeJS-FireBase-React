@@ -1,9 +1,14 @@
 import ClipLoader from "react-spinners/ClipLoader";
 
+
 /**
- * 로딩 스피너 표출 페이지
- * @returns
-*/
+ * @author 로딩 스피너 호출 컴포넌트
+ * @returns 로딩 스피너 HTML 
+ * @param props.loading : 로딩스피너 활성화 여부
+ * @param props.type    : 스피너 굵기
+ * @param props.size    : 스피너 크기
+ * @param props.color   : 스피너 색깔
+**/
 export default function Loader(props) {
 
     let size = props.size != null ? props.size : 150 ;

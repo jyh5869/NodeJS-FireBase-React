@@ -53,23 +53,20 @@ else {
 var db = firebase.firestore();
 
 /** 
- *   @author 파이어베이스 문서 ID와 컬렉션명을 받아 스넵샷으로 리턴 (해당스냅샷 기준으로 페이징 처리)
- *   @param docId 문서ID
- *   @param collectionNm 컬렉션 명
- */
+ * @author 파이어베이스 문서 ID와 컬렉션명을 받아 스넵샷으로 리턴 (해당스냅샷 기준으로 페이징 처리)
+ * @returns 파이어베이스 스넵샷  
+ * @param docId        : 문서 인덱스
+ * @param collectionNm : 컬렉션 명
+ * @param type         : 페이징 타입 next & prev
+ * @param countPerPage : 페이지당 보여줄 문서 갯수
+**/
  function getSnapshot(docId, collectionNm, type, countPerPage){
     
     return new Promise(function (resolve, reject) {
         
-        let docRef  ;
+        let docRef;
 
-        console.log(docId);
-        console.log(collectionNm);
-        console.log(type);
-        console.log(countPerPage);
-
-        if(docId != undefined){
-            
+        if(docId != undefined){    
             db.collection(collectionNm).doc(String(docId)).get().then(function(snapshot){
                 
                 if(type == "next"){

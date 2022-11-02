@@ -1,16 +1,17 @@
 /**
  * @author 공통 페이징 처리 함수
- * @returns 받은 파라메터를 그대로 [prevDoc, nextDoc, docList, prevTarget, data]
- * @param data
- * @param type
- * @param docList
- * @param prevTarget 
-*/
+ * @returns prevDoc, nextDoc, docList, prevTarget, data
+ * @param data       : 표출할 데이터
+ * @param type       : 페이징 타입 next & prev
+ * @param docList    : 호출한 페이지 의 이전페이지 리스트
+ * @param prevTarget : 이전 페이지 호출 Index
+**/
 export default function Pagination (data, type, docList, prevTarget) {
 
-    var type       = type       == undefined ? '' : type
-    var docList    = docList    == undefined ? [] : docList
-    var prevTarget = prevTarget == undefined ? 0  : prevTarget;
+    var type         = type       == undefined ? '' : type;
+    var docList      = docList    == undefined ? [] : docList;
+    var prevTarget   = prevTarget == undefined ? 0  : prevTarget;
+    var countPerPage = 10;
     var prevDoc;
     var nextDoc;
 
@@ -38,23 +39,29 @@ export default function Pagination (data, type, docList, prevTarget) {
         }
     }
 
-    //다음페이지 눌렸을때 게시물 수가 countPerPage 이하힐때 마지막페이지로 간주
-    if(type == "next" && data.length < 10){  
-        nextDoc = data[0].doc_id
-        prevDoc = type == "" ? docList[0] : docList[docList.length - (prevTarget + 2)]
+    //마지막 페이지일 경우
+    if(data.length <= countPerPage){
+
+        if(type == "next"){//페이지 이동중 마지막 페이지일 경우
+            nextDoc = data[0].doc_id
+            prevDoc = type == "" ? docList[0] : docList[docList.length - (prevTarget + 2)]
+        }
+        else {//첫 페이지가 마지막 페이지일 경우
+            nextDoc = data[0].doc_id
+            prevDoc = data[0].doc_id
+        }
     }
-    else{//마지막 페이지가 아닐때
+    else{//마지막 페이지가 아닐 경우
 
         nextDoc = data[Number(data.length-1)].doc_id
         prevDoc = type == "" ? docList[0] : docList[docList.length - (prevTarget + 2)]
+    
+        //페이지 처리를 위해 실제 보여지는 수 보다 하나 더 많이 들고오는 부분 처리 
+        data.splice(data.length - 1);
     }
-    console.log(data);
-    //원활한 페이징 처리를 위해 보여지는 갯수보다 하나 더 많이 들고오는 부분을 처리 (countPerPage + 1 -> countPerpage ) 
-    data.splice(data.length - 1);
-    console.log(data);
-    //리터 파라메터를 배열로 작성
+
+    //리턴 파라메터를 배열로 작성
     let pagingArr = [prevDoc, nextDoc, docList, prevTarget, data]
 
     return pagingArr;
-
 }

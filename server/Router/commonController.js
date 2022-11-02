@@ -54,14 +54,12 @@ var db = firebase.firestore();
 
 
 
-
-
-/*
-    추천 영화 머신러닝 예제 컨트롤러
-    참조링크1 : https://proinlab.com/archives/2103
-    참조링크2 : https://www.npmjs.com/package/nodeml
-    1. User-based CF (ex > 넷플릭스 : 사용자의 시청 영화에 따라 영화 추천 )
-*/
+/**
+ * @author 추천 영화 머신러닝 예제 컨트롤러
+ * @author 1. 참조링크1 : https://proinlab.com/archives/2103
+ * @author 2. 참조링크2 : https://www.npmjs.com/package/nodeml
+ * @author 3. User-based CF (ex > 넷플릭스 : 사용자의 시청 영화에 따라 영화 추천 )
+**/
 router.get("/nodemlSample", (req, res) => {
 
     const {Bayes} = require('nodeml');
@@ -109,14 +107,13 @@ router.get("/nodemlSample", (req, res) => {
 });
 
 
-/*
-    ★ 민원 행정기관 처리 모듈 ★
-
-    1. 경로의 엑셀파일에서 데이터 추출
-    2. 주소 컬럼으로 주소API호출 
-    3. 호출 결과를 조합하여 좌표API호출
-    4. 주소와 좌표API 호출 결과를 엑셀파일로 추출
-*/
+/**
+ * @author ★ 민원 행정기관 처리 모듈 ★
+ * @author  1. 경로의 엑셀파일에서 데이터 추출
+ * @author  2. 주소 컬럼으로 주소API호출 
+ * @author  3. 호출 결과를 조합하여 좌표API호출
+ * @author  4. 주소와 좌표API 호출 결과를 엑셀파일로 추출
+**/
 const xlsx    = require('xlsx');            //데이터를 엑셀파일로 저장하기 위한 라이브러리
 const request = require('request-promise'); //API요청을 위한 라이브러리
 const JSONP   = require('node-jsonp');      //API요청을 JSONP로 받기 위한 라이브러리
@@ -125,9 +122,7 @@ const axios   = require('axios');           //axios를 사용하기 위한 라�
 const https   = require('http');            //httpAgent(new https.Agent({ keepAlive: true })를 방지하기 위한 https 라이브러리
 
 
-/*
-    Axios 통신 실패시 재시도 관련 세팅 및 작업
-*/
+//Axios 통신 실패시 재시도 관련 세팅 및 작업
 axios.defaults.retry = 4;
 axios.defaults.retryDelay = 1000;
 axios.interceptors.response.use(undefined, function axiosRetryInterceptor(err) {
@@ -161,7 +156,10 @@ axios.interceptors.response.use(undefined, function axiosRetryInterceptor(err) {
 });
 
 
-/* 민원 행정기관 처리 컨트롤러 */
+
+/**
+ * @author 민원 행정기관 처리 컨트롤러
+**/
 router.get("/minwonDataInit", async (req, res) => {
     
     const minwonResult = [];//엑셀에서 추출된 데이터
@@ -324,11 +322,12 @@ router.get("/minwonDataInit", async (req, res) => {
 });
 
 
-/** 
- *   시간 지연 함수(반복문의 경우 시간 * 반복문의 인덱스 i 를 곱하여 호출)
- *   참고 URL : https://stackoverflow.com/questions/30676849/delay-between-api-calls-nodejs
- *   @param n 반복문의 인덱스 
- */
+/**
+ * @author 시간 지연 함수(반복문의 경우 시간 * 반복문의 인덱스 i 를 곱하여 호출)
+ * @author 참고 URL : /https://stackoverflow.com/questions/30676849/delay-between-api-calls-nodejs
+ * @param  n : 반복문의 인덱스 
+ * @return 시간지연 함수
+**/
 function delay(n){
     return new Promise(function(resolve){
         setTimeout(resolve,n*1);
@@ -337,10 +336,10 @@ function delay(n){
 
 
 /** 
- *   배열과 파일명을 파라메터로 받아 엘셀파일로 추출하는 함수
- *   @param rows    데이터 배열 
- *   @param fileNum 파일명 체번
- */
+ * @author 배열과 파일명을 파라메터로 받아 엘셀파일로 추출하는 함수
+ * @param  rows    데이터 배열 
+ * @param  fileNum 파일명 체번
+**/
 function makeExcel(rows, fileNum){
     console.log("<COPY START>");
     const workSheet = xlsx.utils.json_to_sheet(rows);

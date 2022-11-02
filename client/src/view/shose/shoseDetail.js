@@ -5,10 +5,11 @@ import { Card, Button }     from 'react-bootstrap';
 
 import Data from '../../data';
 
+
 /**
- * 신발정보 상세보기 페이지
- * @returns
-*/
+ * @author 신발 상세정보 컴포넌트
+ * @returns 신발 상세정보 HTML
+**/
 function ShoseDetail(props) {
 
     let [shoes, shoeState] = useState(Data);

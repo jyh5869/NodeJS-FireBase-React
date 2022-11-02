@@ -1,11 +1,16 @@
-import React,  {useEffect, useState } from 'react';
-import Carousel  from 'react-bootstrap/Carousel';
+import { React, useEffect, useState } from 'react';
 import { Image } from 'react-bootstrap';
 
+import Carousel from 'react-bootstrap/Carousel';
+
+
 /**
- * 이미지 슬라이더 표출 페이지
- * @returns
-*/
+ * @author 이미지 슬라이더 표출 컴포넌트
+ * @returns 이미지 슬라이더 HTML 
+ * @param props.sliderImgArr : 슬릭 이미지경로 배열
+ * @param props.sliderTitArr : 슬릭 콘텐츠 (제목)
+ * @param props.sliderSubArr : 슬릭 콘텐츠 (내용)
+**/
 function Slider(props) {
 
     let [sliderImgArr, setSliderImgArr] = useState([]);

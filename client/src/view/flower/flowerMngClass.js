@@ -1,14 +1,16 @@
-import React,  {useEffect, useState, useParams } from 'react';
+import React,  { useEffect, useState } from 'react';
 import { Modal, Table, Form, Button, ToggleButton, ButtonGroup } from 'react-bootstrap';
+
 import axios from 'axios';
 
-import ShowAlert from '../common/showAlert';
+import ShowAlert  from '../common/showAlert';
 import Pagination from '../common/pagination';
 
+
 /**
- * 분석가능 클레스 리스트 페이지
- * @returns
-*/
+ * @author 분석가능 클레스 리스트 컴포넌트
+ * @returns 분석가능 클래스 리스트 HTML
+**/
 function FlowerMngClass() {
 
     const [list, setList]    = useState([])
@@ -106,7 +108,6 @@ function FlowerMngClass() {
     )
 
     
-
     function SetClassList(props){
 
         let id = props.id;

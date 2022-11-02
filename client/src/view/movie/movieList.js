@@ -1,16 +1,16 @@
 
 import React, { useEffect, useState } from "react";
-import axios from 'axios';
+import { ToggleButton, ButtonGroup }  from 'react-bootstrap';
 
-import ToggleButton from 'react-bootstrap/ToggleButton';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import axios from 'axios';
 
 import Pagination from '../common/pagination';
 
+
 /**
- * @author 영화 리스트 페이지
- * @returns
-*/
+ * @author 영화 리스트 컴포넌트
+ * @returns 영화 리스트 HTML
+**/
 function MovieList() {
 
     const [list      , setList      ] = useState([]);
@@ -72,7 +72,7 @@ function MovieList() {
                 {list.map((list, index) => ( 
                     <a href={url + list.id} key={list.id} className="text-center" >    
                         <div className={"cardWrap card border-"+ color[Number(index%6)] +" col-md-5 m-2"} >
-                            <div className={"card-header bg-"+ color[Number(index%6)]}>{list.id}</div>
+                            <div className={"card-header bg-"+ color[Number(index%6)]}>{list.title}</div>
                             <div className={"card-body text-" + color[Number(index%6)]} >
                                 {/* 
                                     랜덤 이미지 링크 1, 2

@@ -54,21 +54,24 @@ else {
 }
 var db = firebase.firestore();
 
-/*
+
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos';
 const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
 const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
-*/
 
+/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
 const reulstImgPath = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/'
 const saveModelUrl  = 'D:/Development/DeveloperKits/Tensorflow/model/'
+*/
 
 
 
-/*  이미지 학습에제1  */
+/**
+ * @author 이미지 학습 예제 컨트롤러1
+**/
 router.get("/imageDeepLeaning1", (req, res) => {
 
     var options = {
@@ -93,7 +96,9 @@ router.get("/imageDeepLeaning1", (req, res) => {
     
 });
 
-/*  이미지 학습 예제 2  */
+/**
+ * @author 이미지 학습 예제 컨트롤러2
+**/
 router.get("/imageDeepLeaning2", (req, res) => {
 
     var options = {
@@ -118,7 +123,9 @@ router.get("/imageDeepLeaning2", (req, res) => {
 });
 
 
-/* 실제 모델을 사용하여 이미지를 분석하는 컨트롤러  */
+/**
+ * @author 실제 모델을 사용하여 이미지를 분석하는 컨트롤러
+**/
 router.post("/flowerAnalysis", upload.single('file'),  (req, res,  next) => {
 
     const file = req.file;//Multer를 이용한 파일 객체
@@ -167,8 +174,9 @@ router.post("/flowerAnalysis", upload.single('file'),  (req, res,  next) => {
 });
 
 
-
-/*  모델 분류결과 대상의 사전의미 크롤링 컨트롤러  */
+/**
+ * @author 모델 분류결과 대상의 사전의미 크롤링 컨트롤러
+**/
 router.get("/crawlingGoogle", async  (req, res,  next) => {
 
     var keyword = req.query.keyword
@@ -197,7 +205,9 @@ router.get("/crawlingGoogle", async  (req, res,  next) => {
 });
 
 
-/*  분류 결과 값의 사육법 크롤링 컨트롤러  */
+/**
+ * @author 분류 결과 값의 사육법 크롤링 컨트롤러
+**/
 router.get("/crawlingGoogleGrwFlw",async  (req, res,  next) => {
 
     var keyword = req.query.keyword
@@ -235,7 +245,9 @@ router.get("/crawlingGoogleGrwFlw",async  (req, res,  next) => {
 });
 
 
-/*  모델 훈련 호출 컨트롤러 */
+/**
+ * @author 모델 훈련 호출 컨트롤러
+**/
 router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
 
     let saveModelNmReq   = req.query.keyword       != undefined ? req.query.keyword       : saveModelNm;
@@ -268,7 +280,9 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
 });
 
 
-/* 모델 훈련 클래스 리스트 조회 및 변경 컨트롤러 */
+/**
+ * @author 모델 훈련 클래스 리스트 조회 및 변경 컨트롤러
+**/
 router.get("/flwNewClass", async (req, res) => {
     
     const label_name_eng = ['cosmos', 'daisy', 'dandelion', 'forsythia', 'myosotis', 'roses', 'sunflowers', 'tulips']
@@ -399,7 +413,9 @@ router.get("/flwNewClass", async (req, res) => {
 });
 
 
-/* 모델 훈련결과 리스트 호출 및 변경 컨트롤러 */
+/**
+ * @author 모델 훈련결과 리스트 호출 및 변경 컨트롤러
+**/
 router.get("/getTrainingHist", async (req, res) => {
     
     let callType     = req.query.callType;
@@ -466,10 +482,10 @@ router.get("/getTrainingHist", async (req, res) => {
 });
 
 
-/*  
-    모델 저장 디렉토리에 해당 모델 존재여부 확인 
-    모델이 없을 경우 생성 컨트롤러 호출 or 생성 안내 문구 표출   
-*/
+/**
+ * @author 모델 저장 디렉토리에 해당 모델 학습데이터 존재여부 확인
+ * @author 모델이 없을 경우 생성 컨트롤러 호출 or 생성 안내 문구 표출
+**/
 router.get("/getModelExistYn",async  (req, res,  next) => {
 
     var modelNm = req.query.modelNm
@@ -481,7 +497,9 @@ router.get("/getModelExistYn",async  (req, res,  next) => {
 });
 
 
-/* 로컬 경로의 이미지 호출 컨트롤러 */
+/**
+ * @author 로컬 경로의 이미지 호출 컨트롤러
+**/
 router.get("/getImgs",async  (req, res,  next) => {
     //호출 경로
     var path = req.query.path
@@ -493,8 +511,9 @@ router.get("/getImgs",async  (req, res,  next) => {
 });
 
 
-
-/* 파이썬 쉘 테스트 컨트롤러 */
+/**
+ * @author 파이썬 쉘 테스트 컨트롤러
+**/
 router.get("/test",async  (req, res,  next) => {
 
     var options2 = {
@@ -520,15 +539,20 @@ router.get("/test",async  (req, res,  next) => {
 
 
 /** 
- *  디렉토리 삭제 함수 : 파일들을 일괄 삭제 후 디렉토리 삭제
- *  @param path   삭제할 경로
- */
+ * @author 디렉토리 삭제 함수 : 파일들을 일괄 삭제 후 디렉토리 삭제
+ * @param  path : 삭제할 경로
+ * @returns
+**/
 function deleteall(path) {
+
 	var files = [];
+
 	if(fs.existsSync(path)) {
 		files = fs.readdirSync(path);
+        
 		files.forEach(function(file, index) {
 			var curPath = path + "/" + file;
+
 			if(fs.statSync(curPath).isDirectory()) { // recurse
 				deleteall(curPath);
 			} 
@@ -542,7 +566,7 @@ function deleteall(path) {
 
 
 /** 
- *  모델 훈련을 위한 배치 함수
+ *  @author 모델 훈련을 위한 배치 함수
  *  @param saveModelNm   저장될 모델명
  *  @param datasetUrl    훈련데이터 경로
  *  @param reulstImgPath 훈련결과 이미지 저장경로 
@@ -624,7 +648,7 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
  *  3. 훈련데이터 생성이 필요한 클래스들을 조회 후 훈련 데이터 생성(클래스 활성화 여부, 디렉토리 유무)
  *  4. 해당 클래스를 대상으로 모델 훈련
  *  5. 훈련 이력 및 데이터를 저장 (수치 and 이미지 그래프) 
- */
+**/
 const schedule = require('node-schedule');//스케줄러 사용을 위한 라이브러리
 const app      = express()
 app.listen(6000, (request, response, next) => {

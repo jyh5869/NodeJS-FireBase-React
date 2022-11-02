@@ -5,10 +5,11 @@ import { Card, CardGroup } from 'react-bootstrap';
 
 import Data from '../../data';
 
+
 /**
- * 신발정보 리스트 페이지
- * @returns
-*/
+ * @author 신발 리스트 컴포넌트
+ * @returns 신발 리스트 HTML
+**/
 function ShoseList() {
 
     let [shoes, shoeState] = useState(Data);

@@ -15,6 +15,8 @@ const tf  = require("@tensorflow/tfjs");//느리다... @tensorflow/tfjs_node로 
 //파이썬 사용을 위한 라이브러리
 const PythonShell = require("python-shell");
 
+const commonUtil = require("./common.js");
+
 //파일 업로드를 위한 multer, stream 세팅 
 const multer = require("multer")
 const storage = multer.diskStorage({
@@ -53,65 +55,39 @@ else {
 var db = firebase.firestore();
 
 
-function snapshotCall(doc_id){
+
+/**
+ * @author 영화 데이터 리스트 호출 컨트롤러
+**/
+router.get("/", async (req, res) => {
+
+    let docId  = req.query.doc_id
+    let type   = req.query.type
+    let collectionNm = "movies"; 
     
-    if(doc_id != ""){
-        return new Promise(function (resolve, reject) {
-            let snapshot = db.collection('movies').doc(doc_id).get();
-            resolve(snapshot).catch(null)
+    await commonUtil.getTargetSnaphot(docId, collectionNm, type, 10)
+        .then((snapshot) => {
+            var rows = []; 
+
+            snapshot.forEach((doc) => {
+                var childData = doc.data();
+                
+                childData.release_date = dateFormat(childData.release_date,"yyyy-mm-dd");
+                childData.doc_id = doc.id 
+                rows.push(childData);
+                
+            });
+            res.send( {rows: rows}); 
+        })
+        .catch((err) => {
+            console.log('Error getting documents', err);
         });
-    }
-    else{
-        return new Promise(function (resolve, reject) {
-            let snapshot = db.collection('movies').orderBy("id",'asc').limit(1).get();
-            resolve(snapshot).catch(null)
-        });
-    }
-}
-
-
-/*  영화 데이터 리스트 호출 컨트롤러  */
-router.get("/", (req, res) => {
-
-    var doc_id = req.query.doc_id
-    var type   = req.query.type
-    var rows = [];
-    var movieRef;
-    
-    snapshotCall(doc_id)
-        .then(function(snapshot){
-            if(type == ""){
-                movieRef = db.collection('movies').orderBy("id",'asc')
-            }
-            else if(type == "next"){
-                movieRef = db.collection('movies').orderBy("id",'asc').startAfter(snapshot)
-            }
-            else if(type == "prev"){
-                movieRef = db.collection('movies').orderBy("id",'asc').startAt(snapshot)
-            }
-
-            movieRef.limit(11).get() 
-                .then((snapshot) => {
-                    snapshot.forEach((doc) => {
-                        
-                        var childData = doc.data();
-                        
-                        childData.release_date = dateFormat(childData.release_date,"yyyy-mm-dd");
-                        childData.doc_id = doc.id 
-                        rows.push(childData);
-                        
-                    });
-                    res.send( {rows: rows}); 
-                })
-                .catch((err) => {
-                    console.log('Error getting documents', err);
-                });
-    });
-    
 });
 
 
-/*  영화정보 상세보기 컨트롤러 */
+/**
+ * @author 영화 상세정보 컨트롤러
+**/
 router.get("/movieDetail", (req, res) => {
 
     var id = req.query.id
@@ -129,7 +105,9 @@ router.get("/movieDetail", (req, res) => {
 });
 
 
-/*  영화 리뷰를 분석하여 긍정 & 부정 판단 컨트롤러  */
+/**
+ * @author 영화 리뷰를 분석하여 긍정 & 부정 판단 컨트롤러
+**/
 router.get("/reviewDeepLeaning", (req, res) => {
 
     var options = {
@@ -169,12 +147,9 @@ router.get("/reviewDeepLeaning", (req, res) => {
 });
 
 
-/*
-    PythonShell을 이용한 ignore 협업 필터링 사용
-    콘텐츠 간의 유사토를 측정 하여 추천 영화 top10을 반환
-    참고 URL : https://big-dream-world.tistory.com/66
-    Direct 호출 URL 셈플 : http://localhost:5000/movieRecommended?id=315011
-*/
+/**
+ * @author 콘텐츠간의 유사도를 측정하여 추천 영화 top10을 반환(PythonShell을 이용한 ignore 협업 필터링)
+**/
 router.get("/movieRecommended", (req, res) => {
 
     var id = req.query.id;//유사 콘텐츠를 찾을 대상 ID
@@ -255,11 +230,11 @@ router.get("/movieRecommended", (req, res) => {
 });
 
 
-/*
-    영화 추천 시스템 구축을 위한 데이터 초기화 컨트롤러 
-    원천 데이터 : https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata?resource=download
-    ※호출 시 데이터가 중첩해 쌓이므로 FIREBASE STOREGE는 초기화 필요.
-*/
+/**
+ * @author 영화 추천 시스템 구축을 위한 데이터 초기화 컨트롤러
+ * @author ※ 원천 데이터 : /https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata?resource=download
+ * @author ※ 호출 시 데이터가 중첩해 쌓이므로 FIREBASE STOREGE는 초기화 필요.
+**/
 router.get("/moviesDataInit", (req, res) => {
     
     const moviesResult = [];

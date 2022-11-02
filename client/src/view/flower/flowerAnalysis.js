@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button,Table,Form  }   from 'react-bootstrap';
+import { Button, Table, Form  }   from 'react-bootstrap';
+
 import axios                          from 'axios';
 
 import Loader from '../common/loader';
@@ -7,12 +8,12 @@ import Slider from '../common/slider';
 
 import '../../assets/css/flower.css';
 
-const formData = new FormData();//이미지 데이터 저장 Form
 
 /**
- * 꽃 종류 분석 및 분석 정보 표출 페이지
- * @returns
-*/
+ * @author 꽃 종류 분석 및 분석 정보 표출 컴포넌트
+ * @returns 꽃 종류 분석 HTML
+**/
+const formData = new FormData();//이미지 데이터 저장 Form
 function FlowerAnalysis() {
 
     const [list , setList] = useState([]);//해당꽃에대한 검색결과 리스트

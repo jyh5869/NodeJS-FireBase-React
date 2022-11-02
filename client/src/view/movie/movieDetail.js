@@ -1,16 +1,17 @@
 
 import React,  {useEffect, useState } from 'react';
 import { useParams }                  from 'react-router-dom';
-import { Card, Button,Table  }        from 'react-bootstrap';
+import { Card, Table  }               from 'react-bootstrap';
 
 import axios from 'axios';
 
 import Loader from '../common/loader';
 
+
 /**
- * 영화 상세보기 페이지
- * @returns
-*/
+ * @author 영화 상세정보 컴포넌트
+ * @returns 영화 상세정보 HTML
+**/
 function MovieDetail(props) {
    
     let {id} = useParams();

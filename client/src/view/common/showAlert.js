@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
+
 import Alert from 'react-bootstrap/Alert';
 
+
 /**
- * 토스트 창 표출 페이지
- * @returns
-*/
+ * @author 토스트 창 표출 컴포넌트
+ * @returns 토스트 HTML 
+ * @param props.title     : 토스트 제목
+ * @param props.message   : 토스트 메시지
+ * @param props.showState : 토스트 활성화 여부 TRUE & FALSE
+**/
 export default function ShowAlert(props) {
 
     const toastTile = props.toastInfo.title
