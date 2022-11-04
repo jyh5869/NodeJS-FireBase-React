@@ -45,7 +45,7 @@ class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Ma
 # 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
-epochs          = 10                                       # 훈련반복 횟수 
+epochs          = 10                                      # 훈련반복 횟수 
 down_status     = str(sys.argv[5])                        # 이미지 크롤링 결과
 load_status     = ""                                      # 데이터 로드 결과 (Success / Fail -> error)
 training_status = ""                                      # 훈련 결과 (Success / Fail -> error)

@@ -351,6 +351,35 @@ function makeExcel(rows, fileNum){
 }
 
 
+/**
+ * @author 영화 리뷰를 분석하여 긍정 & 부정 판단 컨트롤러
+**/
+router.get("/videoDeep", (req, res) => {
+
+    var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: ["vlaue1", 'value2'],
+        encoding : 'utf8'
+    };
+
+    PythonShell.PythonShell.run ('Router/leaningModel/humanActionDeepLearning.py', options, function (err, results) {
+
+        if (err) {
+            console.log(err);           
+        }   
+        else{
+
+            resultArr = []
+
+            res.send( {results: results});     
+        }
+    });    
+});
+
+
 
 
 
