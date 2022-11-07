@@ -60,9 +60,13 @@ imenb = bytes(imen)
 imnb  = list(imenb)
  
 # 실제 이미지 분석을 위한 바이트 변수 생성
-anaImg = io.BytesIO(imenb)
+anaImg = io.BytesIO(imenb).getvalue()
 
-
+from PIL import Image
+img = Image.open(io.BytesIO(imenb))
+img = img.convert('RGB')
+img = img.resize((180, 180))
+#img = image.img_to_array(img)
 ###############################################################
 
 
@@ -80,15 +84,15 @@ model.compile(loss='binary_crossentropy',
 
 
 # 분석할 이미지 버퍼 세팅
-img_url = [ anaImg ]
+img_url = [ img ]
 
 # 분석
 for index, value in enumerate(img_url, start=0):
 
-    img = tf.keras.preprocessing.image.load_img(
-        value, target_size=(IMG_SIZE, IMG_SIZE)
-    )
-    img_array = tf.keras.preprocessing.image.img_to_array(img)
+    # img = tf.keras.preprocessing.image.load_img(
+    #     value, target_size=(IMG_SIZE, IMG_SIZE)
+    # )
+    img_array = tf.keras.preprocessing.image.img_to_array(value)
     img_array = tf.expand_dims(img_array, 0) # Create a batch
 
     predictions = model.predict(img_array, verbose = 0)
