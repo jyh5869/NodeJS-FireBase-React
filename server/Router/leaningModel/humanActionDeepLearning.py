@@ -34,35 +34,46 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome          import ChromeDriverManager
 from selenium.webdriver.common.by      import By
 
+# ※참고사항 : tesorflow_io, tensorflowr 호환 버전 확인 필요 (URL : https://pypi.org/project/tensorflow-io/)
+
+
 dn_url = 'C:/Users/all4land/.keras/datasets/animalSound/'
-# tesorflow_io, tensorflowr 호환 버전 확인 URL : https://pypi.org/project/tensorflow-io/
+# YAMNet : MobileNetV1 깊이별 분리형 컨볼루션 아키텍처를 사용하는 사전 훈련된 신경망 
 yamnet_model_handle = 'https://tfhub.dev/google/yamnet/1'
 yamnet_model = hub.load(yamnet_model_handle)
-
-print(yamnet_model)
-
-testing_wav_file_name = tf.keras.utils.get_file('miaow_16k.wav',
-                                                'https://storage.googleapis.com/audioset/miaow_16k.wav',
-                                                cache_dir=dn_url,
-                                                cache_subdir='test_data')
-
-print(testing_wav_file_name)
+# print(yamnet_model)
 
 
+# 오디오 샘플 데이터 로드
+testing_wav_file_name = tf.keras.utils.get_file(
+    'miaow_16k.wav',
+    'https://storage.googleapis.com/audioset/miaow_16k.wav',
+    cache_dir = dn_url,
+    cache_subdir = 'test_data'
+)
+# print(testing_wav_file_name)
 
+
+
+# 오디오 파일 로드하는 함수
 def load_wav_16k_mono(filename):
     """ Load a WAV file, convert it to a float tensor, resample to 16 kHz single-channel audio. """
     file_contents = tf.io.read_file(filename)
+    
     wav, sample_rate = tf.audio.decode_wav(
           file_contents,
-          desired_channels=1)
+          desired_channels=1
+    )
     wav = tf.squeeze(wav, axis=-1)
+    
     sample_rate = tf.cast(sample_rate, dtype=tf.int64)
+    
     wav = tfio.audio.resample(wav, rate_in=sample_rate, rate_out=16000)
+    
     return wav
 
-testing_wav_data = load_wav_16k_mono(testing_wav_file_name)
 
+testing_wav_data = load_wav_16k_mono(testing_wav_file_name)
 # plt.plot(testing_wav_data)
 # plt.show()
 # Play the audio file.
@@ -70,15 +81,14 @@ testing_wav_data = load_wav_16k_mono(testing_wav_file_name)
 
 
 
-
-
+# YAMNET 모델의 CLASS 리스트 추출 및 출력
 class_map_path = yamnet_model.class_map_path().numpy().decode('utf-8')
-class_names =list(pd.read_csv(class_map_path)['display_name'])
-print(len(class_map_path))
-for name in class_names[:20]:
-  print(name)
-print('...')
+class_names = list(pd.read_csv(class_map_path)['display_name'])
+# print(len(class_map_path))
 
+# for name in class_names[:20]:
+#     print(name)
+# print('...')
 
 
 scores, embeddings, spectrogram = yamnet_model(testing_wav_data)
@@ -91,14 +101,16 @@ print(f'The embeddings shape: {embeddings.shape}')
 
 
 # 링크로 들어가서 수동으로 다운 받기
-# audio_data = tf.keras.utils.get_file('master.zip',
-#                         'https://github.com/karoldvl/ESC-50/archive/master.zip',
-#                         cache_dir = dn_url,
-#                         cache_subdir = 'datasets')
+# audio_data = tf.keras.utils.get_file(
+#     'master.zip',
+#     'https://github.com/karoldvl/ESC-50/archive/master.zip',
+#     cache_dir = dn_url,
+#     cache_subdir = 'datasets'
+# )
 
 
-
-esc50_csv = dn_url + 'datasets/ESC-50-master/meta/esc50.csv'
+# 메타정보가 담긴 엑셀파일 로드
+esc50_csv      = dn_url + 'datasets/ESC-50-master/meta/esc50.csv'
 base_data_path = dn_url + 'datasets/ESC-50-master/audio/'
 
 pd_data = pd.read_csv(esc50_csv)
@@ -107,46 +119,39 @@ pd_data.head()
 print(pd_data.head())
 
 
-
+# 개와 고양이 두클래스만을 포함한 PD 데이터프레임 생성
 my_classes = ['dog', 'cat']
 map_class_to_id = {'dog':0, 'cat':1}
 
 filtered_pd = pd_data[pd_data.category.isin(my_classes)]
 
-class_id = filtered_pd['category'].apply(lambda name: map_class_to_id[name])
-filtered_pd = filtered_pd.assign(target=class_id)
+class_id    = filtered_pd['category'].apply(lambda name : map_class_to_id[name])
+filtered_pd = filtered_pd.assign(target = class_id)
 
-full_path = filtered_pd['filename'].apply(lambda row: os.path.join(base_data_path, row))
-filtered_pd = filtered_pd.assign(filename=full_path)
+full_path   = filtered_pd['filename'].apply(lambda row : os.path.join(base_data_path, row))
+filtered_pd = filtered_pd.assign(filename = full_path)
 
 print(filtered_pd.head(10))
 
 
 
-
-
-
-
-
 filenames = filtered_pd['filename']
-targets = filtered_pd['target']
-folds = filtered_pd['fold']
-
+targets   = filtered_pd['target']
+folds     = filtered_pd['fold']
+#텐서플로 데이터셋 생성
 main_ds = tf.data.Dataset.from_tensor_slices((filenames, targets, folds))
 main_ds.element_spec
 
 
 
-
-
 def load_wav_for_map(filename, label, fold):
-  return load_wav_16k_mono(filename), label, fold
+    return load_wav_16k_mono(filename), label, fold
 
 main_ds = main_ds.map(load_wav_for_map)
+
 print(main_ds.element_spec)
-
-
 print("--------------------------------------------------------------------------------------------")
+
 
 
 # applies the embedding extraction model to a wav data
@@ -267,7 +272,7 @@ serving_model.save(saved_model_path, include_optimizer=False)
 
 
 
-
+tf.keras.utils.plot_model(serving_model)
 
 
 
