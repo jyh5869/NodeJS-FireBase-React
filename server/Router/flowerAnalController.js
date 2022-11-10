@@ -40,7 +40,7 @@ router.get("/imageDeepLeaning1", (req, res) => {
         encoding : 'utf8'
     };
 
-    PythonShell.PythonShell.run ('Router/leaningModel/imageDeepLearningType1.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('Router/sampleModel/imageDeepLearningType1.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
@@ -67,7 +67,7 @@ router.get("/imageDeepLeaning2", (req, res) => {
         encoding : 'utf8'
     };
 
-    PythonShell.PythonShell.run ('Router/leaningModel/imageDeepLearningType2.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('Router/sampleModel/imageDeepLearningType2.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           

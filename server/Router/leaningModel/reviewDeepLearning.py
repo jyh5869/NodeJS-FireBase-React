@@ -53,10 +53,10 @@ train_data = keras.preprocessing.sequence.pad_sequences(train_data,
                                                         padding='post',
                                                         maxlen=256)
 
-test_data = keras.preprocessing.sequence.pad_sequences(test_data,
-                                                       value=word_index["<PAD>"],
-                                                       padding='post',
-                                                       maxlen=256)
+test_data = keras.preprocessing.sequence.pad_sequences( test_data,
+                                                        value=word_index["<PAD>"],
+                                                        padding='post',
+                                                        maxlen=256)
 
 
 # print(len(train_data[0]), len(train_data[1]))
@@ -89,12 +89,14 @@ partial_y_train = train_labels[10000:]
 
 
 # 1. verbose = 0 : 로깅하지않음  2. verbose = 1이상 : 0보다 클수록 상세하게 로깅을 프린트함 ( 로깅은 처리속도 저하에 영향을 끼침 )
-model.fit(partial_x_train,
-                     partial_y_train,
-                     epochs=20,
-                     batch_size=512,
-                     validation_data=(x_val, y_val),
-                     verbose=0)
+model.fit(
+    partial_x_train,
+    partial_y_train,
+    epochs=20,
+    batch_size=512,
+    validation_data=(x_val, y_val),
+    verbose=0
+)
 
 
 # 테스트 데이터를 통한 모델 평가 (result 에 정확도 반환)
@@ -105,49 +107,46 @@ print(results)
 
 max_len = 256
 def sentiment_predict(new_sentence):
-  # 알파벳과 숫자를 제외하고 모두 제거 및 알파벳 소문자화
-  # new_sentence = re.sub('[^0-9a-zA-Z ]', '', new_sentence).lower()
-  encoded = []
+    # 알파벳과 숫자를 제외하고 모두 제거 및 알파벳 소문자화
+    # new_sentence = re.sub('[^0-9a-zA-Z ]', '', new_sentence).lower()
+    encoded = []
 
-  # 띄어쓰기 단위 토큰화 후 정수 인코딩
-  for word in new_sentence.split():
-    try :
-      # 단어 집합의 크기를 10,000으로 제한.
-      if word_index[word] <= 10000:
-        # encoded.append(word_index[word]+3)
-        encoded.append(word_index[word])
-      else:
-      # 10,000 이상의 숫자는 <unk> 토큰으로 변환.
-        encoded.append(2)
-      #encoded.append(word_index[word])
-    # 단어 집합에 없는 단어는 <unk> 토큰으로 변환.
-    except KeyError:
-      encoded.append(2)
-
-
-
-  test_data = pad_sequences([encoded],
-                value=word_index["<PAD>"],
-                padding='post',
-                maxlen=256)
-
-  
-
-  pad_sequence = pad_sequences([encoded], maxlen=max_len)
-  score = float(model.predict(pad_sequence)) # 예측
-
-  print(new_sentence)
-  print(encoded)
-  print(test_data)
-  print(pad_sequence) 
-
-  print(score)
+    # 띄어쓰기 단위 토큰화 후 정수 인코딩
+    for word in new_sentence.split():
+        try :
+            # 단어 집합의 크기를 10,000으로 제한.
+            if word_index[word] <= 10000:
+                # encoded.append(word_index[word]+3)
+                encoded.append(word_index[word])
+            else:
+                # 10,000 이상의 숫자는 <unk> 토큰으로 변환.
+                encoded.append(2)
+                #encoded.append(word_index[word])
+                # 단어 집합에 없는 단어는 <unk> 토큰으로 변환.
+        except KeyError:
+          encoded.append(2)
 
 
 
-  if(score > 0.5): 
+test_data = pad_sequences([encoded],
+              value=word_index["<PAD>"],
+              padding='post',
+              maxlen=256)
+
+
+pad_sequence = pad_sequences([encoded], maxlen=max_len)
+score = float(model.predict(pad_sequence)) # 예측
+
+print(new_sentence)
+print(encoded)
+print(test_data)
+print(pad_sequence) 
+print(score)
+
+
+if(score > 0.5): 
     print(base64.b64encode(("{:.2f}% 확률로 긍정적 리뷰 입니다.(Positive)".format(score * 100)).encode('utf-8')))
-  else:   
+else:   
     print(base64.b64encode(("{:.2f}% 확률로 부정적 리뷰 입니다.(Positive)".format((1 - score) * 100)).encode('utf-8')))
 
 

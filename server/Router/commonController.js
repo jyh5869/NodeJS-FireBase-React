@@ -322,7 +322,7 @@ router.get("/videoDeep", (req, res) => {
         encoding : 'utf8'
     };
 
-    PythonShell.PythonShell.run ('Router/leaningModel/humanActionDeepLearning.py', options, function (err, results) {
+    PythonShell.PythonShell.run ('Router/sampleModel/audioDeepLearningType1.py', options, function (err, results) {
 
         if (err) {
             console.log(err);           
