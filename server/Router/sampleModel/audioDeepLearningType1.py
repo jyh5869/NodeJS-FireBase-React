@@ -91,7 +91,7 @@ class_names = list(pd.read_csv(class_map_path)['display_name'])
 #     print(name)
 # print('...')
 
-
+# ※ 임베딩 : 사람이 쓰는 자연어를 기계가 이해할 수 있는 숫자의 나열인 백터로 바꾸는 과정 및 결과물
 scores, embeddings, spectrogram = yamnet_model(testing_wav_data)
 
 class_scores   = tf.reduce_mean(scores, axis=0)
@@ -111,7 +111,7 @@ print(f'The embeddings shape: {embeddings.shape}')
 # )
 
 
-# 메타정보가 담긴 엑셀파일 로드
+# 메타정보가 담긴 엑셀파일 및 원천 오디오데이터 로드
 esc50_csv      = dn_url + 'datasets/ESC-50-master/meta/esc50.csv'
 base_data_path = dn_url + 'datasets/ESC-50-master/audio/'
 
@@ -129,15 +129,15 @@ filtered_pd = pd_data[pd_data.category.isin(my_classes)]
 class_id    = filtered_pd['category'].apply(lambda name : map_class_to_id[name])
 filtered_pd = filtered_pd.assign(target = class_id)
 
-full_path   = filtered_pd['filename'].apply(lambda row : os.path.join(base_data_path, row))
+full_path   = filtered_pd['filename'].apply(lambda row  : os.path.join(base_data_path, row))
 filtered_pd = filtered_pd.assign(filename = full_path)
 print(filtered_pd.head(10))
 
 
 
 filenames = filtered_pd['filename']
-targets   = filtered_pd['target']
-folds     = filtered_pd['fold']
+targets   = filtered_pd['target'  ]
+folds     = filtered_pd['fold'    ]
 #텐서플로 데이터셋 생성
 main_ds = tf.data.Dataset.from_tensor_slices((filenames, targets, folds))
 main_ds.element_spec
@@ -158,11 +158,11 @@ def extract_embedding(wav_data, label, fold):
     
     scores, embeddings, spectrogram = yamnet_model(wav_data)
     num_embeddings = tf.shape(embeddings)[0]
-    return(
+    return  (
               embeddings,
               tf.repeat(label, num_embeddings),
               tf.repeat(fold, num_embeddings)
-          )
+            )
 
 # 임베딩된 데이터셋 추출
 main_ds = main_ds.map(extract_embedding).unbatch()
@@ -203,17 +203,17 @@ my_model = tf.keras.Sequential([
 my_model.summary()
 
 my_model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
-                 optimizer="adam",
-                 metrics=['accuracy'])
+                optimizer="adam",
+                metrics=['accuracy'])
 
 callback = tf.keras.callbacks.EarlyStopping(monitor='loss',
                                             patience=3,
                                             restore_best_weights=True)
 
-history = my_model.fit(train_ds,
-                      epochs=20,
-                      validation_data=val_ds,
-                      callbacks=callback)
+history = my_model.fit( train_ds,
+                        epochs=20,
+                        validation_data=val_ds,
+                        callbacks=callback)
 
 
 loss, accuracy = my_model.evaluate(test_ds)
