@@ -5,7 +5,7 @@
  * @param type       : 페이징 타입 next & prev
  * @param docList    : 호출한 페이지 의 이전페이지 리스트
  * @param prevTarget : 이전 페이지 호출 Index
-**/
+**/ 
 export default function Pagination (data, type, docList, prevTarget) {
 
     var type         = type       == undefined ? '' : type;
