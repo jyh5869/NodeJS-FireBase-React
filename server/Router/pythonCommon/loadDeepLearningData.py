@@ -134,10 +134,16 @@ def collect_image(search_word, extract_img_count):
 
     for img in imgs:
         img_src1 = img.click()  # 이미지 클릭 시 display 되는 url을 찾기 위해 클릭함
+
         try:
-            img_src2 = driver.find_element(By.CSS_SELECTOR, '#Sva75c > div > div > div.pxAole > div.tvh9oe.BIB1wf > c-wiz > div > div.OUZ5W > div.zjoqD > div.qdnLaf.isv-id > div > a')
+            # 선택자를 상세히 했을때와 상세히 하지 않았을때 성능차이 10~15% 차이 남으로 최대한 상세하게 기술
+            img_src2 = driver.find_element(By.CSS_SELECTOR, '#Sva75c > div > div > div > div.pxAole > div.tvh9oe.BIB1wf > c-wiz > div > div.OUZ5W > div.zjoqD > div.qdnLaf.isv-id > div > a')
         except Exception:
-            continue
+            try:
+                img_src2 = driver.find_element(By.CSS_SELECTOR, '#Sva75c c-wiz div.qdnLaf.isv-id a')
+            except Exception as e:
+                continue
+
         time.sleep(random.uniform(0.2, 0.5))
         img_src3 = img_src2.find_element(By.TAG_NAME, 'img').get_attribute('src')
         if img_src3[:4] != 'http':

@@ -13,18 +13,17 @@ const PythonShell = commonUtil.getPythonShellObj();
 
 
 
-/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos';
 const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
 const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
-*/
 
+/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
 const reulstImgPath = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/'
 const saveModelUrl  = 'D:/Development/DeveloperKits/Tensorflow/model/'
-
+*/
 
 /**
  * @author 이미지 학습 예제 컨트롤러1
@@ -212,7 +211,7 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
     let reulstImgPathReq = req.query.reulstImgPath != undefined ? req.query.reulstImgPath : reulstImgPath
     let saveModelUrlReq  = req.query.saveModelUrl  != undefined ? req.query.saveModelUrl  : saveModelUrl
 
-    const promise1 = new Promise(async (resolve, reject)  => {
+    const promise = new Promise(async (resolve, reject)  => {
         let results = await FlwDeepLearningNewClass(saveModelNmReq, datasetUrlReq, reulstImgPathReq, saveModelUrlReq)
         .then(function(){
             resolve(results); // resolve 가 실행이 되면 밑에 .then 이 실행이 됨
@@ -224,16 +223,7 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
             reject()
         });
 
-    })
-    promise1.then((results) => {
-            console.log("then!");
-            res.send({results: results});
-        })
-        .catch(() => {
-            console.log("catch!");
-            res.send({results: 'error'});
-        });
-          
+    })    
 });
 
 
@@ -274,9 +264,13 @@ router.get("/flwNewClass", async (req, res) => {
                 var childData = doc.data();
 
                 fs.exists(datasetUrl+"/"+childData.class_kor_nm, function(exists) {
-                    if(!exists){
-                        boardDoc = commonUtil.getFirebaseDB().collection("model_class_list").doc(childData.id);
+                    boardDoc = commonUtil.getFirebaseDB().collection("model_class_list").doc(childData.id);
+                    
+                    if(!exists){    
                         boardDoc.update({ train_dt : ""})
+                    }
+                    else{
+                        boardDoc.update({ train_dt : Date.now()})
                     }
                 });
             });
@@ -540,9 +534,13 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
                 var childData = doc.data();
                 
                 fs.exists(datasetUrl+"/"+childData.class_kor_nm, function(exists) {
-                    if(!exists){
-                        boardDoc = db.collection("model_class_list").doc(childData.id);
+                    boardDoc = db.collection("model_class_list").doc(childData.id);
+                    
+                    if(!exists){    
                         boardDoc.update({ train_dt : ""})
+                    }
+                    else{
+                        boardDoc.update({ train_dt : Date.now()})
                     }
                 });
             });
@@ -590,9 +588,6 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
             if (err) {
                 console.log(err);           
             }   
-            else{
-                
-            }
         });
     });    
 }
@@ -610,10 +605,9 @@ const schedule = require('node-schedule');//스케줄러 사용을 위한 라이
 const app      = express()
 app.listen(6000, (request, response, next) => {
     console.log('Example app listening on port 6000')
-    const trainingModelBatch = schedule.scheduleJob('1 05 * * * *', function(requestTime){
-        console.log(requestTime + ' 딥러닝 모델 훈련 배치 시작');
-        const results = FlwDeepLearningNewClass(saveModelNm, datasetUrl, reulstImgPath, saveModelUrl)
-        console.log(requestTime + ' 딥러닝 모델 훈련 배치 종료');
+    const trainingModelBatch = schedule.scheduleJob('1 20 1 * * *',async function(requestTime){
+        console.log("모델 훈련 배치 시작: " + new Date());
+        FlwDeepLearningNewClass(saveModelNm, datasetUrl, reulstImgPath, saveModelUrl)
     });
 })
 
