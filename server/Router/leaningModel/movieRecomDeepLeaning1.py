@@ -127,3 +127,5 @@ def find_sim_movie_weight(df, sorted_ind, title_name, top_n=10):
 similar_movies = find_sim_movie_weight(movies_df, genre_sim_sorted_ind, title, 10)
 print(similar_movies[['id', 'title', 'vote_average', 'weighted_vote']].to_json())
 
+
+
