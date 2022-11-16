@@ -8,4 +8,4 @@
 
 
 
-<img src="./common/SystemConfiguration.jpg">
+<img src="/documents/common/SystemConfiguration.jpg">
