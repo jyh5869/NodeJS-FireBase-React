@@ -95,7 +95,7 @@ function List() {
     //JSX식 작성
     return (
         <React.Fragment>
-            <h1>분류 가능 클래스 </h1>
+            <h1>모델 훈련 스케줄러 이력</h1>
             <div className="mx-1 my-3">
                 <Table responsive bordered hover className="text-center">
                     <thead>
