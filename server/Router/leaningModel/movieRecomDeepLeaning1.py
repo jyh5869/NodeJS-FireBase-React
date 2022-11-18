@@ -8,34 +8,35 @@ pd.set_option('display.max_rows', None)
 pd.set_option('display.max_colwidth', None)
 
 movies = pd.read_csv('C:/Users/all4land/Desktop/NodeJS-FireBase-React/client/src/data/movie/tmdb_5000_movies.csv')
-#print(movies.shape)
-#print(movies.head(10))
+# print(movies.shape)
+# print(movies.columns)
+# print(movies.head(20))
 
 movies_df = movies[['id','title','genres','vote_average', 'vote_count', 'popularity', 'keywords', 'overview']]
-#print(movies_df['genres'].head(1))
-#print(movies_df['keywords'].head(1))
+# print(movies_df['genres'].head(1))
+# print(movies_df['keywords'].head(1))
 
-from ast import literal_eval #해당 데이터를 리스트화 한 뒤 벨류만 추출
+from ast import literal_eval #해당 데이터를 1. 리스트화 한 뒤 2. 벨류만 추출
 
-movies_df['genres'] = movies_df['genres'].apply(literal_eval)
+movies_df['genres']   = movies_df['genres'].apply(literal_eval)
 movies_df['keywords'] = movies_df['keywords'].apply(literal_eval)
-#print(movies_df['genres'].head(1))
-#print(movies_df['keywords'].head(1))
-movies_df['genres'] = movies_df['genres'].apply(lambda x : [y['name'] for y in x])
+# print(movies_df['genres'].head(1))
+# print(movies_df['keywords'].head(1))
+movies_df['genres']   = movies_df['genres'].apply(lambda x : [y['name'] for y in x])
 movies_df['keywords'] = movies_df['keywords'].apply(lambda x : [y['name'] for y in x])
-#print(movies_df['genres'].head(1))
-#print(movies_df['keywords'].head(1))
+# print(movies_df['genres'].head(1))
+# print(movies_df['keywords'].head(1))
 
 
 from sklearn.feature_extraction.text import CountVectorizer #추출한 벨류를 벨류 + 공백으로 구성하여 백터화
 
 #CountVectorizer를 적용하기 위해 공백문자로 word단위가 구분되는 문자열로 변환.
 movies_df['generes_literal'] = movies_df['genres'].apply(lambda x :  (' ').join(x))
-#print(movies_df['generes_literal'].head(10))
+# print(movies_df['generes_literal'].head(10))
 count_vect = CountVectorizer(min_df=0, ngram_range=(1,2))
-genre_mat = count_vect.fit_transform(movies_df['generes_literal'])
-#print(genre_mat)
-#print(genre_mat.shape)
+genre_mat  = count_vect.fit_transform(movies_df['generes_literal'])
+# print(genre_mat)
+# print(genre_mat.shape)
 
 
 #피처 벡터화된 행렬에 cosine_similarity( )를 적용해서 반환된 코사인 유사도 행렬의 크기 
@@ -43,11 +44,11 @@ genre_mat = count_vect.fit_transform(movies_df['generes_literal'])
 from sklearn.metrics.pairwise import cosine_similarity 
 
 genre_sim = cosine_similarity(genre_mat, genre_mat)
-#print(genre_sim.shape)
-#print(genre_sim[:1])
+# print(genre_sim.shape)
+# print(genre_sim[:1])
 
 genre_sim_sorted_ind = genre_sim.argsort()[:,::-1]
-#print(genre_sim_sorted_ind[:1])
+# print(genre_sim_sorted_ind[:1])
 
 
 
@@ -70,18 +71,21 @@ def find_sim_movie(df, sorted_ind, title_name, top_n=10):
 
 
 #유사 콘텐츠를 뽑을 대상 추출
-selectMovie = movies_df[movies_df['id'] == int(sys.argv[1])]
+movie_idx = int(sys.argv[1])
+# movie_idx = 100
+selectMovie = movies_df[movies_df['id'] == movie_idx]
+# print(selectMovie)
 title = selectMovie.iloc[0]['title']
-
+# print(title)
 
 similar_movies = find_sim_movie(movies_df, genre_sim_sorted_ind, title , 10)
-#print(similar_movies.info())
-#print(similar_movies)
-#print(similar_movies[['id', 'title', 'vote_count', 'vote_average']].to_json())
+# print(similar_movies.info())
+# print(similar_movies)
+# print(similar_movies[['id', 'title', 'vote_count', 'vote_average']].to_json())
 
-#print(movies_df[['title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10])
-#print(movies_df[['id', 'title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10].to_json())
-#print(movies_df[['title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10].to_numpy())
+# print(movies_df[['title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10])
+# print(movies_df[['id', 'title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10].to_json())
+# print(movies_df[['title', 'vote_count', 'vote_average']].sort_values('vote_average', ascending=False)[:10].to_numpy())
 
 
 
@@ -99,11 +103,12 @@ def weighted_vote_average(record):
 
 movies_df['weighted_vote'] = movies.apply(weighted_vote_average, axis=1)
 movies_df[['title', 'weighted_vote', 'vote_average', 'vote_count']].sort_values('weighted_vote', ascending=False)[:10]
-#print(movies_df['title'].head(100))
+# print(movies_df['title'].head(10))
+# print(movies_df.head(10))
 
 
 genre_sim_sorted_ind = genre_sim.argsort()[:,::-1]
-#print(genre_sim_sorted_ind[:1])
+# print(genre_sim_sorted_ind[:1])
 
 
 #유사한 콘텐츠 20개 추출하여 가중치별로 top10을 추출
@@ -125,7 +130,7 @@ def find_sim_movie_weight(df, sorted_ind, title_name, top_n=10):
 
 
 similar_movies = find_sim_movie_weight(movies_df, genre_sim_sorted_ind, title, 10)
-print(similar_movies[['id', 'title', 'vote_average', 'weighted_vote']].to_json())
+# print(similar_movies[['id', 'title', 'vote_average', 'weighted_vote']].to_json())
 
 
 

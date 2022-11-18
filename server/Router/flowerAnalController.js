@@ -476,7 +476,7 @@ router.get("/test",async  (req, res,  next) => {
         encoding : 'utf8',
     };
 
-    PythonShell.PythonShell.run ('Router/leaningModel/01.test.py', options2, function (err, results) {
+    PythonShell.PythonShell.run ('Router/leaningModel/reviewDeepLearning2.py', options2, function (err, results) {
 
         if (err) {
             console.log(err);           
