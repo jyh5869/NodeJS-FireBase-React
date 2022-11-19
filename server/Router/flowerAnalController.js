@@ -423,7 +423,6 @@ router.get("/getTrainingHist", async (req, res) => {
          .catch(function(error) {
             returnStr = "Class Delete Fail----->" + error;
          });
-  
         res.send({results: returnStr});
     }
     else{
