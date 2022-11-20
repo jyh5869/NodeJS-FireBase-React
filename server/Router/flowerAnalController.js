@@ -226,12 +226,22 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
     })    
 });
 
-
+const cb0 = function (req, res, next) {
+    console.log('CB0')
+    return false;
+    next()
+}
+  
+const cb1 = function (req, res, next) {
+    console.log('CB1')
+    next()
+}
+  
 /**
  * @author 모델 훈련 클래스 리스트 조회 및 변경 컨트롤러
 **/
-router.get("/flwNewClass", async (req, res) => {
-    
+router.get("/flwNewClass", [cb0, cb1], async (req, res) => {
+    console.log("하위하위");
     const label_name_eng = ['cosmos', 'daisy', 'dandelion', 'forsythia', 'myosotis', 'roses', 'sunflowers', 'tulips']
     const label_name_kor = ['코스모스', '데이지', '민들레', '개나리', '물망초', '장미', '해바라기속', '튤립']
     
