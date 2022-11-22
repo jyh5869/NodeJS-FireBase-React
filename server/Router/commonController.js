@@ -5,7 +5,7 @@ const commonUtil = require("./common.js");
 
 const fs          = commonUtil.getFileStreamObj();
 const csv         = commonUtil.getReadCSVObj();
-const PythonShell = commonUtil.getPythonShellObj();
+const firebase    = commonUtil.getFirebaseObj();
 
 
 
@@ -282,7 +282,7 @@ router.get("/minwonDataInit", async (req, res) => {
 /**
  * @author 시간 지연 함수(반복문의 경우 시간 * 반복문의 인덱스 i 를 곱하여 호출)
  * @author 참고 URL : /https://stackoverflow.com/questions/30676849/delay-between-api-calls-nodejs
- * @param  n : 반복문의 인덱스 
+ * @param  n 반복문의 인덱스 
  * @return 시간지연 함수
 **/
 function delay(n){
@@ -309,31 +309,60 @@ function makeExcel(rows, fileNum){
 
 
 /**
- * @author 영화 리뷰를 분석하여 긍정 & 부정 판단 컨트롤러
+ * @author 사용자 권한 확인 및 부여 컨트롤러
+ * @param authType 권한 부여 타입 (1.생성 2.로그인 3.로그아웃)
+ * @param userId 사용자 아이디
+ * @param userPw 사용자 비밀번호
+ * -signUp : userAuthority?authType=signUp&userId=5869jyh@gmail.com&userPw=dudgus5869*
+ * -logIn  : userAuthority?authType=logIn&userId=5869jyh@gmail.com&userPw=dudgus5869*
+ * -logOut : userAuthority?authType=logOut&userId=5869jyh@gmail.com&userPw=dudgus5869*
 **/
-router.get("/videoDeep", (req, res) => {
+router.get("/userAuthority", (req, res) => {
 
-    var options = {
-        mode: 'text',
-        pythonPath: '',
-        pythonOptions: ['-u'],
-        scriptPath: '',
-        args: ["vlaue1", 'value2'],
-        encoding : 'utf8'
-    };
+    let authType = req.query.authType;
+    let userId   = req.query.userId;
+    let userPw   = req.query.userPw;
 
-    PythonShell.PythonShell.run ('Router/sampleModel/audioDeepLearningType1.py', options, function (err, results) {
 
-        if (err) {
-            console.log(err);           
-        }   
-        else{
+    if(authType == "signUp"){//사용자 추가
+        
+        firebase.auth().createUserWithEmailAndPassword(userId, userPw)
+            .then((userCredential) => {
+                var user = userCredential.user;
+                res.send(user);
+            })
+            .catch((error) => {
+                var errorCode    = error.code;
+                var errorMessage = error.message;
+                res.send(error);
+            });
+    }
+    else if(authType == "logIn"){//로그인
+        
+        firebase.auth().signInWithEmailAndPassword(userId, userPw)
+            .then(function(userCredential) {
+                var user = userCredential.user;
 
-            resultArr = []
+                res.send(user);
+            })
+            .catch(function(error) {
 
-            res.send( {results: results});     
-        }
-    });    
+                res.send(error);
+            });   
+    }
+    else if(authType == "logOut"){//로그아웃
+        
+        firebase.auth().signOut()
+            .then(function(userCredential) {
+                var user = userCredential.user;
+
+                res.send(user);
+            })
+            .catch(function(error) {
+
+                res.send(error);
+            }); 
+    }   
 });
 
 

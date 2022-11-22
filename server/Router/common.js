@@ -1,4 +1,4 @@
-const firebase = require("firebase"  );
+const firebase = require("firebase");
 const config   = {
     apiKey: "AIzaSyCzWDbX5Qad0iyaxAeam45rUJxkV41yFPs",
     authDomain: "movie-f362d.firebaseapp.com",
@@ -96,6 +96,10 @@ module.exports = {
     getFirebaseDB: function () {
         //파이어 베이스 데이터베이스 객체 호출
         return db;
+    },
+    getFirebaseObj: function () {
+        //파이어 베이스 객체 호출(사용자 권한 관리를 위함)
+        return firebase;
     },
     getUploadObj: function() {
         //파일 업로드를 위한 객체 호출 함수

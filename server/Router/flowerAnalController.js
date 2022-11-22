@@ -133,7 +133,7 @@ router.post("/flowerAnalysis", upload.single('file'),  (req, res,  next) => {
 /**
  * @author 모델 분류결과 대상의 사전의미 크롤링 컨트롤러
 **/
-router.get("/crawlingGoogle", async  (req, res,  next) => {
+router.get("/crawlingGoogle", async (req, res,  next) => {
 
     var keyword = req.query.keyword
 
@@ -164,7 +164,7 @@ router.get("/crawlingGoogle", async  (req, res,  next) => {
 /**
  * @author 분류 결과 값의 사육법 크롤링 컨트롤러
 **/
-router.get("/crawlingGoogleGrwFlw",async  (req, res,  next) => {
+router.get("/crawlingGoogleGrwFlw", async (req, res,  next) => {
 
     var keyword = req.query.keyword
 
@@ -226,22 +226,28 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
     })    
 });
 
-const cb0 = function (req, res, next) {
-    console.log('CB0')
-    return false;
+
+/**
+ * @author Previous 핸들러 샘플
+ * @param {*} req  request 
+ * @param {*} res  response
+ * @param {*} next next
+ */
+const handler1 = function (req, res, next) {
+    //console.log('handler1')
+    next()
+}
+const handler2 = function (req, res, next) {
+    //console.log('handler2')
     next()
 }
   
-const cb1 = function (req, res, next) {
-    console.log('CB1')
-    next()
-}
-  
+
 /**
  * @author 모델 훈련 클래스 리스트 조회 및 변경 컨트롤러
 **/
-router.get("/flwNewClass", [cb0, cb1], async (req, res) => {
-    console.log("하위하위");
+router.get("/flwNewClass", [handler1, handler2], async (req, res) => {
+
     const label_name_eng = ['cosmos', 'daisy', 'dandelion', 'forsythia', 'myosotis', 'roses', 'sunflowers', 'tulips']
     const label_name_kor = ['코스모스', '데이지', '민들레', '개나리', '물망초', '장미', '해바라기속', '튤립']
     
@@ -495,6 +501,33 @@ router.get("/test",async  (req, res,  next) => {
         }
     });
 
+});
+
+
+/**
+ * @author 텐서플로를 이용한 오디오 파일 인식 및 훈련 컨트롤러
+**/
+router.get("/audioDeepLearning", (req, res) => {
+
+    var options = {
+        mode: 'text',
+        pythonPath: '',
+        pythonOptions: ['-u'],
+        scriptPath: '',
+        args: ["vlaue1", 'value2'],
+        encoding : 'utf8'
+    };
+
+    PythonShell.PythonShell.run ('Router/sampleModel/audioDeepLearningType1.py', options, function (err, results) {
+
+        if (err) {
+            console.log(err);           
+        }   
+        else{
+            resultArr = []
+            res.send( {results: results});     
+        }
+    });    
 });
 
 

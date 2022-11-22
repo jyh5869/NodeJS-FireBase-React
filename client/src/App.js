@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown, Form, Button, FormControl } from 'react-bootstrap';
 
@@ -11,13 +11,37 @@ import MovieDetail     from './view/movie/movieDetail';
 import FlowerAnalysis  from './view/flower/flowerAnalysis';
 import FlowerMngClass  from './view/flower/flowerMngClass';
 import FlowerTrainHist from './view/flower/FlowerTrainHist';
+import { authService } from './view/common/firebaseConfig';
 
 import './assets/css/common.css';
 
 import logo from './logo.svg';
 
+import {
+    createUserWithEmailAndPassword,
+    getRedirectResult,
+    GithubAuthProvider,
+    GoogleAuthProvider,
+    signInWithEmailAndPassword,
+    signInWithRedirect,
+    signOut,
+  } from "firebase";
+  
+
 function App() {
 
+    useEffect(() => {
+        authService.onAuthStateChanged((user) => {
+          if (user) {
+            alert("로그인 되어있어");
+            //setIsLoggedIn(true);
+          } else {
+            alert("로그인 안되어있어");
+            //setLogout();
+          }
+        });
+      }, []);
+    
     return(
         <div>
             <header>
@@ -58,4 +82,82 @@ function App() {
         </div>
     )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//Email로 가입하는 함수
+//동작이 이루어지면 앞서 작성한 로그인 상태 감지 함수로 인해 user정보가 변수에 저장되고 setState가 발생
+export async function registerWithEamil(email, password) {
+    try {
+      await createUserWithEmailAndPassword(authService, email, password).then(
+        (e) => {}
+      );
+    } catch (e) {
+      return e.message.replace("Firebase: Error ", "");
+    }
+  }
+  
+  
+  //Email로 로그인하는 함수
+  export async function loginWithEamil(email, password) {
+    try {
+      await signInWithEmailAndPassword(authService, email, password);
+    } catch (e) {
+      return e.message.replace("Firebase: Error ", "");
+    }
+  }
+  
+  
+  //Google, Github로 로그인하는 함수
+  export async function loginWithSocial(provider) {
+    if (provider === "google") {
+      try {
+        const provider = new GoogleAuthProvider();
+        await new signInWithRedirect(authService, provider);
+        const result = await getRedirectResult(authService);
+        if (result) {
+          // const user = result.user;
+        }
+        return;
+      } catch (error) {
+        return error;
+      }
+    } else if (provider === "github") {
+      try {
+        const provider = new GithubAuthProvider();
+  
+        await new signInWithRedirect(authService, provider);
+        const result = await getRedirectResult(authService);
+        if (result) {
+          // const user = result.user;
+        }
+        return;
+      } catch (error) {
+        return error;
+      }
+    }
+  }
+  
+  
+  
+  //Logout 하는 함수
+  export async function logout() {
+    await signOut(authService);
+    return;
+  }
 export default App; 

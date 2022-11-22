@@ -3,7 +3,7 @@
     "server": "cd server && nodemon server",
     "client": "cd client && yarn start",
     "start": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
-  }, 
+  },
   "dependencies": {
     "@tensorflow/tfjs": "^3.16.0",
     "@tensorflow/tfjs-node": "^2.1.0",
