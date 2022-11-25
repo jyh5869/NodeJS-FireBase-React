@@ -323,13 +323,12 @@ router.get("/userAuthority", (req, res) => {
     let userId   = req.query.userId;
     let userPw   = req.query.userPw;
 
-
     if(authType == "signUp"){//사용자 추가
         
         firebase.auth().createUserWithEmailAndPassword(userId, userPw)
             .then((userCredential) => {
                 var user = userCredential.user;
-                res.send(user);
+                res.send({user : user});
             })
             .catch((error) => {
                 var errorCode    = error.code;
@@ -339,11 +338,14 @@ router.get("/userAuthority", (req, res) => {
     }
     else if(authType == "logIn"){//로그인
         
+        console.log(userId);
+        console.log(userPw);
+        
         firebase.auth().signInWithEmailAndPassword(userId, userPw)
             .then(function(userCredential) {
                 var user = userCredential.user;
 
-                res.send(user);
+                res.send({user : user});
             })
             .catch(function(error) {
 
@@ -356,13 +358,22 @@ router.get("/userAuthority", (req, res) => {
             .then(function(userCredential) {
                 var user = userCredential.user;
 
-                res.send(user);
+                res.send({user : user});
             })
             .catch(function(error) {
 
                 res.send(error);
             }); 
     }   
+    else {
+        let isLogin = true;
+
+        if (!firebase.auth().currentUser) {
+            isLogin =  false;
+        }
+
+        res.send({isLogin: isLogin});
+    }
 });
 
 

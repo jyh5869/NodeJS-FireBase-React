@@ -1,8 +1,9 @@
 
 import React, { useEffect, useState } from "react";
-import {BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
+import {BrowserRouter as Router, Route, Routes, Link,  useLocation, useNavigate  } from 'react-router-dom';
 import { Navbar, Nav, Container, NavDropdown, Form, Button, FormControl } from 'react-bootstrap';
 
+import axios from 'axios';
 
 import ShoseDetail     from './view/shose/shoseDetail';
 import ShoseList       from './view/shose/shoseList';
@@ -11,36 +12,46 @@ import MovieDetail     from './view/movie/movieDetail';
 import FlowerAnalysis  from './view/flower/flowerAnalysis';
 import FlowerMngClass  from './view/flower/flowerMngClass';
 import FlowerTrainHist from './view/flower/FlowerTrainHist';
-import { authService } from './view/common/firebaseConfig';
+import Login           from './view/common/login';
 
 import './assets/css/common.css';
 
 import logo from './logo.svg';
 
-import {
-    createUserWithEmailAndPassword,
-    getRedirectResult,
-    GithubAuthProvider,
-    GoogleAuthProvider,
-    signInWithEmailAndPassword,
-    signInWithRedirect,
-    signOut,
-  } from "firebase";
-  
-
 function App() {
 
+    let [isLogIn , setIsLogIn] = useState();
+    let [logOut  , setLogout]  = useState([]);
+
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    const AuthHandler = async (useParams, e) => {  
+        let authType = useParams.authType
+
+        let response = axios({
+            method  : 'get',
+            url     : '/api/userAuthority',
+            params  : {
+                authType : authType
+            },
+            headers : {
+                'Content-Type' : 'multipart/form-data'
+            }
+
+        }).then(function(res){
+            setIsLogIn(Boolean(res.data.isLogin))
+
+            if (Boolean(res.data.isLogin) == false) {
+                navigate("/" , {state : location.pathname});
+            } 
+        })
+    }
+
     useEffect(() => {
-        authService.onAuthStateChanged((user) => {
-          if (user) {
-            alert("로그인 되어있어");
-            //setIsLoggedIn(true);
-          } else {
-            alert("로그인 안되어있어");
-            //setLogout();
-          }
-        });
-      }, []);
+        //사용자 권한 검증
+        AuthHandler({useParams : "verify"})
+    }, []);
     
     return(
         <div>
@@ -58,7 +69,14 @@ function App() {
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item href="/view/flower/flowerTrainHist">model Training schedules</NavDropdown.Item>
                                 <NavDropdown.Item href="/view/flower/flowerMngClass">Add flowerClass</NavDropdown.Item>
-                            </NavDropdown> 
+                            </NavDropdown>
+                            <NavDropdown title="User" id="basic-nav-dropdown">
+                                {isLogIn == true ? 
+                                    <NavDropdown.Item href="/"  onClick={(e) => { AuthHandler({authType : "logOut"}, e)}}>Log out</NavDropdown.Item>
+                                : 
+                                    <NavDropdown.Item href="/">Log in</NavDropdown.Item>
+                                }
+                            </NavDropdown>
                         </Nav>
                     </Navbar.Collapse>
                     <Form className="form1" >
@@ -69,7 +87,7 @@ function App() {
             </header>
             <div className="container pt-3">
                 <Routes>
-                    <Route path="/" element={<FlowerAnalysis/> }></Route>
+                    <Route path="/" element={<Login/> }></Route>
                     <Route path="/view/list/" element={ <ShoseList /> }></Route>
                     <Route path="/view/detail/:id" element={ <ShoseDetail/> }></Route>
                     <Route path="/view/movieList" element={ <MovieList/> } ></Route>
@@ -87,77 +105,4 @@ function App() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Email로 가입하는 함수
-//동작이 이루어지면 앞서 작성한 로그인 상태 감지 함수로 인해 user정보가 변수에 저장되고 setState가 발생
-export async function registerWithEamil(email, password) {
-    try {
-      await createUserWithEmailAndPassword(authService, email, password).then(
-        (e) => {}
-      );
-    } catch (e) {
-      return e.message.replace("Firebase: Error ", "");
-    }
-  }
-  
-  
-  //Email로 로그인하는 함수
-  export async function loginWithEamil(email, password) {
-    try {
-      await signInWithEmailAndPassword(authService, email, password);
-    } catch (e) {
-      return e.message.replace("Firebase: Error ", "");
-    }
-  }
-  
-  
-  //Google, Github로 로그인하는 함수
-  export async function loginWithSocial(provider) {
-    if (provider === "google") {
-      try {
-        const provider = new GoogleAuthProvider();
-        await new signInWithRedirect(authService, provider);
-        const result = await getRedirectResult(authService);
-        if (result) {
-          // const user = result.user;
-        }
-        return;
-      } catch (error) {
-        return error;
-      }
-    } else if (provider === "github") {
-      try {
-        const provider = new GithubAuthProvider();
-  
-        await new signInWithRedirect(authService, provider);
-        const result = await getRedirectResult(authService);
-        if (result) {
-          // const user = result.user;
-        }
-        return;
-      } catch (error) {
-        return error;
-      }
-    }
-  }
-  
-  
-  
-  //Logout 하는 함수
-  export async function logout() {
-    await signOut(authService);
-    return;
-  }
 export default App; 
