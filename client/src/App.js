@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
-import {BrowserRouter as Router, Route, Routes, Link,  useLocation, useNavigate  } from 'react-router-dom';
-import { Navbar, Nav, Container, NavDropdown, Form, Button, FormControl } from 'react-bootstrap';
+import { Route, Routes, useLocation, useNavigate  } from 'react-router-dom';
+import { Navbar, Nav, NavDropdown, Form, Button, FormControl } from 'react-bootstrap';
 
 import axios from 'axios';
 
@@ -21,7 +21,6 @@ import logo from './logo.svg';
 function App() {
 
     let [isLogIn , setIsLogIn] = useState();
-    let [logOut  , setLogout]  = useState([]);
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -55,10 +54,11 @@ function App() {
     
     return(
         <div>
+            {isLogIn == true ? 
             <header>
                 <Navbar bg="light" expand="lg" >
                     <Navbar.Brand href="/view/flower/flowerAnalysis">{' '}
-                        <img alt=""src={logo} width="40" height="40" className="d-inline-block align-top mt-n1"/>Deep Learning World</Navbar.Brand>
+                        <img alt="" src={logo} width="40" height="40" className="d-inline-block align-top mt-n1"/>Deep Learning World</Navbar.Brand>
                     <Navbar.Toggle aria-controls="basic-navbar-nav" />
                     <Navbar.Collapse id="basic-navbar-nav">
                         <Nav className="ml-auto">
@@ -85,6 +85,7 @@ function App() {
                     </Form>
                 </Navbar>
             </header>
+            : "" }
             <div className="container pt-3">
                 <Routes>
                     <Route path="/" element={<Login/> }></Route>
@@ -100,9 +101,5 @@ function App() {
         </div>
     )
 }
-
-
-
-
 
 export default App; 

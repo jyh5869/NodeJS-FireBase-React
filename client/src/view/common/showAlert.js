@@ -21,11 +21,10 @@ export default function ShowAlert(props) {
     
     return (
         <div style={showAlert_wrap} >
-            <Alert variant="info" show={showState} style={showAlert}  dismissible>
+            <Alert variant="info" show={showState} style={showAlert} dismissible>
                 <Alert.Heading>{toastTile}</Alert.Heading>
                 <p>{toastMsg}</p>
             </Alert>
         </div>
     );
 }
-

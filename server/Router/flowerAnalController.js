@@ -12,18 +12,18 @@ const PythonShell = commonUtil.getPythonShellObj();
 
 
 
-
+/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos';
 const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
 const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
+*/
 
-/*
 const saveModelNm   = 'model_flw';
 const datasetUrl    = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
 const reulstImgPath = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/'
 const saveModelUrl  = 'D:/Development/DeveloperKits/Tensorflow/model/'
-*/
+
 
 /**
  * @author 이미지 학습 예제 컨트롤러1
@@ -647,7 +647,7 @@ const schedule = require('node-schedule');//스케줄러 사용을 위한 라이
 const app      = express()
 app.listen(6000, (request, response, next) => {
     console.log('Example app listening on port 6000')
-    const trainingModelBatch = schedule.scheduleJob('1 20 1 * * *',async function(requestTime){
+    const trainingModelBatch = schedule.scheduleJob('1 53 * * * *',async function(requestTime){
         console.log("모델 훈련 배치 시작: " + new Date());
         FlwDeepLearningNewClass(saveModelNm, datasetUrl, reulstImgPath, saveModelUrl)
     });

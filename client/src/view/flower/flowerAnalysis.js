@@ -129,7 +129,7 @@ function FlowerAnalysis() {
             },
         })
 
-        var datas =  response.data.results
+        var datas = response.data.results
 
         return datas;
     }
