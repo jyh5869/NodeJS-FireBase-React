@@ -338,9 +338,6 @@ router.get("/userAuthority", (req, res) => {
     }
     else if(authType == "logIn"){//로그인
         
-        console.log(userId);
-        console.log(userPw);
-        
         firebase.auth().signInWithEmailAndPassword(userId, userPw)
             .then(function(userCredential) {
                 var user = userCredential.user;
