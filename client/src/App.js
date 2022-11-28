@@ -17,7 +17,7 @@ import Login           from './view/common/login';
 import './assets/css/common.css';
 
 import logo from './logo.svg';
-
+let currentPath = "";
 function App() {
 
     let [isLogIn , setIsLogIn] = useState();
@@ -27,7 +27,7 @@ function App() {
 
     const AuthHandler = async (useParams, e) => {  
         let authType = useParams.authType
-
+        console.log("검증");
         let response = axios({
             method  : 'get',
             url     : '/api/userAuthority',
@@ -47,10 +47,27 @@ function App() {
         })
     }
 
+    
     useEffect(() => {
         //사용자 권한 검증
-        AuthHandler({useParams : "verify"})
-    }, []);
+
+        console.log(currentPath)
+        console.log(location.pathname)
+
+        if(location.pathname != "/"){
+            AuthHandler({useParams : "verify"});
+        }
+        
+
+        //같은 Link를 클릭해도 새로고침 되도록 하기 (리액트 라우터 useLocation)
+        if(currentPath == location.pathname) {
+            window.location.reload(); 
+            
+        }
+        currentPath = location.pathname;
+
+
+    }, [location]);
     
     return(
         <div>
