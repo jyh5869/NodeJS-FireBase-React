@@ -51,8 +51,8 @@ function App() {
     useEffect(() => {
         //사용자 권한 검증
 
-        console.log(currentPath)
-        console.log(location.pathname)
+        console.log("currentPath = " + currentPath)
+        console.log("location.pathname = " + location.pathname)
 
         if(location.pathname != "/"){
             AuthHandler({useParams : "verify"});
@@ -61,6 +61,7 @@ function App() {
 
         //같은 Link를 클릭해도 새로고침 되도록 하기 (리액트 라우터 useLocation)
         if(currentPath == location.pathname) {
+            console.log("리로드")
             window.location.reload(); 
             
         }
@@ -71,7 +72,7 @@ function App() {
     
     return(
         <div>
-            {isLogIn == true ? 
+            {/* {isLogIn == true ?  */}
             <header>
                 <Navbar bg="light" expand="lg" >
                     <Navbar.Brand href="/view/flower/flowerAnalysis">{' '}
@@ -102,7 +103,7 @@ function App() {
                     </Form>
                 </Navbar>
             </header>
-            : "" }
+            {/* : "" } */}
             <div className="container pt-3">
                 <Routes>
                     <Route path="/" element={<Login/> }></Route>
