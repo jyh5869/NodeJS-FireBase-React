@@ -647,7 +647,7 @@ const schedule = require('node-schedule');//스케줄러 사용을 위한 라이
 const app      = express()
 app.listen(6000, (request, response, next) => {
     console.log('Example app listening on port 6000')
-    const trainingModelBatch = schedule.scheduleJob('1 53 * * * *',async function(requestTime){
+    const trainingModelBatch = schedule.scheduleJob('1 53 1 * * *',async function(requestTime){
         console.log("모델 훈련 배치 시작: " + new Date());
         FlwDeepLearningNewClass(saveModelNm, datasetUrl, reulstImgPath, saveModelUrl)
     });

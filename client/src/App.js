@@ -44,35 +44,27 @@ function App() {
             if (Boolean(res.data.isLogin) == false) {
                 navigate("/" , {state : location.pathname});
             } 
-        })
+        });
     }
 
     
     useEffect(() => {
-        //사용자 권한 검증
-
-        console.log("currentPath = " + currentPath)
-        console.log("location.pathname = " + location.pathname)
-
+        //로그인 페이지를 제외한 사용자 권한 검증
         if(location.pathname != "/"){
             AuthHandler({useParams : "verify"});
         }
-        
 
-        //같은 Link를 클릭해도 새로고침 되도록 하기 (리액트 라우터 useLocation)
+        //같은 경로를 클릭 및 조회 할경우 새로고침 처리
         if(currentPath == location.pathname) {
-            console.log("리로드")
             window.location.reload(); 
-            
         }
         currentPath = location.pathname;
-
 
     }, [location]);
     
     return(
         <div>
-            {/* {isLogIn == true ?  */}
+            {isLogIn == true ? 
             <header>
                 <Navbar bg="light" expand="lg" >
                     <Navbar.Brand href="/view/flower/flowerAnalysis">{' '}
@@ -103,7 +95,7 @@ function App() {
                     </Form>
                 </Navbar>
             </header>
-            {/* : "" } */}
+            : "" }
             <div className="container pt-3">
                 <Routes>
                     <Route path="/" element={<Login/> }></Route>
