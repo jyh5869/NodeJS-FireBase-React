@@ -333,7 +333,7 @@ router.get("/userAuthority", (req, res) => {
             .catch((error) => {
                 var errorCode    = error.code;
                 var errorMessage = error.message;
-                res.send(error);
+                res.send({error : error});
             });
     }
     else if(authType == "logIn"){//로그인
@@ -346,7 +346,7 @@ router.get("/userAuthority", (req, res) => {
             })
             .catch(function(error) {
 
-                res.send(error);
+                res.send({error : error});
             });   
     }
     else if(authType == "logOut"){//로그아웃
@@ -359,7 +359,7 @@ router.get("/userAuthority", (req, res) => {
             })
             .catch(function(error) {
 
-                res.send(error);
+                res.send({error : error});
             }); 
     }   
     else {
