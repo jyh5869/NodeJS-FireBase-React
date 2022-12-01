@@ -18,9 +18,9 @@ function FlowerAnalysis() {
 
     const [list , setList] = useState([]);//해당꽃에대한 검색결과 리스트
     const [obj  , setObj ] = useState();//업로드 이미지 분석 결과 객체
-    const [loading, setLoading] = useState(false);//로딩 스피너
+    const [loading, setLoading]   = useState(false);//로딩 스피너
     const [imageSrc, setImageSrc] = useState('');//아마자 태그 변경시 실시간 미리보기
-    const [flwInfo , setFlwInfo] = useState([]);//해당꽃에대한 검색결과 리스트
+    const [flwInfo , setFlwInfo]  = useState([]);//해당꽃에대한 검색결과 리스트
     const [flwGrwInfo , setFlwGrwInfo] = useState([]);//해당꽃에대한 검색결과 리스트
     const color = [];
 

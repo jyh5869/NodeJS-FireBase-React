@@ -17,6 +17,12 @@ import Login           from './view/common/login';
 import './assets/css/common.css';
 
 import logo from './logo.svg';
+
+
+/**
+ * @author 메인 페이지 및 라우터 셋팅 컴포넌트
+ * @returns 메인페이지 HTML 및 라우터 설정
+**/
 let currentPath = "";
 function App() {
 
@@ -25,9 +31,10 @@ function App() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const AuthHandler = async (useParams, e) => {  
+    //사용자 권한 헨들링 함수
+    const getAuthHandler = async (useParams, e) => {  
         let authType = useParams.authType
-        console.log("검증");
+        
         let response = axios({
             method  : 'get',
             url     : '/api/userAuthority',
@@ -39,6 +46,7 @@ function App() {
             }
 
         }).then(function(res){
+            //권한 설정 및 부재시 로그인 페이지로 이동
             setIsLogIn(Boolean(res.data.isLogin))
 
             if (Boolean(res.data.isLogin) == false) {
@@ -47,19 +55,26 @@ function App() {
         });
     }
 
-    
+    /*
+        컴포넌트가 최초 랜더링 및 리랜더링 될 때 실행되는 HOOK (EFFECT, ARRAY, CLEAN-UP)
+        1. EFFECT   : 마운트시 실행부
+        2. ARRAY    : 최초마운트 실행 후 배열의 파라메터 값이 변경될때마다 실행 (배열을 []로 선언시 최초 1회만 실행)
+        3. CLEAN-UP : EFFECT 실행전 어떠한 처리가 필요할경우나 이벤트가 바인딩 됨으로서 쌓일수 있는 메모리 누수를 막음 
+        ※ 랜더링/리랜더링 -> 이전 EFFECT CLEAN-UP -> EFFECT 
+    */
     useEffect(() => {
         //로그인 페이지를 제외한 사용자 권한 검증
         if(location.pathname != "/"){
-            AuthHandler({useParams : "verify"});
+            getAuthHandler({useParams : "verify"});
         }
-
         //같은 경로를 클릭 및 조회 할경우 새로고침 처리
         if(currentPath == location.pathname) {
             window.location.reload(); 
         }
         currentPath = location.pathname;
 
+        //CLEAN-UP
+        return () => {}
     }, [location]);
     
     return(
@@ -82,7 +97,7 @@ function App() {
                             </NavDropdown>
                             <NavDropdown title="User" id="basic-nav-dropdown">
                                 {isLogIn == true ? 
-                                    <NavDropdown.Item href="/"  onClick={(e) => { AuthHandler({authType : "logOut"}, e)}}>Log out</NavDropdown.Item>
+                                    <NavDropdown.Item href="/"  onClick={(e) => { getAuthHandler({authType : "logOut"}, e)}}>Log out</NavDropdown.Item>
                                 : 
                                     <NavDropdown.Item href="/">Log in</NavDropdown.Item>
                                 }

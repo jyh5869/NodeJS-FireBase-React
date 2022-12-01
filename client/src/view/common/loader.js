@@ -13,7 +13,7 @@ import ClipLoader from "react-spinners/ClipLoader";
 export default function Loader(props) {
 
     let size = props.size != null ? props.size : 150 ;
-    //alert(props.text)
+
     return (
         <div className={'loading_wrap'}>
             <div className={'loding-text-'+ props.type}  style={{display:props.text != "" && props.loading === true ? 'block' : 'none'}}>{props.text}</div>

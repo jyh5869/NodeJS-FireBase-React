@@ -3,9 +3,9 @@ const router  = express.Router();
 
 const commonUtil = require("./common.js");
 
-const fs          = commonUtil.getFileStreamObj();
-const csv         = commonUtil.getReadCSVObj();
-const firebase    = commonUtil.getFirebaseObj();
+const fs       = commonUtil.getFileStreamObj();
+const csv      = commonUtil.getReadCSVObj();
+const firebase = commonUtil.getFirebaseObj();
 
 
 
@@ -18,7 +18,7 @@ const firebase    = commonUtil.getFirebaseObj();
  * @author 3. User-based CF (ex > 넷플릭스 : 사용자의 시청 영화에 따라 영화 추천 )
 **/
 router.get("/nodemlSample", (req, res) => {
-
+    
     const {Bayes} = require('nodeml');
     let bayes = new Bayes();
     
@@ -111,7 +111,6 @@ axios.interceptors.response.use(undefined, function axiosRetryInterceptor(err) {
         return axios(config);
     });
 });
-
 
 
 /**
@@ -362,7 +361,7 @@ router.get("/userAuthority", (req, res) => {
                 res.send({error : error});
             }); 
     }   
-    else {
+    else {//권한검증
         let isLogin = true;
 
         if (!firebase.auth().currentUser) {

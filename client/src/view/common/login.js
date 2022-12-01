@@ -6,20 +6,20 @@ import axios from 'axios';
 
 
 /**
- * @author 로그인 페이지 컴포넌트
- * @returns 로그인 페이지 HTML 
+ * @author 권한 검증 및 생성 컴포넌트
+ * @returns 권한 검증 및 생성 페이지 HTML 
 **/
 const Login = () => {
 
     const navigate = useNavigate();
-    const {state} = useLocation();
+    const {state}  = useLocation();
 
     const [uiType    , setUiType  ] = useState("login")
     const [txtReg    , setTxtReg  ] = useState("아이디와 비밀번호를 입력해주세요.")
     const [txtLogIn  , setTxtLogIn] = useState("아이디와 비밀번호를 입력해주세요.")
     const [authInfo  , setAuthInfo] = useState({
-        userId    : "",
-        userPw    : "", 
+        userId  : "",
+        userPw  : "", 
     });
 
     const onChangeAuthInfo = (e) => {
@@ -28,7 +28,8 @@ const Login = () => {
             [e.target.name]: e.target.value,
         });
     };
-
+    
+    //권한 검증 및 생성 헨들러
     const handleLogin = async (authType) => {
 
         let response = await axios({
@@ -44,7 +45,7 @@ const Login = () => {
             }
         })
 
-        if(response.data.user){
+        if(response.data.user){//권한 검증 후 리턴페이지 이동
             if(state && state != "/") {
                 navigate(state);
             } 
@@ -52,7 +53,7 @@ const Login = () => {
                 navigate("/view/flower/flowerAnalysis");
             }
         }
-        else {
+        else {//실패시 경우에 따른 Action
             if(authType == "logIn"){
                 setTxtLogIn("아이디와 비밀번호를 확인해 주세요.");
             }
