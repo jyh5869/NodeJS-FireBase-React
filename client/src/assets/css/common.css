@@ -17,6 +17,11 @@ a:hover { color: darkslategray;}
 
 h1 { font-size: 30px;}
 
+.text-sm{ font-size: 12px;}
+.text-md{ font-size: 14px;}
+.text-lg{ font-size: 16px;}
+.text-xl{ font-size: 18px;}
+
 header nav{ padding: 10px 7%;}
 header .navbar-brand { line-height: 2; white-space: normal;}
 header .form-control {width: initial;}

@@ -19,7 +19,8 @@ const Login = () => {
     const [txtLogIn  , setTxtLogIn] = useState("아이디와 비밀번호를 입력해주세요.")
     const [authInfo  , setAuthInfo] = useState({
         userId  : "",
-        userPw  : "", 
+        userPw  : "",
+        userPw2 : "",
     });
 
     const onChangeAuthInfo = (e) => {
@@ -27,10 +28,19 @@ const Login = () => {
             ...authInfo,
             [e.target.name]: e.target.value,
         });
+
     };
     
     //권한 검증 및 생성 헨들러
     const handleLogin = async (authType) => {
+
+        //권한 추가시 VALIDATION
+        if(authType == "signUp"){
+            if (authInfo.userPw != authInfo.userPw2){
+                setTxtReg("비밀번호를 다시한번 확인해 주세요.");
+                return;
+            }  
+        }
 
         let response = await axios({
             method  : 'get',
@@ -74,13 +84,13 @@ const Login = () => {
                         <h2 className="fw-bold mb-2 text-center">로그인</h2>
                         <div className="mb-3">
                             <Form>
-                                <Form.Group className="mb-3" controlId="loginEmail">
-                                    <Form.Label>이메일</Form.Label>
-                                    <Form.Control type="email" placeholder="Enter email" name="userId" onChange={(e) => { onChangeAuthInfo(e);}} />
+                                <Form.Group className="mb-3 text-md" controlId="loginEmail">
+                                    <Form.Label className="mb-1">이메일</Form.Label>
+                                    <Form.Control className="text-md" type="email" placeholder="Enter email" name="userId" onChange={(e) => { onChangeAuthInfo(e);}} />
                                 </Form.Group>
-                                <Form.Group className="mb-3" controlId="loginPassword">
-                                    <Form.Label>비밀번호</Form.Label>
-                                    <Form.Control type="password" placeholder="Password" name="userPw" onChange={(e) => { onChangeAuthInfo(e);}} />
+                                <Form.Group className="mb-3 text-md" controlId="loginPassword">
+                                    <Form.Label className="mb-1">비밀번호</Form.Label>
+                                    <Form.Control className="text-md" type="password" placeholder="Password" name="userPw" onChange={(e) => { onChangeAuthInfo(e);}} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="formBasicCheckbox">
                                     <p className="small">
@@ -101,19 +111,23 @@ const Login = () => {
                         </div>
                     </div>
                 </Card.Body>
-                : 
+                :
                 <Card.Body className="card-register">
                     <div className="mb-3 mt-md-4">
                         <h2 className="fw-bold mb-2 text-center">가입하기</h2>
                         <div className="mb-3">
                             <Form>
-                                <Form.Group className="mb-3" controlId="regEmail">
-                                    <Form.Label>이메일</Form.Label>
-                                    <Form.Control type="email" placeholder="Enter email" name="userIdReg"  onChange={(e) => { onChangeAuthInfo(e);}} autoComplete="new-email" />
+                                <Form.Group className="mb-3 text-md" controlId="regEmail">
+                                    <Form.Label className="mb-1">이메일</Form.Label>
+                                    <Form.Control type="email" className="text-md" placeholder="사용할 이메일을 입력해 주세요." name="userId"  onChange={(e) => { onChangeAuthInfo(e);}} />
                                 </Form.Group>
-                                <Form.Group className="mb-3" controlId="regPassword">
-                                    <Form.Label>비밀번호</Form.Label>
-                                    <Form.Control type="password" placeholder="Password" name="userPwReg"  onChange={(e) => { onChangeAuthInfo(e);}} autoComplete="new-password"/>
+                                <Form.Group className="mb-3 text-md" controlId="regPassword">
+                                    <Form.Label className="mb-1">비밀번호</Form.Label>
+                                    <Form.Control type="password" className="text-md" placeholder="비밀번호를 입력해 주세요" name="userPw"  onChange={(e) => { onChangeAuthInfo(e);}} />
+                                </Form.Group>
+                                <Form.Group className="mb-3 text-md" controlId="regPassword">
+                                    <Form.Label className="mb-1">비밀번호 확인</Form.Label>
+                                    <Form.Control type="password" className="text-md" placeholder="비밀번호를 한번 더 입력해 주세요" name="userPw2"  onChange={(e) => { onChangeAuthInfo(e);}} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="chkOverlap">
                                     <p className="small">
