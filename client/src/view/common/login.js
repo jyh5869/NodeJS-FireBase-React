@@ -119,15 +119,15 @@ const Login = () => {
                             <Form>
                                 <Form.Group className="mb-3 text-md" controlId="regEmail">
                                     <Form.Label className="mb-1">이메일</Form.Label>
-                                    <Form.Control type="email" className="text-md" placeholder="사용할 이메일을 입력해 주세요." name="userId"  onChange={(e) => { onChangeAuthInfo(e);}} />
+                                    <Form.Control type="email" className="text-md" placeholder="Enter email" name="userId"  onChange={(e) => { onChangeAuthInfo(e);}} />
                                 </Form.Group>
                                 <Form.Group className="mb-3 text-md" controlId="regPassword">
                                     <Form.Label className="mb-1">비밀번호</Form.Label>
-                                    <Form.Control type="password" className="text-md" placeholder="비밀번호를 입력해 주세요" name="userPw"  onChange={(e) => { onChangeAuthInfo(e);}} />
+                                    <Form.Control type="password" className="text-md" placeholder="Password" name="userPw"  onChange={(e) => { onChangeAuthInfo(e);}} />
                                 </Form.Group>
                                 <Form.Group className="mb-3 text-md" controlId="regPassword">
                                     <Form.Label className="mb-1">비밀번호 확인</Form.Label>
-                                    <Form.Control type="password" className="text-md" placeholder="비밀번호를 한번 더 입력해 주세요" name="userPw2"  onChange={(e) => { onChangeAuthInfo(e);}} />
+                                    <Form.Control type="password" className="text-md" placeholder="Password" name="userPw2"  onChange={(e) => { onChangeAuthInfo(e);}} />
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="chkOverlap">
                                     <p className="small">
