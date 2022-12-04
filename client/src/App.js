@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { Route, Routes, useLocation, useNavigate  } from 'react-router-dom';
+import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { Navbar, Nav, NavDropdown, Form, Button, FormControl } from 'react-bootstrap';
 
 import axios from 'axios';
@@ -26,7 +26,8 @@ import logo from './logo.svg';
 let currentPath = "";
 function App() {
 
-    let [isLogIn , setIsLogIn] = useState();
+    let [isLogIn  , setIsLogIn ] = useState();
+    let [authInfo , setAuchInfo] = useState();       
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -48,6 +49,7 @@ function App() {
         }).then(function(res){
             //권한 설정 및 부재시 로그인 페이지로 이동
             setIsLogIn(Boolean(res.data.isLogin))
+            setAuchInfo(res.data.user)
 
             if (Boolean(res.data.isLogin) == false) {
                 navigate("/" , {state : location.pathname});
@@ -96,10 +98,17 @@ function App() {
                                 <NavDropdown.Item href="/view/flower/flowerMngClass">Add flowerClass</NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown title="User" id="basic-nav-dropdown">
+
                                 {isLogIn == true ? 
-                                    <NavDropdown.Item href="/"  onClick={(e) => { getAuthHandler({authType : "logOut"}, e)}}>Log out</NavDropdown.Item>
+                                    <Form>
+                                        <Form.Label className="mx-3 my-0 text-primary">{authInfo.email}</Form.Label>
+                                        <NavDropdown.Divider />
+                                        <NavDropdown.Item href="/"  onClick={(e) => { getAuthHandler({authType : "logOut"}, e)}}>Log out</NavDropdown.Item>
+                                    </Form>
                                 : 
-                                    <NavDropdown.Item href="/">Log in</NavDropdown.Item>
+                                    <Form>
+                                        <NavDropdown.Item href="/">Log in</NavDropdown.Item>
+                                    </Form>
                                 }
                             </NavDropdown>
                         </Nav>

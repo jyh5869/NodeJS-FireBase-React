@@ -363,12 +363,13 @@ router.get("/userAuthority", (req, res) => {
     }   
     else {//권한검증
         let isLogin = true;
+        let user    = firebase.auth().currentUser
 
-        if (!firebase.auth().currentUser) {
+        if (!user) {
             isLogin =  false;
         }
 
-        res.send({isLogin: isLogin});
+        res.send({user : user , isLogin: isLogin});
     }
 });
 

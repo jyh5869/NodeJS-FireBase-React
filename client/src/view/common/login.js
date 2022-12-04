@@ -17,6 +17,8 @@ const Login = () => {
     const [uiType    , setUiType  ] = useState("login")
     const [txtReg    , setTxtReg  ] = useState("아이디와 비밀번호를 입력해주세요.")
     const [txtLogIn  , setTxtLogIn] = useState("아이디와 비밀번호를 입력해주세요.")
+    const [colReg    , setColReg  ] = useState("text-primary")
+    const [colLogIn  , setColLogIn] = useState("text-primary")
     const [authInfo  , setAuthInfo] = useState({
         userId  : "",
         userPw  : "",
@@ -30,17 +32,51 @@ const Login = () => {
         });
 
     };
+
+     //권한 추가시 VALIDATION 검증
+    const validationChk = (authType) => {
+        if(authType == "signUp"){
+            if(authInfo.userId == ""){
+                setTxtReg("아이디를 입력해 주세요.");
+                setColReg("text-danger")
+                return false;
+            }
+            if(authInfo.userPw == ""){
+                setTxtReg("비밀번호를 입력해 주세요.");
+                setColReg("text-danger")
+                return false;
+            }
+            if(authInfo.userPw2 == ""){
+                setTxtReg("확인비밀번호를 입력해 주세요.");
+                setColReg("text-danger")
+                return false;
+            }
+            if (authInfo.userPw != authInfo.userPw2){
+                setTxtReg("일치하는 비밀번호를 입력해 주세요.");
+                setColReg("text-danger")
+                return false;
+            }  
+        }
+        else{
+            if(authInfo.userId == ""){
+                setTxtLogIn("아이디를 입력해 주세요.");
+                setColLogIn("text-danger")
+                return false;
+            }
+            if(authInfo.userPw == ""){
+                setTxtLogIn("비밀번호를 입력해 주세요.");
+                setColLogIn("text-danger")
+                return false;
+            }
+        }
+        return true;
+    };
     
     //권한 검증 및 생성 헨들러
     const handleLogin = async (authType) => {
 
-        //권한 추가시 VALIDATION
-        if(authType == "signUp"){
-            if (authInfo.userPw != authInfo.userPw2){
-                setTxtReg("비밀번호를 다시한번 확인해 주세요.");
-                return;
-            }  
-        }
+        //console.log()
+        if(!validationChk(authType)) return
 
         let response = await axios({
             method  : 'get',
@@ -53,22 +89,24 @@ const Login = () => {
             headers : {
                 'Content-Type' : 'multipart/form-data'
             }
-        })
+        });
 
         if(response.data.user){//권한 검증 후 리턴페이지 이동
             if(state && state != "/") {
                 navigate(state);
-            } 
+            }
             else {
                 navigate("/view/flower/flowerAnalysis");
             }
         }
         else {//실패시 경우에 따른 Action
             if(authType == "logIn"){
-                setTxtLogIn("아이디와 비밀번호를 확인해 주세요.");
+                setTxtLogIn("올바른 아이디와 비밀번호를 입력해 주세요.");
+                setColLogIn("text-danger")
             }
             else if(authType == "signUp"){
                 setTxtReg("이미 사용중인 아이디입니다.");
+                setColReg("text-danger")
             }
         }
     };
@@ -94,7 +132,7 @@ const Login = () => {
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="formBasicCheckbox">
                                     <p className="small">
-                                        <span className="text-primary">{txtLogIn}</span>
+                                        <span className={colLogIn}>{txtLogIn}</span>
                                     </p>
                                 </Form.Group>
                                 <div className="d-grid">
@@ -131,7 +169,7 @@ const Login = () => {
                                 </Form.Group>
                                 <Form.Group className="mb-3" controlId="chkOverlap">
                                     <p className="small">
-                                        <span className="text-primary">{txtReg}</span>
+                                        <span className={colReg}>{txtReg}</span>
                                     </p>
                                 </Form.Group>
                                 <div className="d-grid">
