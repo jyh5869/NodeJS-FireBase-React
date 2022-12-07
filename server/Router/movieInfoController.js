@@ -17,7 +17,7 @@ const PythonShell = commonUtil.getPythonShellObj();
  * @author 영화 데이터 리스트 호출 컨트롤러
 **/
 router.get("/", async (req, res) => {
-    console.log(commonUtil.getsdfwefsdfs(req))
+    console.log(commonUtil.getUserIp(req))
     let docId  = req.query.doc_id
     let type   = req.query.type
     let collectionNm = "movies"; 
