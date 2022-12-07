@@ -130,5 +130,11 @@ module.exports = {
         const readCSV = require('csv-parser');
 
         return readCSV;
+    },
+    getsdfwefsdfs : function(request){
+        const requestIp = require('request-ip');
+        console.log("client IP!!!: " + requestIp.getClientIp(request));
+
+        return requestIp;
     }
 };
