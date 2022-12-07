@@ -98,7 +98,6 @@ function App() {
                                 <NavDropdown.Item href="/view/flower/flowerMngClass">Add flowerClass</NavDropdown.Item>
                             </NavDropdown>
                             <NavDropdown title="User" id="basic-nav-dropdown">
-
                                 {isLogIn == true ? 
                                     <Form>
                                         <Form.Label className="mx-3 my-0 text-primary">{authInfo.email}</Form.Label>
@@ -136,4 +135,4 @@ function App() {
     )
 }
 
-export default App; 
+export default App;
