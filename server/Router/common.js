@@ -131,11 +131,47 @@ module.exports = {
 
         return readCSV;
     },
-    getUserIp : function(request){
-        const requestIp = require('request-ip');
-        console.log("client IP!!!: " + requestIp.getClientIp(request));
-        console.log("client IP!!!: " + requestIp.mw());
+    getUserIp : function(){
+        //접속 IP를 반환하기 위한 라이브러리
+        const requestIp = require("ip");
 
-        return requestIp;
+        return requestIp.address();
+    },
+    getModelInfo : function(targetNm){
+        //접속 IP를 구분값으로 세팅된 모델경로 환경을 리턴(접속환경에 따라 유연하게 대응하기 위함)
+        const requestIp = require("ip");
+
+        let returnParam; 
+
+        if(requestIp.address() == "192.168.219.103"){
+            if(targetNm == "saveModelNm"){
+                returnParam = 'model_flw';
+            }
+            else if(targetNm == "datasetUrl"){
+                returnParam = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
+            }
+            else if(targetNm == "reulstImgPath"){
+                returnParam = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/';
+            }
+            else if(targetNm == "saveModelUrl"){
+                returnParam = 'D:/Development/DeveloperKits/Tensorflow/model/';
+            }
+        }
+        else{
+            if(targetNm == "saveModelNm"){
+                returnParam = 'model_flw';
+            }
+            else if(targetNm == "datasetUrl"){
+                returnParam = 'C:/Users/all4land/.keras/datasets/flower_photos';
+            }
+            else if(targetNm == "reulstImgPath"){
+                returnParam = 'C:/Users/all4land/.keras/trainingResImg/';
+            }
+            else if(targetNm == "saveModelUrl"){
+                returnParam = 'C:/Users/all4land/.keras/model/';
+            }
+        }
+
+        return returnParam;
     }
 };

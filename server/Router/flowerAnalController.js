@@ -8,21 +8,15 @@ const fs          = commonUtil.getFileStreamObj();
 const dateFormat  = commonUtil.getDataFormatObj();
 const upload      = commonUtil.getUploadObj();
 const PythonShell = commonUtil.getPythonShellObj();
+const userIp      = commonUtil.getUserIp();
+
+let saveModelNm   = commonUtil.getModelInfo("saveModelNm");
+let datasetUrl    = commonUtil.getModelInfo("datasetUrl");
+let reulstImgPath = commonUtil.getModelInfo("reulstImgPath");
+let saveModelUrl  = commonUtil.getModelInfo("saveModelUrl");
 
 
 
-
-/*
-const saveModelNm   = 'model_flw';
-const datasetUrl    = 'C:/Users/all4land/.keras/datasets/flower_photos';
-const reulstImgPath = 'C:/Users/all4land/.keras/trainingResImg/'
-const saveModelUrl  = 'C:/Users/all4land/.keras/model/'
-*/
-
-const saveModelNm   = 'model_flw';
-const datasetUrl    = 'D:/Development/DeveloperKits/Tensorflow/datasets/flower_photos';
-const reulstImgPath = 'D:/Development/DeveloperKits/Tensorflow/trainingResImg/'
-const saveModelUrl  = 'D:/Development/DeveloperKits/Tensorflow/model/'
 
 
 /**
