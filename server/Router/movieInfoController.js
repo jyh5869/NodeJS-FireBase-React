@@ -189,7 +189,7 @@ router.get("/movieRecommended", (req, res) => {
 
 /**
  * @author 영화 추천 시스템 구축을 위한 데이터 초기화 컨트롤러
- * @author ※ 원천 데이터 : /https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata?resource=download
+ * @author ※ 원천 데이터 : https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata?resource=download
  * @author ※ 호출 시 데이터가 중첩해 쌓이므로 FIREBASE STOREGE는 초기화 필요.
 **/
 router.get("/moviesDataInit", (req, res) => {
