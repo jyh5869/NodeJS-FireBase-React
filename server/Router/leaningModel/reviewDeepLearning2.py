@@ -38,13 +38,6 @@ def multi_hot_sequences(sequences, dimension):
 train_data = multi_hot_sequences(train_data, dimension=NUM_WORDS)
 test_data = multi_hot_sequences(test_data, dimension=NUM_WORDS)
 
-
-
-
-
-
-
-
 baseline_model = keras.Sequential([
     # `.summary` 메서드 때문에 `input_shape`가 필요합니다
     keras.layers.Dense(16, activation='relu', input_shape=(NUM_WORDS,)),
@@ -66,17 +59,6 @@ baseline_history = baseline_model.fit(
     validation_data=(test_data, test_labels),
     verbose=2
 )
-
-
-
-
-
-
-
-
-
-
-
 
 
 l2_model = keras.models.Sequential([

@@ -107,8 +107,7 @@ try:
             
             start = idxStr
             end = idxStr+idxCnt
-            # print(start)
-            # print(end)
+
             x_train.append(train_images[start : end])
             y_train.append(train_labels[start : end])
 
@@ -306,9 +305,9 @@ data_documnets = {
     'load_status'     : load_status,
     'training_status' : training_status,
     'class_nm'        : label_name,
-    'verbose'         : parmas_hist['verbose']                                             if len(parmas_hist)  != 0 else 0,
-    'epochs'          : parmas_hist['epochs']                                              if len(parmas_hist)  != 0 else 0,
-    'steps'           : parmas_hist['steps']                                               if len(parmas_hist)  != 0 else 0,
+    'verbose'         : parmas_hist ['verbose']                                             if len(parmas_hist)  != 0 else 0,
+    'epochs'          : parmas_hist ['epochs']                                              if len(parmas_hist)  != 0 else 0,
+    'steps'           : parmas_hist ['steps']                                               if len(parmas_hist)  != 0 else 0,
     'loss'            : history_hist['loss'][len(history_hist['loss']) -1]                 if len(history_hist) != 0 else 0,
     'accuracy'        : history_hist['accuracy'][len(history_hist['accuracy']) -1]         if len(history_hist) != 0 else 0,
     'val_loss'        : history_hist['val_loss'][len(history_hist['val_loss']) -1]         if len(history_hist) != 0 else 0,

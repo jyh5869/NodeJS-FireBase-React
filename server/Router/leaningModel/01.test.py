@@ -35,8 +35,6 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-# 텐서플로 사용 초기 세팅
-
 
 class_list_ref    = db.collection("model_class_list")
 

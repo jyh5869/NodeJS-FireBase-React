@@ -41,7 +41,6 @@ class_list_docs  = class_list_query.stream()  # 쿼리 조건에 맞는 데이�
 class_list_dict  = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함
 
 
-
 # 파일 buffer데이터 받기(json)으로 받기.
 inputs = sys.stdin.read() # JSON
 data = json.loads(inputs) # DIC
