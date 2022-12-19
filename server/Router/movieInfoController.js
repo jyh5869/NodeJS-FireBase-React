@@ -257,7 +257,7 @@ router.get("/moviesDataInit", (req, res) => {
         });
         res.json({data : creditsRsult});
     });
-    
+     
 });
 
 

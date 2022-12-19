@@ -171,7 +171,6 @@ module.exports = {
                 returnParam = 'C:/Users/all4land/.keras/model/';
             }
         }
-
         return returnParam;
     }
 };
