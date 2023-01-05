@@ -5,7 +5,7 @@ import axios from 'axios';
 
 import ShowAlert  from '../common/showAlert';
 import Pagination from '../common/pagination';
-
+import SelectBox  from '../common/selectBox';
 
 /**
  * @author 분석가능 클레스 리스트 컴포넌트
@@ -75,6 +75,7 @@ function FlowerMngClass() {
             <h1>분류 가능 클래스 </h1>
             <div className="mx-1 my-3">
                 <AddClass status={'open'} loading={true} />
+                <SelectBox selectOption={["동물 분류 모델", "꽃 분류 모델"]} selectValue={["model_flw", "model_animal"]} initOption={["클래스를 조회할 모델을 선택하세요."]}/>
                 <ShowAlert toastInfo={toastInfo}/>
                 <Table striped bordered hover responsive  className="text-center px-1" >
                     <thead>
