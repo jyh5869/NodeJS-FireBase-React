@@ -10,6 +10,7 @@ import ShoseList       from './view/shose/shoseList';
 import MovieList       from './view/movie/movieList';
 import MovieDetail     from './view/movie/movieDetail';
 import FlowerAnalysis  from './view/flower/flowerAnalysis';
+import AnimalAnalysis  from './view/flower/animalAnalysis';
 import FlowerMngClass  from './view/flower/flowerMngClass';
 import FlowerTrainHist from './view/flower/FlowerTrainHist';
 import Login           from './view/common/login';
@@ -93,6 +94,7 @@ function App() {
                             <Nav.Link href="/view/movieList">Movie</Nav.Link>
                             <NavDropdown title="Flower" id="basic-nav-dropdown">
                                 <NavDropdown.Item href="/view/flower/flowerAnalysis">flower Analysis</NavDropdown.Item>
+                                <NavDropdown.Item href="/view/flower/animalAnalysis">animal Analysis</NavDropdown.Item>
                                 <NavDropdown.Divider />
                                 <NavDropdown.Item href="/view/flower/flowerTrainHist">model Training schedules</NavDropdown.Item>
                                 <NavDropdown.Item href="/view/flower/flowerMngClass">Add flowerClass</NavDropdown.Item>
@@ -127,6 +129,7 @@ function App() {
                     <Route path="/view/movieList" element={ <MovieList/> } ></Route>
                     <Route path="/view/movieDetail/:id" element={ <MovieDetail/> } ></Route>
                     <Route path="/view/flower/flowerAnalysis" element={ <FlowerAnalysis/> } ></Route>
+                    <Route path="/view/flower/animalAnalysis" element={ <AnimalAnalysis/> } ></Route>
                     <Route path="/view/flower/flowerMngClass" element={ <FlowerMngClass/> } ></Route>
                     <Route path="/view/flower/flowerTrainHist" element={ <FlowerTrainHist/> } ></Route>
                 </Routes>
