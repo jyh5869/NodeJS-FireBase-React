@@ -10,8 +10,8 @@ import '../../assets/css/flower.css';
 
 
 /**
- * @author 꽃 종류 분석 및 분석 정보 표출 컴포넌트
- * @returns 꽃 종류 분석 HTML
+ * @author 동물 종류 분석 및 분석 정보 표출 컴포넌트
+ * @returns 동물 종류 분석 HTML
 **/
 const formData = new FormData();//이미지 데이터 저장 Form
 function FlowerAnalysis() {
@@ -25,9 +25,9 @@ function FlowerAnalysis() {
     const color = [];
 
     //슬라이더 정보 배열 
-    const sliderImgArr = ['/images/slider_tulip.jpg', '/images/slider_daisy.jpg', '/images/slider_fortusia.jpg']
-    const sliderTitArr = ['튤립', '데이지', '개나리']
-    const sliderSubArr = ['사랑의 시작과 영원한 사랑을 의미하는 사랑의 큐피드', '명랑함과 아름다움을 의미하는 개란후라이꽃', ' 가장 먼저 봄이 왔음을 알리는 봄의 전령사']
+    const sliderImgArr = ['/images/slider_cat.jpg', '/images/slider_dog.jpg']
+    const sliderTitArr = ['고양이', '강아지']
+    const sliderSubArr = ['도도하지만 츤데래 같은 매력 고양이', '귀엽고 친화적인 매력 강아지']
 
     /* 등록 이미지 미리보기 기능 */
     const encodeFileToBase64 = (e) => {
@@ -137,7 +137,7 @@ function FlowerAnalysis() {
     /* 이미지 분석을 위한 데이터 전송 */
     function handleSubmit(e) {
         
-        let modelNm = 'model_flw';
+        let modelNm = 'model_animal';
         let modelExistYn = getModelExistYn(modelNm);//모델 존재 여부 파악
 
         modelExistYn.then((value) => {
@@ -187,7 +187,7 @@ function FlowerAnalysis() {
     //JSX 식으로 리스트 파싱
     return (
         <React.Fragment>
-            <h1>꽃 종류 분석</h1>    
+            <h1>동물 종류 분석</h1>    
             <div className="my-3">
                 <div>    
                     <Slider sliderImgArr={sliderImgArr} sliderTitArr={sliderTitArr} sliderSubArr={sliderSubArr}/>
@@ -196,7 +196,7 @@ function FlowerAnalysis() {
                     <Form >
                         <Form.Group controlId="formFileMultiple" className="my-5" >
                             <div className="title">
-                                <Form.Label><h4>종류를 알고싶은 꽃 이미지를 업로드해 주세요.</h4></Form.Label>
+                                <Form.Label><h4>종류를 알고싶은 동물 이미지를 업로드해 주세요.</h4></Form.Label>
                             </div>
                             <div className="content_2">
                                 <span>
