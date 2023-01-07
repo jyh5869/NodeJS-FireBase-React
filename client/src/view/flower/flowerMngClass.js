@@ -42,6 +42,7 @@ function FlowerMngClass() {
         let docList    = useParams.docList;   
         let prevTarget = useParams.prevTarget; 
         let docId      = useParams.docId;
+        let modelNm    = useParams.modelNm;
 
         let response = await axios({
             method: 'get',
@@ -49,7 +50,8 @@ function FlowerMngClass() {
             params: {
                 'callType' : 'select',
                 'docId'    : docId ,
-                'type'     : type
+                'type'     : type ,
+                'modelNm'  : 'animal'
             },
             headers: {
               'Content-Type': 'multipart/form-data'
@@ -264,7 +266,7 @@ function FlowerMngClass() {
                                     <option key= {'0'} value={'model_flw'}>
                                         {'flower'}
                                     </option>
-                                    <option key= {'1'} value={'model_flw'}>
+                                    <option key= {'1'} value={'model_animal'}>
                                         {'animal'}
                                     </option>
                             </Form.Select>
