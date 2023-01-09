@@ -30,8 +30,10 @@ var db = firebase.firestore();
  * @param type         : 페이징 타입 next & prev
  * @param countPerPage : 페이지당 보여줄 문서 갯수
 **/
- function getSnapshot(docId, collectionNm, type, countPerPage){
-    
+ function getSnapshot(docId, collectionNm, type, countPerPage, column, operator, value){
+    console.log(column)
+    console.log(operator)
+    console.log(value)
     return new Promise(function (resolve, reject) {
         
         let docRef;
@@ -49,7 +51,8 @@ var db = firebase.firestore();
             });
         }
         else{
-            db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage+1)).get().then(function(docRef){
+            db.collection(collectionNm).where(column, operator, value).orderBy(column).orderBy("id", 'desc').limit(Number(countPerPage+1)).get()
+            .then(function(docRef){
                 resolve(docRef);
             })        
         }    
@@ -87,9 +90,9 @@ function getUploadObj(){
 
 
 module.exports = {
-    getTargetSnaphot: async function (docId, collectionNm, type, countPerPage) {
+    getTargetSnaphot: async function (docId, collectionNm, type, countPerPage, column, operator, value) {
         //파이어베이스 스냅샷 호출 함수
-        const snapshot = await getSnapshot(docId, collectionNm, type, countPerPage);
+        const snapshot = await getSnapshot(docId, collectionNm, type, countPerPage, column, operator, value);
 
         return snapshot;
     },
