@@ -18,6 +18,7 @@ function FlowerMngClass() {
     const [prevTarget, setPrevTarget] = useState("");
     const [next      , setNext      ] = useState("");
     const [prev      , setPrev      ] = useState("");
+    const [modelNm   , setModelNm   ] = useState("");
 
     const [toastStatus, setToastStatus] = useState(false);
     const [toastInfo  , setToastInfo  ] = useState({
@@ -36,8 +37,10 @@ function FlowerMngClass() {
         });
     };
 
+    //모델 리스트 호출 
     const getFlowerGrwResult = async (useParams, e) => {
 
+        
         let type       = useParams.type;       
         let docList    = useParams.docList;   
         let prevTarget = useParams.prevTarget; 
@@ -51,7 +54,7 @@ function FlowerMngClass() {
                 'callType' : 'select',
                 'docId'    : docId ,
                 'type'     : type ,
-                'modelNm'  : 'animal'
+                'modelNm'  : modelNm,
             },
             headers: {
               'Content-Type': 'multipart/form-data'
@@ -65,19 +68,25 @@ function FlowerMngClass() {
         setDocList(pagingArr[2])
         setPrevTarget(pagingArr[3])
         setList(pagingArr[4]);
+        setModelNm(modelNm);
     }
+
+    //선택된 모델 타입으로 리스트 호출
+    const getSelectValue = async (modelNm, e) => {
+
+        getFlowerGrwResult({modelNm : modelNm }, e)
+	};
 
     useEffect(() => {
         getFlowerGrwResult('select');
     },  []);
 
-    
     return (
         <React.Fragment>
             <h1>분류 가능 클래스 </h1>
             <div className="mx-1 my-3">
                 <AddClass status={'open'} loading={true} />
-                <SelectBox selectOption={["동물 분류 모델", "꽃 분류 모델"]} selectValue={["model_flw", "model_animal"]} initOption={["클래스를 조회할 모델을 선택하세요."]}/>
+                <SelectBox getSelectValue={getSelectValue} selectOption={["동물 분류 모델", "꽃 분류 모델"]} selectValue={[ "model_animal", "model_flw"]} initOption={["클래스를 조회할 모델을 선택하세요."]}/>
                 <ShowAlert toastInfo={toastInfo}/>
                 <Table striped bordered hover responsive  className="text-center px-1" >
                     <thead>
@@ -101,8 +110,8 @@ function FlowerMngClass() {
                 {list.length != 0 ? 
                     <div className="pagination_wrap">      
                         <ButtonGroup className="pagination">
-                            <ToggleButton onClick={(e)=>{getFlowerGrwResult({ type : 'prev', docId : prev, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-success'} name="radio"> &larr; 이전 </ToggleButton>
-                            <ToggleButton onClick={(e)=>{getFlowerGrwResult({ type : 'next', docId : next, docList : docList, prevTarget : prevTarget}, e)}} type="radio"variant={'outline-primary'} name="radio"> 다음 &rarr; </ToggleButton>
+                            <ToggleButton onClick={(e)=>{getFlowerGrwResult({ type : 'prev', docId : prev, docList : docList, prevTarget : prevTarget, modelNm : modelNm}, e)}} type="radio"variant={'outline-success'} name="radio"> &larr; 이전 </ToggleButton>
+                            <ToggleButton onClick={(e)=>{getFlowerGrwResult({ type : 'next', docId : next, docList : docList, prevTarget : prevTarget, modelNm : modelNm}, e)}} type="radio"variant={'outline-primary'} name="radio"> 다음 &rarr; </ToggleButton>
                         </ButtonGroup>  
                     </div>
                 : "" }
@@ -174,7 +183,7 @@ function FlowerMngClass() {
                 })
 
                 //삭제 후 리스트 재호출
-                getFlowerGrwResult('select');
+                getFlowerGrwResult({modelNm : modelNm }, e)
             }
         };
     
@@ -225,7 +234,11 @@ function FlowerMngClass() {
         };
     
         const addClassActon = async (useParams, e) => {
-    
+            
+            if(classInfo.modelNm == ""){alert("클래스를 추가할 모델을 선택하세요."   ); return}
+            if(classInfo.korNm   == ""){alert("추가할 클래스의 한글명을 입력하세요." ); return}
+            if(classInfo.engNm   == ""){alert("추가할 클래스의 영문명을 입력하세요." ); return}
+
             let flag  = window.confirm('해당 분류 모델에 새 클래스를 추가 하시겠습니까?\n익일 AM 1:00에 제외된 채로 색인 되어 모델에 적용됩니다.');
             
             if(flag){
@@ -244,7 +257,8 @@ function FlowerMngClass() {
                 })
                 
                 setShow(false)//클래스 추가 창 닫기
-                getFlowerGrwResult('select')//클래스 리스트 호출
+
+                getFlowerGrwResult({modelNm : modelNm }, e)
 
                 setTimeout(() => { handleToast("성공", "클래스 추가가 정상적으로 완료 되었습니다.", true)} , 0);   //토스트 호출
                 setTimeout(() => { handleToast("성공", "클래스 추가가 정상적으로 완료 되었습니다.", false)}, 2500);//토스트 숨김
@@ -262,12 +276,13 @@ function FlowerMngClass() {
                     <Form>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label>모델명</Form.Label>
-                            <Form.Select defaultValue={'model_flw'} name='modelNm' onChange={onChangeClassInfo}>
-                                    <option key= {'0'} value={'model_flw'}>
-                                        {'flower'}
+                            <Form.Select defaultValue={""} name='modelNm' onChange={onChangeClassInfo}>
+                                    <option key= {'0'} vlaue="">모델을 선택하세요.</option>
+                                    <option key= {'1'} value={'model_flw'}>
+                                        {'Flower'}
                                     </option>
-                                    <option key= {'1'} value={'model_animal'}>
-                                        {'animal'}
+                                    <option key= {'2'} value={'model_animal'}>
+                                        {'Animal'}
                                     </option>
                             </Form.Select>
                         </Form.Group>

@@ -266,14 +266,12 @@ router.get("/flwNewClass", [handler1, handler2], async (req, res) => {
         let docId        = req.query.docId;
         let collectionNm = "model_class_list"; 
         let type         = req.query.type; 
-        let modelNm      = req.query.modelNm == undefined ? false : req.query.modelNm
+        let modelNm      = req.query.modelNm == undefined ? undefined : req.query.modelNm
+        let operator     = req.query.modelNm == undefined ? 'not-in' : 'in'
+        let value        = [modelNm]
+        let column       = 'model_nm'
 
-        column   = 'model_nm'
-        operator = 'not-in'
-        value    = ['model_flw']
-        //console.log(modelNm)
-        //console.log(flag) //.where('model_nm', 'in', ['model_flw'] )
-        //리스트 호출 전 클래스별 훈련데이터 존재 유무를 파악 하여 없을 경우 훈련 일자를 초기화 함(구동 환경에 구애 받지않기 위함) where('model_nm', '==', 'model_animal' ).orderBy('reg_dt', "desc")
+        //리스트 호출 전 클래스별 훈련데이터 존재 유무를 파악 하여 없을 경우 훈련 일자를 초기화 함(구동 환경에 구애 받지않기 위함)
         await commonUtil.getFirebaseDB().collection('model_class_list').orderBy('reg_dt', "desc").get()
         .then((snapshot) => {
             snapshot.forEach((doc) => {

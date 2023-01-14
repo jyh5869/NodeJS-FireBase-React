@@ -29,32 +29,81 @@ var db = firebase.firestore();
  * @param collectionNm : 컬렉션 명
  * @param type         : 페이징 타입 next & prev
  * @param countPerPage : 페이지당 보여줄 문서 갯수
+ * @param column       : 조건 : 컬럼명
+ * @param operator     : 조건 : 연산자
+ * @param value        : 조건 : 값
 **/
  function getSnapshot(docId, collectionNm, type, countPerPage, column, operator, value){
-    console.log(column)
-    console.log(operator)
-    console.log(value)
+
+    console.log("docId ------------ " + docId)
+    console.log("collectionNm ----- " + collectionNm)
+    console.log("type-------------- " + type)
+    console.log("countPerPage------ " + countPerPage)
+    console.log("column------------ " + column)
+    console.log("operator---------- " + operator)
+    console.log("value------------- " + value)
+
     return new Promise(function (resolve, reject) {
         
         let docRef;
 
-        if(docId != undefined){    
-            db.collection(collectionNm).doc(String(docId)).get().then(function(snapshot){
-                
-                if(type == "next"){
-                    docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
+        if( collectionNm == 'model_class_list'){
+            if(docId != undefined){    
+                db.collection(collectionNm).doc(String(docId)).get().then(function(snapshot){
+                    
+                    if(value != ""){
+                        if(type == "next"){
+                            docRef = db.collection(collectionNm).where(column, operator, value).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
+                        }
+                        else if(type == "prev"){
+                            docRef = db.collection(collectionNm).where(column, operator, value).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
+                        } 
+                    }
+                    else{
+                        if(type == "next"){
+                            docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
+                        }
+                        else if(type == "prev"){
+                            docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
+                        } 
+                    }
+                    resolve(docRef);
+                });
+            }
+            else{
+                if(value != ""){
+                    db.collection(collectionNm).where(column, operator, value).orderBy("id", 'desc').limit(Number(countPerPage+1)).get()
+                    .then(function(docRef){
+                        resolve(docRef);
+                    }) 
                 }
-                else if(type == "prev"){
-                    docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
-                }    
-                resolve(docRef);
-            });
+                else{
+                    db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage+1)).get()
+                    .then(function(docRef){
+                        resolve(docRef);
+                    }) 
+                }  
+            }    
         }
         else{
-            db.collection(collectionNm).where(column, operator, value).orderBy(column).orderBy("id", 'desc').limit(Number(countPerPage+1)).get()
-            .then(function(docRef){
-                resolve(docRef);
-            })        
+            if(docId != undefined){    
+                db.collection(collectionNm).doc(String(docId)).get().then(function(snapshot){
+                    
+                    if(type == "next"){
+                        docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
+                    }
+                    else if(type == "prev"){
+                        docRef = db.collection(collectionNm).orderBy("id", 'desc').startAt(snapshot).limit(Number(countPerPage+1)).get()
+                    }    
+                    resolve(docRef);
+                });
+            }
+            else{
+                db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage+1)).get()
+                .then(function(docRef){
+                    resolve(docRef);
+                })        
+            }
         }    
     });
 }

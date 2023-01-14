@@ -11,9 +11,13 @@ import { Form } from 'react-bootstrap';
 **/
 function SelectBox(props) {
     
-    let [selectOption, setSelectOption] = useState([]);
-    let [selectValue , setSelectValue ] = useState([]);
-    let [initOption  , setInitOption  ] = useState([]);
+    let [selectOption  , setSelectOption  ] = useState([]);
+    let [selectValue   , setSelectValue   ] = useState([]);
+    let [initOption    , setInitOption    ] = useState([]);
+
+    const handleSelectChange = (e) => {
+        props.getSelectValue(e.target.value);
+	};
 
     useEffect(() => {
         setSelectOption(props.selectOption)
@@ -22,12 +26,12 @@ function SelectBox(props) {
     },  []);
 
     return (
-    <Form.Select aria-label="Default select example">
-        <option>{initOption}</option>
-        {selectOption.map((list, index) => (
-            <option key={index} value={selectValue[index]}>{list}</option>
-        ))}
-    </Form.Select>
+        <Form.Select aria-label="Default select example" onChange={handleSelectChange}>
+            <option>{initOption}</option>
+            {selectOption.map((list, index) => (
+                <option key={index} value={selectValue[index]} >{list}</option>
+            ))}
+        </Form.Select>
     );
 }
 
