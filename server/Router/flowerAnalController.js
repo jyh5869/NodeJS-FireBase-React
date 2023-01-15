@@ -379,6 +379,37 @@ router.get("/flwNewClass", [handler1, handler2], async (req, res) => {
 
 
 /**
+ * @author 모델 리스트 조회 컨트롤러
+**/
+router.get("/getModelList", async (req, res) => {
+
+    let docId        = undefined;
+    let type         = undefined;
+    let collectionNm = "model_list"; 
+    let column       = 'use_yn';
+    let operator     = '==';
+    let value        = 'Y';
+
+    let rows = [];
+    
+    await commonUtil.getTargetSnaphot(docId, collectionNm, type, 100, column, operator, value)
+    .then((snapshot) => {
+        snapshot.forEach((doc) => {
+            var childData = doc.data();
+            console.log(childData);
+
+            rows.push(childData);
+        });
+    })
+    .catch((err) => {
+        console.log('Error getting documents', err);
+    });
+
+    res.send({results: rows});
+});
+
+
+/**
  * @author 모델 훈련결과 리스트 호출 및 변경 컨트롤러
 **/
 router.get("/getTrainingHist", async (req, res) => {

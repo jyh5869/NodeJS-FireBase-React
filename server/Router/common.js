@@ -47,7 +47,7 @@ var db = firebase.firestore();
         
         let docRef;
 
-        if( collectionNm == 'model_class_list'){
+        if( collectionNm == 'model_class_list' || collectionNm == 'model_list'){
             if(docId != undefined){    
                 db.collection(collectionNm).doc(String(docId)).get().then(function(snapshot){
                     
@@ -72,7 +72,7 @@ var db = firebase.firestore();
             }
             else{
                 if(value != ""){
-                    db.collection(collectionNm).where(column, operator, value).orderBy("id", 'desc').limit(Number(countPerPage+1)).get()
+                    db.collection(collectionNm).where(column, operator, value).limit(Number(countPerPage+1)).get()
                     .then(function(docRef){
                         resolve(docRef);
                     }) 

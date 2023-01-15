@@ -13,12 +13,15 @@ import SelectBox  from '../common/selectBox';
 **/
 function FlowerMngClass() {
 
-    const [list, setList]    = useState([])
+    const [list, setList]    = useState([]);
     const [docList   , setDocList   ] = useState();
     const [prevTarget, setPrevTarget] = useState("");
     const [next      , setNext      ] = useState("");
     const [prev      , setPrev      ] = useState("");
     const [modelNm   , setModelNm   ] = useState("");
+
+    const [modelCateList, setModelCateList] = useState([]);
+    const [modelNmList  , setModelNmList  ] = useState([]);
 
     const [toastStatus, setToastStatus] = useState(false);
     const [toastInfo  , setToastInfo  ] = useState({
@@ -37,10 +40,9 @@ function FlowerMngClass() {
         });
     };
 
-    //모델 리스트 호출 
+    //모델 클래스 리스트 호출 
     const getFlowerGrwResult = async (useParams, e) => {
 
-        
         let type       = useParams.type;       
         let docList    = useParams.docList;   
         let prevTarget = useParams.prevTarget; 
@@ -71,14 +73,43 @@ function FlowerMngClass() {
         setModelNm(modelNm);
     }
 
-    //선택된 모델 타입으로 리스트 호출
+    //선택된 모델 타입으로 클래스 리스트 호출
     const getSelectValue = async (modelNm, e) => {
 
         getFlowerGrwResult({modelNm : modelNm }, e)
 	};
 
+    //모델 리스트 호출
+    const getModelList = async  (params, e) => {
+
+        let response = await axios({
+            method: 'get',
+            url: '/api/getModelList',
+            params: {},
+            headers: {
+                'Content-Type' : 'multipart/form-data'
+            },
+        });
+
+        let tempArr1 = [];
+        let tempArr2 = [];
+        let data = response.data.results
+        
+        for(var i = 0; i < data.length; i ++){
+            tempArr1.push(data[i].model_nm);
+            tempArr2.push(data[i].model_cate);
+        }
+        
+        setModelCateList(tempArr1);
+        setModelNmList(tempArr2);
+
+        console.log(modelCateList);
+        console.log(modelNmList);
+    };
+
     useEffect(() => {
         getFlowerGrwResult('select');
+        getModelList();
     },  []);
 
     return (
@@ -86,7 +117,7 @@ function FlowerMngClass() {
             <h1>분류 가능 클래스 </h1>
             <div className="mx-1 my-3">
                 <AddClass status={'open'} loading={true} />
-                <SelectBox getSelectValue={getSelectValue} selectOption={["동물 분류 모델", "꽃 분류 모델"]} selectValue={[ "model_animal", "model_flw"]} initOption={["클래스를 조회할 모델을 선택하세요."]}/>
+                <SelectBox getSelectValue={getSelectValue} selectOption={modelCateList} selectValue={modelNmList} initOption={["클래스를 조회할 모델을 선택하세요."]}/>
                 <ShowAlert toastInfo={toastInfo}/>
                 <Table striped bordered hover responsive  className="text-center px-1" >
                     <thead>

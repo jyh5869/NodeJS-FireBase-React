@@ -18,11 +18,13 @@ function SelectBox(props) {
     const handleSelectChange = (e) => {
         props.getSelectValue(e.target.value);
 	};
-
+    
     useEffect(() => {
         setSelectOption(props.selectOption)
         setSelectValue(props.selectValue)
         setInitOption(props.initOption)
+        console.log(props.selectOption)
+        console.log(props.selectValue)
     },  []);
 
     return (
