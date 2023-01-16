@@ -34,7 +34,8 @@ var db = firebase.firestore();
  * @param value        : 조건 : 값
 **/
  function getSnapshot(docId, collectionNm, type, countPerPage, column, operator, value){
-
+    
+    /* ※스넵샷 호출 상태 확인 콘솔
     console.log("docId ------------ " + docId)
     console.log("collectionNm ----- " + collectionNm)
     console.log("type-------------- " + type)
@@ -42,6 +43,7 @@ var db = firebase.firestore();
     console.log("column------------ " + column)
     console.log("operator---------- " + operator)
     console.log("value------------- " + value)
+    */
 
     return new Promise(function (resolve, reject) {
         
@@ -72,10 +74,13 @@ var db = firebase.firestore();
             }
             else{
                 if(value != ""){
-                    db.collection(collectionNm).where(column, operator, value).limit(Number(countPerPage+1)).get()
-                    .then(function(docRef){
-                        resolve(docRef);
-                    }) 
+                    if(countPerPage != undefined){
+                        docRef = db.collection(collectionNm).where(column, operator, value).limit(Number(countPerPage+1)).get()
+                    }
+                    else{
+                        docRef = db.collection(collectionNm).where(column, operator, value).get()
+                    }
+                    resolve(docRef);
                 }
                 else{
                     db.collection(collectionNm).orderBy("id", 'desc').limit(Number(countPerPage+1)).get()

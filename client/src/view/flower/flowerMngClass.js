@@ -80,7 +80,7 @@ function FlowerMngClass() {
 	};
 
     //모델 리스트 호출
-    const getModelList = async  (params, e) => {
+    const getModelList = async (params, e) => {
 
         let response = await axios({
             method: 'get',
@@ -102,9 +102,6 @@ function FlowerMngClass() {
         
         setModelCateList(tempArr1);
         setModelNmList(tempArr2);
-
-        console.log(modelCateList);
-        console.log(modelNmList);
     };
 
     useEffect(() => {
@@ -117,7 +114,9 @@ function FlowerMngClass() {
             <h1>분류 가능 클래스 </h1>
             <div className="mx-1 my-3">
                 <AddClass status={'open'} loading={true} />
-                <SelectBox getSelectValue={getSelectValue} selectOption={modelCateList} selectValue={modelNmList} initOption={["클래스를 조회할 모델을 선택하세요."]}/>
+                {modelNmList.length != 0 && modelCateList.length != 0 &&
+                   <SelectBox getSelectValue={getSelectValue} selectOption={modelNmList} selectValue={modelCateList} initOption={["클래스를 조회할 모델을 선택하세요."]}/>
+                }
                 <ShowAlert toastInfo={toastInfo}/>
                 <Table striped bordered hover responsive  className="text-center px-1" >
                     <thead>

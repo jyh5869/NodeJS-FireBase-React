@@ -23,8 +23,6 @@ function SelectBox(props) {
         setSelectOption(props.selectOption)
         setSelectValue(props.selectValue)
         setInitOption(props.initOption)
-        console.log(props.selectOption)
-        console.log(props.selectValue)
     },  []);
 
     return (

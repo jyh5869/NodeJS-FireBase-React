@@ -382,9 +382,11 @@ router.get("/flwNewClass", [handler1, handler2], async (req, res) => {
  * @author 모델 리스트 조회 컨트롤러
 **/
 router.get("/getModelList", async (req, res) => {
-
+    
+    //파라메터 세팅
     let docId        = undefined;
     let type         = undefined;
+    let countPerPage = undefined;
     let collectionNm = "model_list"; 
     let column       = 'use_yn';
     let operator     = '==';
@@ -392,19 +394,19 @@ router.get("/getModelList", async (req, res) => {
 
     let rows = [];
     
-    await commonUtil.getTargetSnaphot(docId, collectionNm, type, 100, column, operator, value)
+    //리스트 조회
+    await commonUtil.getTargetSnaphot(docId, collectionNm, type, countPerPage, column, operator, value)
     .then((snapshot) => {
         snapshot.forEach((doc) => {
             var childData = doc.data();
-            console.log(childData);
-
             rows.push(childData);
         });
     })
     .catch((err) => {
         console.log('Error getting documents', err);
     });
-
+    
+    //응답
     res.send({results: rows});
 });
 
