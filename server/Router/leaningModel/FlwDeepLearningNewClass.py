@@ -29,19 +29,6 @@ from webdriver_manager.chrome          import ChromeDriverManager
 from selenium.webdriver.common.by      import By
 
 
-# Firebase 연계 초기 세팅
-cred = credentials.Certificate('Config/firebase_appKey_Movies.json') # server\Router\firebase_appKey_Movies.json
-firebase_admin.initialize_app(cred)
-
-db = firestore.client()
-
-# 데이터 조회 1 - (학습된 클레스 리스트 호출)
-class_list_ref    = db.collection("model_class_list")
-class_list_query  = class_list_ref.where('use_yn', '==', 'Y').where('train_dt', '!=', '')
-class_list_docs   = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
-class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
-
-
 # 변수 선언
 # epochs - 하나의 데이터셋을 몇 번 반복 학습할지 정하는 파라미터. 
 #          같은 데이터셋이라 할지라도 가중치가 계속해서 업데이트되기 때문에 모델이 추가적으로 학습가능
@@ -62,6 +49,19 @@ start_dt        = ""
 end_dt          = ""
 label_name      = []
 label_count     = 0
+
+# Firebase 연계 초기 세팅
+cred = credentials.Certificate('Config/firebase_appKey_Movies.json') # server\Router\firebase_appKey_Movies.json
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
+# 데이터 조회 1 - (학습된 클레스 리스트 호출)
+class_list_ref    = db.collection("model_class_list")
+class_list_query  = class_list_ref.where('model_nm', '==', save_model_nm).where('use_yn', '==', 'Y').where('train_dt', '!=', '')
+class_list_docs   = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
+class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
+
 
 try:
 
@@ -305,9 +305,9 @@ data_documnets = {
     'load_status'     : load_status,
     'training_status' : training_status,
     'class_nm'        : label_name,
-    'verbose'         : parmas_hist ['verbose']                                             if len(parmas_hist)  != 0 else 0,
-    'epochs'          : parmas_hist ['epochs']                                              if len(parmas_hist)  != 0 else 0,
-    'steps'           : parmas_hist ['steps']                                               if len(parmas_hist)  != 0 else 0,
+    'verbose'         : parmas_hist ['verbose']                                            if len(parmas_hist)  != 0 else 0,
+    'epochs'          : parmas_hist ['epochs']                                             if len(parmas_hist)  != 0 else 0,
+    'steps'           : parmas_hist ['steps']                                              if len(parmas_hist)  != 0 else 0,
     'loss'            : history_hist['loss'][len(history_hist['loss']) -1]                 if len(history_hist) != 0 else 0,
     'accuracy'        : history_hist['accuracy'][len(history_hist['accuracy']) -1]         if len(history_hist) != 0 else 0,
     'val_loss'        : history_hist['val_loss'][len(history_hist['val_loss']) -1]         if len(history_hist) != 0 else 0,

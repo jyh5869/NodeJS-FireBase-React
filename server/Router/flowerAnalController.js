@@ -208,7 +208,7 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
     const promise = new Promise(async (resolve, reject)  => {
         let results = await FlwDeepLearningNewClass(saveModelNmReq, datasetUrlReq, reulstImgPathReq, saveModelUrlReq)
         .then(function(){
-            resolve(results); // resolve 가 실행이 되면 밑에 .then 이 실행이 됨
+            resolve(results);
             console.log("then!");
             console.log(results)
         })
@@ -216,7 +216,6 @@ router.get("/FlwDeepLearningNewClass", async  (req, res,  next) => {
             console.log("catch!");
             reject()
         });
-
     })    
 });
 
@@ -597,11 +596,10 @@ function deleteall(path) {
  *  @param saveModelUrl  훈련 모델 저장경로
  */
 async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, saveModelUrl){
-    
-    let dwonStatus;//크롤링 결과 변수 (Success, Fail)
 
+    let dwonStatus;//크롤링 결과 변수 (Success, Fail)
     //모델 훈련전 클레스의 훈련데이터 존재유무 파악 및 없을경우 훈련데이터를 수집하도록 세팅
-    await db.collection('model_class_list').orderBy('reg_dt', "desc").get()
+    await commonUtil.getTargetSnaphot(undefined, 'model_class_list', undefined, undefined, 'model_nm', '==', saveModelNm)
         .then((snapshot) => {
             snapshot.forEach((doc) => {
                 var childData = doc.data();
@@ -613,6 +611,7 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
                         boardDoc.update({ train_dt : ""})
                     }
                     else{
+                        console.log("경로 있다!"+datasetUrl+"/"+childData.class_kor_nm);
                         boardDoc.update({ train_dt : Date.now()})
                     }
                 });
@@ -628,10 +627,10 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
         pythonPath   : '',
         pythonOptions: ['-u'],
         scriptPath   : '',
-        args         : [datasetUrl],
+        args         : [datasetUrl, saveModelNm],
         encoding : 'utf8',
     };
-
+    await commonUtil.getDelay(2000*1)
     //훈련안된 클레스를 쿼리하여 이미지 다운 후 훈련 하고 이미지 분류 오류 수정(파이썬 버전차이로 추측)
     let pyshell = await new PythonShell.PythonShell('Router/pythonCommon/loadDeepLearningData.py', options1); 
     pyshell.send(datasetUrl, { mode: "text" })
@@ -678,9 +677,36 @@ const schedule = require('node-schedule');//스케줄러 사용을 위한 라이
 const app      = express()
 app.listen(6000, (request, response, next) => {
     console.log('Example app listening on port 6000')
-    const trainingModelBatch = schedule.scheduleJob('1 53 1 * * *',async function(requestTime){
-        console.log("모델 훈련 배치 시작: " + new Date());
-        FlwDeepLearningNewClass(saveModelNm, datasetUrl, reulstImgPath, saveModelUrl)
+    const trainingModelBatch = schedule.scheduleJob('1 10 * * * *',async function(requestTime){
+    //const trainingModelBatch = schedule.scheduleJob('1 * * * * *',async function(requestTime){
+
+        let rows = [];
+        //리스트 조회
+        await commonUtil.getTargetSnaphot(undefined, 'model_list', undefined, undefined, 'use_yn', '==', 'Y')
+        .then(async(snapshot) => {
+            
+            snapshot.forEach((doc) => {
+                var childData = doc.data();
+                rows.push(childData); 
+                console.log(childData.model_nm);
+            });
+
+            //900초 15분 = 900000
+            for(var i = 0; i < rows.length; i++) {
+                
+                await commonUtil.getDelay(900000*i).then(() => {   
+                    console.log("모델 훈련 배치 시작: " + rows[i].model_nm + " / " + new Date());
+                    
+                    let saveModelNmDetail = rows[i].model_nm;
+                    let datasetUrlDetail = datasetUrl + '/' + saveModelNmDetail;
+                    
+                    FlwDeepLearningNewClass(saveModelNmDetail, datasetUrlDetail, reulstImgPath, saveModelUrl)
+                });
+            }
+        })
+        .catch((err) => {
+            console.log('Error getting documents', err);
+        });
     });
 })
 

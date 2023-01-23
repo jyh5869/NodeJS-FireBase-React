@@ -229,5 +229,11 @@ module.exports = {
             }
         }
         return returnParam;
+    },
+    getDelay : function(n){
+        //동기처리를 위한 딜레이
+        return new Promise(function(resolve){
+            setTimeout(resolve,n*1);
+        });
     }
 };

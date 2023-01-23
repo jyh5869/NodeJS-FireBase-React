@@ -18,6 +18,9 @@ from firebase_admin                    import credentials
 from firebase_admin                    import firestore
 from pathlib                           import Path
 
+# 이미지데이터 저장 경로
+save_path     = str(sys.argv[1])
+save_model_nm = str(sys.argv[2])
 
 # Firebase 연계 초기 세팅
 cred = credentials.Certificate('Config/firebase_appKey_Movies.json') # server\Router\firebase_appKey_Movies.json
@@ -28,13 +31,11 @@ db = firestore.client()
 class_list_ref    = db.collection("model_class_list")
 
 # 데이터 조회 1 (조회하고자 하는 영화 데이터 존재 유무 파악)
-class_list_query  = class_list_ref.where('use_yn', '==', 'Y').where('train_dt', '==', '') # 개봉일 기준 limit의 레코드 호출 쿼리 작성
+class_list_query  = class_list_ref.where('model_nm', '==', save_model_nm).where('train_dt', '==', '').where('use_yn', '==', 'Y') # 개봉일 기준 limit의 레코드 호출 쿼리 작성
 class_list_docs   = class_list_query.stream()  # 쿼리 조건에 맞는 데이터 가져오기
 
 class_list_dict   = list(map(lambda x: x.to_dict(), class_list_docs))  # list(Map) 타입으로 데이터 형식 변경 (DataFrame으로 사용하기 위함)
 
-# 이미지데이터 저장 경로
-save_path = str(sys.argv[1])
 
 # 업로드 경로 존재 체크 및 생성과 저장경로 세팅
 def createDirectory(directory):
@@ -185,7 +186,7 @@ for key in class_list_dict:
     train_dt = int(str(time.time()).replace('.','')[0:13])
 
     # 크롤링 진행
-    collect_image(key['class_kor_nm'], 200)
+    collect_image(key['class_kor_nm'], 100)
     
     # 트레이닝 날짜 업데이트
     class_list_ref.document(key['id']).set({
