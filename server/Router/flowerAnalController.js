@@ -78,8 +78,9 @@ router.get("/imageDeepLeaning2", (req, res) => {
 **/
 router.post("/flowerAnalysis", upload.single('file'),  (req, res,  next) => {
 
-    const file = req.file;//Multer를 이용한 파일 객체
-    
+    const file    = req.file;//Multer를 이용한 파일 객체
+    const modelNm = req.body.modelNm;
+
     if (!file) {
         const error = new Error('No File')
         error.httpStatusCode = 400
@@ -97,7 +98,7 @@ router.post("/flowerAnalysis", upload.single('file'),  (req, res,  next) => {
         args         : [saveModelUrl, 'value2'],
     };
 
-    data = { binary: file.buffer };
+    data = { binary: file.buffer, modelNm: modelNm};
     //data = { binary: file.buffer.toString("base64")};
 
     //파이썬 쉘 생성, 요청 및 응답
@@ -611,7 +612,6 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
                         boardDoc.update({ train_dt : ""})
                     }
                     else{
-                        console.log("경로 있다!"+datasetUrl+"/"+childData.class_kor_nm);
                         boardDoc.update({ train_dt : Date.now()})
                     }
                 });
@@ -630,7 +630,9 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
         args         : [datasetUrl, saveModelNm],
         encoding : 'utf8',
     };
+
     await commonUtil.getDelay(2000*1)
+    
     //훈련안된 클레스를 쿼리하여 이미지 다운 후 훈련 하고 이미지 분류 오류 수정(파이썬 버전차이로 추측)
     let pyshell = await new PythonShell.PythonShell('Router/pythonCommon/loadDeepLearningData.py', options1); 
     pyshell.send(datasetUrl, { mode: "text" })
@@ -676,29 +678,27 @@ async function FlwDeepLearningNewClass (saveModelNm, datasetUrl, reulstImgPath, 
 const schedule = require('node-schedule');//스케줄러 사용을 위한 라이브러리
 const app      = express()
 app.listen(6000, (request, response, next) => {
-    console.log('Example app listening on port 6000')
-    const trainingModelBatch = schedule.scheduleJob('1 10 * * * *',async function(requestTime){
-    //const trainingModelBatch = schedule.scheduleJob('1 * * * * *',async function(requestTime){
+    console.log('Deep-Learning app listening on port 6000')
+    //const trainingModelBatch = schedule.scheduleJob('1 49 * * * *',async function(requestTime){
+    const trainingModelBatch = schedule.scheduleJob('0 0 3 * * *',async function(requestTime){
 
-        let rows = [];
+        let docRows = [];
         //리스트 조회
         await commonUtil.getTargetSnaphot(undefined, 'model_list', undefined, undefined, 'use_yn', '==', 'Y')
         .then(async(snapshot) => {
-            
+            //배열에 데이터 세팅
             snapshot.forEach((doc) => {
-                var childData = doc.data();
-                rows.push(childData); 
-                console.log(childData.model_nm);
+                docRows.push(doc.data()); 
             });
 
-            //900초 15분 = 900000
-            for(var i = 0; i < rows.length; i++) {
+            //호출된 모델 수 만큼 해당 모델을 생성 (Delay: 15분 = 900초  = 900000ms)
+            for(var i = 0; i < docRows.length; i++) {
                 
                 await commonUtil.getDelay(900000*i).then(() => {   
-                    console.log("모델 훈련 배치 시작: " + rows[i].model_nm + " / " + new Date());
+                    console.log("모델 훈련 배치 시작: " + docRows[i].model_nm + " - " + new Date());
                     
-                    let saveModelNmDetail = rows[i].model_nm;
-                    let datasetUrlDetail = datasetUrl + '/' + saveModelNmDetail;
+                    let saveModelNmDetail = docRows[i].model_nm;
+                    let datasetUrlDetail  = datasetUrl + '/' + saveModelNmDetail;
                     
                     FlwDeepLearningNewClass(saveModelNmDetail, datasetUrlDetail, reulstImgPath, saveModelUrl)
                 });

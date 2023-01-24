@@ -38,7 +38,8 @@ function FlowerAnalysis() {
         const fileBlob = e.target.files[0]
         const uploadFile = fileBlob
 
-        formData.append('file', uploadFile)
+        formData.append('file'   , uploadFile)
+        formData.append('modelNm', 'model_animal')
 
         reader.readAsDataURL(uploadFile);
 
@@ -79,11 +80,13 @@ function FlowerAnalysis() {
     /* 분석결과에 따른 크롤링 (정보1 - 백과사전) */
     const getFlowerInfoResult = async (analysisRes) => {
 
+        let keyword = analysisRes
+
         let response = await axios({
             method  : 'get',
             url     : '/api/crawlingGoogle',
             params  : {
-                'keyword' : analysisRes
+                'keyword' : keyword
             },
             headers : {
                 'Content-Type' : 'multipart/form-data'
@@ -99,11 +102,13 @@ function FlowerAnalysis() {
     /* 분석결과에 따른 크롤링 (정보2 - 사육정보) */
     const getFlowerGrwResult = async (analysisRes) => {
 
+        let keyword = analysisRes + ' 키우기'
+
         let response = await axios({
             method  : 'get',
             url     : '/api/crawlingGoogleGrwFlw',
             params  : {
-                'keyword' : analysisRes
+                'keyword' : keyword
             },
             headers : {
                 'Content-Type' : 'multipart/form-data'
@@ -212,7 +217,7 @@ function FlowerAnalysis() {
                         {imageSrc && <img src={imageSrc} alt="preview-img" />}
                     </div>
                     <div id="analysisResult" className="content_1" style={{display:obj != null ?'block':'none'}}>
-                        이 꽃은 <span className="innerText">{"'" + obj + "'"}</span> 입니다.
+                        이 동물은 <span className="innerText">{"'" + obj + "'"}</span> 입니다.
                     </div>
                 </div>    
 

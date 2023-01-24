@@ -38,7 +38,8 @@ function FlowerAnalysis() {
         const fileBlob = e.target.files[0]
         const uploadFile = fileBlob
 
-        formData.append('file', uploadFile)
+        formData.append('file'   , uploadFile)
+        formData.append('modelNm', 'model_flw')
 
         reader.readAsDataURL(uploadFile);
 
@@ -79,11 +80,13 @@ function FlowerAnalysis() {
     /* 분석결과에 따른 크롤링 (정보1 - 백과사전) */
     const getFlowerInfoResult = async (analysisRes) => {
 
+        let keyword = analysisRes + ' 꽃'
+
         let response = await axios({
             method  : 'get',
             url     : '/api/crawlingGoogle',
             params  : {
-                'keyword' : analysisRes
+                'keyword' : keyword
             },
             headers : {
                 'Content-Type' : 'multipart/form-data'
@@ -99,11 +102,13 @@ function FlowerAnalysis() {
     /* 분석결과에 따른 크롤링 (정보2 - 사육정보) */
     const getFlowerGrwResult = async (analysisRes) => {
 
+        let keyword = '꽃 ' + analysisRes + ' 키우기'
+
         let response = await axios({
             method  : 'get',
             url     : '/api/crawlingGoogleGrwFlw',
             params  : {
-                'keyword' : analysisRes
+                'keyword' : keyword
             },
             headers : {
                 'Content-Type' : 'multipart/form-data'

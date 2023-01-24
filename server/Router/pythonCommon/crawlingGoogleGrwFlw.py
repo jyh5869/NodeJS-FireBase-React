@@ -23,7 +23,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 keyword = sys.stdin.read()
 baseUrl = 'https://www.google.com/search?q='
-plusUrl = '꽃 ' + keyword + ' 키우기'
+plusUrl = keyword
 
 url = baseUrl + quote_plus(plusUrl)
 
