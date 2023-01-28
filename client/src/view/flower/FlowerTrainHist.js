@@ -4,6 +4,7 @@ import {Table, Button, ToggleButton, ButtonGroup } from 'react-bootstrap';
 import axios from 'axios';
 
 import Pagination from '../common/pagination';
+import SelectBox  from '../common/selectBox';
 
 
 /**
@@ -17,13 +18,18 @@ function List() {
     const [prevTarget, setPrevTarget] = useState("");
     const [next      , setNext      ] = useState("");
     const [prev      , setPrev      ] = useState("");
+    const [modelNm   , setModelNm   ] = useState("");
+
+    const [modelCateList, setModelCateList] = useState([]);
+    const [modelNmList  , setModelNmList  ] = useState([]);
 
     const getFlowerGrwResult = async (useParams, e) => {
-        
+
         let type       = useParams.type;       
         let docList    = useParams.docList;   
         let prevTarget = useParams.prevTarget; 
         let docId      = useParams.docId;
+        let modelNm    = useParams.modelNm;
 
         let response = await axios({
             method: 'get',
@@ -31,7 +37,8 @@ function List() {
             params: {
                 'callType' : 'select',
                 'docId'    : docId ,
-                'type'     : type
+                'type'     : type , 
+                'modelNm'  : modelNm,
             },
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -39,12 +46,13 @@ function List() {
         })
 
         var pagingArr = Pagination(response.data.rows, type, docList, prevTarget);
-
+        console.log(pagingArr[4]);
         setPrev(pagingArr[0])
         setNext(pagingArr[1])
         setDocList(pagingArr[2])
         setPrevTarget(pagingArr[3])
         setList(pagingArr[4]);
+        setModelNm(modelNm);
     }
 
 
@@ -88,8 +96,40 @@ function List() {
         }        
     }
 
+    //선택된 모델 타입으로 클래스 리스트 호출
+    const getSelectValue = async (modelNm, e) => {
+
+        getFlowerGrwResult({modelNm : modelNm }, e)
+	};
+
+    //모델 리스트 호출
+    const getModelList = async (params, e) => {
+
+        let response = await axios({
+            method: 'get',
+            url: '/api/getModelList',
+            params: {},
+            headers: {
+                'Content-Type' : 'multipart/form-data'
+            },
+        });
+
+        let tempArr1 = [];
+        let tempArr2 = [];
+        let data = response.data.results
+        
+        for(var i = 0; i < data.length; i ++){
+            tempArr1.push(data[i].model_nm);
+            tempArr2.push(data[i].model_cate);
+        }
+        
+        setModelCateList(tempArr1);
+        setModelNmList(tempArr2);
+    };
+
     useEffect(() => {
         getFlowerGrwResult('select');
+        getModelList();
     },  []);
     
     //JSX식 작성
@@ -97,6 +137,9 @@ function List() {
         <React.Fragment>
             <h1>모델 훈련 스케줄러 이력</h1>
             <div className="mx-1 my-3">
+                {modelNmList.length != 0 && modelCateList.length != 0 &&
+                   <SelectBox getSelectValue={getSelectValue} selectOption={modelNmList} selectValue={modelCateList} initOption={["훈련이력을 조회할 모델을 선택하세요."]}/>
+                }
                 <Table responsive bordered hover className="text-center">
                     <thead>
                     <tr>

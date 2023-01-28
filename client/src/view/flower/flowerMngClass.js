@@ -7,6 +7,7 @@ import ShowAlert  from '../common/showAlert';
 import Pagination from '../common/pagination';
 import SelectBox  from '../common/selectBox';
 
+
 /**
  * @author 분석가능 클레스 리스트 컴포넌트
  * @returns 분석가능 클래스 리스트 HTML

@@ -49,7 +49,7 @@ var db = firebase.firestore();
         
         let docRef;
 
-        if( collectionNm == 'model_class_list' || collectionNm == 'model_list'){
+        if( collectionNm == 'model_class_list' || collectionNm == 'model_list' || collectionNm == 'model_trn_hist'){
             if(docId != undefined){    
                 db.collection(collectionNm).doc(String(docId)).get().then(function(snapshot){
                     
