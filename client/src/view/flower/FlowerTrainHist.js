@@ -46,7 +46,7 @@ function List() {
         })
 
         var pagingArr = Pagination(response.data.rows, type, docList, prevTarget);
-        console.log(pagingArr[4]);
+
         setPrev(pagingArr[0])
         setNext(pagingArr[1])
         setDocList(pagingArr[2])
