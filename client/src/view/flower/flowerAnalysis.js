@@ -3,8 +3,10 @@ import { Button, Table, Form  }   from 'react-bootstrap';
 
 import axios                          from 'axios';
 
-import Loader from '../common/loader';
-import Slider from '../common/slider';
+import Loader     from '../common/loader';
+import Slider     from '../common/slider';
+import SelectBox  from '../common/selectBox';
+import OffCanvas  from '../common/offCanvasSingle';
 
 import '../../assets/css/flower.css';
 
@@ -157,6 +159,11 @@ function FlowerAnalysis() {
         e.preventDefault();
     }
     
+    //선택된 모델 타입으로 클래스 리스트 호출
+    const getSelectValue = async (modelNm, e) => {
+
+        alert("하이하이");
+	};
 
     //이벤트 리스너
     useEffect(() => {
@@ -192,7 +199,8 @@ function FlowerAnalysis() {
     //JSX 식으로 리스트 파싱
     return (
         <React.Fragment>
-            <h1>꽃 종류 분석</h1>    
+            <h1>꽃 종류 분석 <OffCanvas canvasIdx={3}/> </h1>
+            <SelectBox getSelectValue={getSelectValue} selectOption={['안녕']} selectValue={['안녕하세용']} initOption={["클래스를 조회할 모델을 선택하세요."]}/>
             <div className="my-3">
                 <div>    
                     <Slider sliderImgArr={sliderImgArr} sliderTitArr={sliderTitArr} sliderSubArr={sliderSubArr}/>
