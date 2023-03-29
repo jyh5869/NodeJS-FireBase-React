@@ -9,6 +9,7 @@ import SelectBox  from '../common/selectBox';
 import OffCanvas  from '../common/offCanvasSingle';
 
 import '../../assets/css/flower.css';
+import '../../assets/css/common.css';
 
 
 /**
@@ -199,8 +200,7 @@ function FlowerAnalysis() {
     //JSX 식으로 리스트 파싱
     return (
         <React.Fragment>
-            <h1>꽃 종류 분석 <OffCanvas canvasIdx={3}/> </h1>
-            <SelectBox getSelectValue={getSelectValue} selectOption={['안녕']} selectValue={['안녕하세용']} initOption={["클래스를 조회할 모델을 선택하세요."]}/>
+            <h1>꽃 종류 분석<OffCanvas canvasIdx={0}/></h1>
             <div className="my-3">
                 <div>    
                     <Slider sliderImgArr={sliderImgArr} sliderTitArr={sliderTitArr} sliderSubArr={sliderSubArr}/>
