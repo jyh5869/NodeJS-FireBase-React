@@ -2,11 +2,13 @@
 ※ npm install library@latest -> 최신버전으로 업데이트
 ※ npm cache clean --force    -> NPM 캐시 삭제
 ※ npm cache verify           -> 캐시를 확인하고 꼬인부분을 정리(무결성 확인)
+※ npm uninstall packegeName  -> npm 라이브러리 삭제
 
 1. danfojs-node - 구조화된 데이터를 조작하고 처리할 수 있는 라이브러리 1
 2. pandas-node - 구조화된 데이터를 조작하고 처리할 수 있는 라이브러리 2
 3. multer - 파일 업로드를 위한 라이브러리
-4. react-spinners - 리엑트 스피너 → npm install react-spinners
+4. react-loader-spinner - 리엑트 스피너 → npm install react-loader-spinner
 5. @emotion/react - 리엑트 스피너 의 CSS적용을 위한 라이브러리 → npm install @emotion/react
 6. python-shell - nodejs에서 파이썬 파일을 실행시키기 위한 라이브러리
 7. node-schedule - nodejs에서 스케줄러 사용을 위한 라이브러리 → npm install node-schedule
+8. ol(Openlayers) - GIS 정보 처리를 위한 라이브러리 npm install ol

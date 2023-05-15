@@ -13,6 +13,7 @@ import FlowerAnalysis  from './view/flower/flowerAnalysis';
 import AnimalAnalysis  from './view/flower/animalAnalysis';
 import FlowerMngClass  from './view/flower/flowerMngClass';
 import FlowerTrainHist from './view/flower/FlowerTrainHist';
+import Openlayers      from './view/map/openlayers';
 import Login           from './view/common/login';
 
 import './assets/css/common.css';
@@ -99,6 +100,9 @@ function App() {
                                 <NavDropdown.Item href="/view/flower/flowerTrainHist">model Training schedules</NavDropdown.Item>
                                 <NavDropdown.Item href="/view/flower/flowerMngClass">Add flowerClass</NavDropdown.Item>
                             </NavDropdown>
+                            <NavDropdown title="Map" id="basic-nav-dropdown">
+                                <NavDropdown.Item href="/view/map/openlayers">Open layers</NavDropdown.Item>
+                            </NavDropdown>
                             <NavDropdown title="User" id="basic-nav-dropdown">
                                 {isLogIn == true ? 
                                     <Form>
@@ -132,6 +136,7 @@ function App() {
                     <Route path="/view/flower/animalAnalysis" element={ <AnimalAnalysis/> } ></Route>
                     <Route path="/view/flower/flowerMngClass" element={ <FlowerMngClass/> } ></Route>
                     <Route path="/view/flower/flowerTrainHist" element={ <FlowerTrainHist/> } ></Route>
+                    <Route path="/view/map/openlayers" element={ <Openlayers/> } ></Route>
                 </Routes>
             </div>
         </div>

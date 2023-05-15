@@ -141,7 +141,7 @@ function MovieDetail(props) {
                     : 
                         <tr>
                             <td colSpan={4} className="text-center" >
-                                <Loader loading={lodeYn} color={'black'} type={"small"} borderWidth={"1px"} size={30}  text={lodeTxt} />
+                                <Loader loading={lodeYn} type={"Oval"} color={'#4fa94d'} secondaryColor={""} size={25}  text={lodeTxt} />
                             </td>
                         </tr>
                     }
@@ -173,7 +173,7 @@ function MovieDetail(props) {
                     : 
                         <tr>
                             <td colSpan={4} className="text-center" >
-                                <Loader loading={lodeYn} color={'black'} type={"small"} borderWidth={"1px"} size={30}  text={lodeTxt} />
+                                <Loader loading={lodeYn}  type={"BallTriangle"} color={'#4fa94d'} secondaryColor={""} size={25}  text={lodeTxt} />
                             </td>
                         </tr>
                     }

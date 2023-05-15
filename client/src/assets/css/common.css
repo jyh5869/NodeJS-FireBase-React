@@ -48,6 +48,7 @@ table tr td > img { width: 100%;}
 
 .offCanvas.right { float: right;}
 
+.loading_wrap .axios-loading{ margin: 0 auto; width: fit-content;}
 .loading_wrap .axios-loading-indicator-normal { top: 45%; left: calc(50% - 75px); position: fixed;}
 .loading_wrap .axios-loading-normal { left: 0; top: 0; width: 100%; height: 100%; z-index: 999; overflow: auto; display: block; position: fixed !important; background-color: rgba(0, 0, 0, 0.300);}
 .loading_wrap .loding-text-normal { left: 0; top: 52%; width: 100%; z-index: 9999; overflow: auto; position: fixed !important; text-align: center; color: aliceblue;}
