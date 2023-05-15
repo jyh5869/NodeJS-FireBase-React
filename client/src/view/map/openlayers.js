@@ -1,21 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Button, Table, Form  }   from 'react-bootstrap';
 
-import axios                          from 'axios';
+import { Button, Table, Form  } from 'react-bootstrap';
+import axios from 'axios';
 
-//import Loader     from '../common/loader';
-//import Slider     from '../common/slider';
-//import SelectBox  from '../common/selectBox';
-//import OffCanvas  from '../common/offCanvasSingle';
+import Map1 from '../common/map';
 
-import Map1  from '../common/map';
-
-/*
-import {Map, View} from 'ol';
-import TileLayer from 'ol/layer/Tile';
-import OSM from 'ol/source/OSM';
-import XYZ from 'ol/source/XYZ';
-*/
 import '../../assets/css/flower.css';
 import '../../assets/css/common.css';
 
@@ -58,7 +47,7 @@ function Openlayers() {
     return (
         <React.Fragment>
             <h1>오픈 레이어스</h1>
-            <div className="my-3">sdfsdf
+            <div className="my-3">
                 <Map1/>
                 {/* <div id="map"></div> */}
                 {/* <script type="module" src="../common/map.js"></script> */}
