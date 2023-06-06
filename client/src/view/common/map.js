@@ -2,7 +2,7 @@ import React,  { useEffect, useState } from 'react';
 /*
 교육 URL
 https://openlayers.org/en/latest/examples/center.html
-
+https://dev.to/camptocamp-geo/integrating-an-openlayers-map-in-vue-js-a-step-by-step-guide-2n1p
 */
 import '../../assets/css/map.css';
 import {Map} from 'ol';
@@ -17,11 +17,29 @@ import {GeometryCollection, Point, Polygon} from 'ol/geom.js';
 import {circular} from 'ol/geom/Polygon.js';
 import {getDistance} from 'ol/sphere.js';
 import {transform} from 'ol/proj.js';
+import {Circle as CircleStyle, Stroke, Style} from 'ol/style.js';
+
+import Feature from 'ol/Feature.js';
+import {easeOut} from 'ol/easing.js';
+import {fromLonLat} from 'ol/proj.js';
+import {getVectorContext} from 'ol/render.js';
+import {unByKey} from 'ol/Observable.js';
+
+
+
+
+
 
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 
 import GeojsonTest from '../../openLayers/examples/data/geojson/switzerland.geojson';
+
+const tileLayer = new TileLayer({
+    source: new XYZ({ //source: new OSM()
+        url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+    })
+});
 
 const source = new VectorSource({
     url: GeojsonTest,
@@ -49,11 +67,7 @@ function Map1({}) {
     const map = new Map({
         target: 'map',
         layers: [
-            new TileLayer({
-                source: new XYZ({ //source: new OSM()
-                    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-                })
-            }),
+            tileLayer,
             vectorLayer,
         ],
         view: new View({
@@ -160,7 +174,7 @@ function Map1({}) {
             return defaultStyle(feature);
         },
     });
-
+    console.log(modify);
     modify.on('modifystart', function (event) {
         console.log("수정 시작");
         event.features.forEach(function (feature) {
@@ -182,15 +196,16 @@ function Map1({}) {
         });
     });
 
+    map.addInteraction(modify);
+    
     //지도 초기화
     const initMap = async (e) => {
         console.log(e.target.value)
         map.removeInteraction(draw);
         map.removeInteraction(snap);
         addInteractions(e);
-        
     };
-
+    
     let draw, snap; // global so we can remove them later
     function addInteractions(e) {
         
@@ -227,6 +242,61 @@ function Map1({}) {
         
     }
 
+    /* 랜덤 좌표 찍기 */
+    function addRandomFeature() {
+
+        const x = Math.random() * 360 - 180;
+        const y = Math.random() * 170 - 85;
+        const geom = new Point(fromLonLat([x, y]));
+        const feature = new Feature(geom);
+        
+        source.addFeature(feature);
+    }
+    
+    const duration = 3000;
+    function flash(feature) {
+        console.log(feature);
+        const start = Date.now();
+        const flashGeom = feature.getGeometry().clone();
+        const listenerKey = tileLayer.on('postrender', animate);
+        
+        function animate(event) {
+            const frameState = event.frameState;
+            const elapsed = frameState.time - start;
+            
+            if (elapsed >= duration) {
+                unByKey(listenerKey);
+                return;
+            }
+
+            const vectorContext = getVectorContext(event);
+            const elapsedRatio = elapsed / duration;
+            // radius will be 5 at start and 30 at end.
+            const radius = easeOut(elapsedRatio) * 25 + 5;
+            const opacity = easeOut(1 - elapsedRatio);
+        
+            const style = new Style({
+                image: new CircleStyle({
+                    radius: radius,
+                    stroke: new Stroke({
+                    color: 'rgba(255, 0, 0, ' + opacity + ')',
+                    width: 0.25 + opacity,
+                    }),
+                }),
+            });
+        
+            vectorContext.setStyle(style);
+            vectorContext.drawGeometry(flashGeom);
+            // tell OpenLayers to continue postrender animation
+            map.render();
+        }
+    }
+    
+    source.on('addfeature', function (e) {
+        flash(e.feature);
+    });
+    
+    //window.setInterval(addRandomFeature, 3000);
     return (
         <>
             <link rel="stylesheet" href="node_modules/ol/ol.css"></link>
@@ -243,7 +313,8 @@ function Map1({}) {
                 <option value="Point">Point</option>
                 <option value="LineString">LineString</option>
                 <option value="Polygon">Polygon</option>
-                <option value="Circle">Circle</option>
+                <option value="Circle">Circle Geometry</option>
+                <option value="Geodesic" selected>Geodesic Circle</option>
             </select>
             </form>
         </>
