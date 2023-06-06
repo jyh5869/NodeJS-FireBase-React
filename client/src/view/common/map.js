@@ -42,8 +42,8 @@ const tileLayer = new TileLayer({
 });
 
 const source = new VectorSource({
-    url: GeojsonTest,
-    format: new GeoJSON(),
+    //url: GeojsonTest,
+    //format: new GeoJSON(),
 });
 
 const vectorLayer = new VectorLayer({
@@ -73,7 +73,7 @@ function Map1({}) {
         view: new View({
             center: [ 126.97659953, 37.579220423 ], //포인트의 좌표를 리턴함
             projection : 'EPSG:4326',
-            zoom: 7,
+            zoom: 1,
         })
     });
 
@@ -174,7 +174,7 @@ function Map1({}) {
             return defaultStyle(feature);
         },
     });
-    console.log(modify);
+    //console.log(modify);
     modify.on('modifystart', function (event) {
         console.log("수정 시작");
         event.features.forEach(function (feature) {
@@ -200,7 +200,7 @@ function Map1({}) {
     
     //지도 초기화
     const initMap = async (e) => {
-        console.log(e.target.value)
+        //console.log(e.target.value)
         map.removeInteraction(draw);
         map.removeInteraction(snap);
         addInteractions(e);
@@ -255,6 +255,7 @@ function Map1({}) {
     
     const duration = 3000;
     function flash(feature) {
+        console.log("피쳐 추가!");
         console.log(feature);
         const start = Date.now();
         const flashGeom = feature.getGeometry().clone();
@@ -301,6 +302,7 @@ function Map1({}) {
         <>
             <link rel="stylesheet" href="node_modules/ol/ol.css"></link>
             <div id="map"></div>
+            
             <button id="zoomtoswitzerland" onClick={(e) => { Switzerland();}}>Zoom to Switzerland</button>
             <button id="zoomtolausanne" onClick={(e) => { ZoomToLausanne();}}>Zoom to Lausanne</button>
             <button id="centerlausanne" onClick={(e) => { CenterOnLausanne();}}>Center on Lausanne</button><br/><br/>
@@ -308,13 +310,14 @@ function Map1({}) {
             <button id="zoom-in" onClick={(e) => { handleClick('zoomIn');}}>Zoom in</button>
 
             <form>
-            <label for="type">Geometry type &nbsp;</label>
-            <select id="type" onChange={(e) => { initMap(e);}}>
-                <option value="Point">Point</option>
-                <option value="LineString">LineString</option>
-                <option value="Polygon">Polygon</option>
-                <option value="Circle">Circle Geometry</option>
-                <option value="Geodesic" selected>Geodesic Circle</option>
+            {/* JSX는 JAVASCRIPT 이기 때문에 FOR는 반복을 의미 하므로 LABEL 테그에서 FOR 대신 HTMLFOR을 사용한다. */}
+            <label htmlFor="type">Geometry type &nbsp;</label>
+            <select id="type" onChange={(e) => { initMap(e);}} defaultValue={"Geodesic"}>
+                <option key={1} value="Point" >Point</option>
+                <option key={2} value="LineString">LineString</option>
+                <option key={3} value="Polygon">Polygon</option>
+                <option key={4}value="Circle">Circle Geometry</option>
+                <option key={5} value="Geodesic">Geodesic Circle</option>
             </select>
             </form>
         </>
