@@ -72,7 +72,7 @@ function Map1({}) {
         ],
         view: new View({
             center: [ 126.97659953, 37.579220423 ], //포인트의 좌표를 리턴함
-            projection : 'EPSG:4326',
+            projection : 'EPSG:4326',//경위도 좌표계 WGS84
             zoom: 1,
         })
     });
@@ -194,6 +194,8 @@ function Map1({}) {
             feature.unset('modifyGeometry', true);
             }
         });
+
+
     });
 
     map.addInteraction(modify);
@@ -291,8 +293,33 @@ function Map1({}) {
             // tell OpenLayers to continue postrender animation
             map.render();
         }
+        saveFeature(feature);
     }
+
     
+    const saveFeature = async (feature) => {
+        console.log("저장된 피쳐 보기");
+        const featureArr = [];
+        var geom = source.getFeatures();
+
+        vectorLayer.getSource().forEachFeature(function(feature) {
+
+            let cloneFeature = feature.clone();
+            cloneFeature.setId(feature.getId());  // clone does not set the id
+            featureArr.push(cloneFeature);
+
+            console.log(feature);// 콘솔창에서 prototype 클릭하여 속성 확인용 로그
+            console.log(feature.getGeometry());
+        });
+
+
+        var geoJsonOri = new GeoJSON().writeFeatures(geom);
+        var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
+
+        console.log(geoJsonOri);
+        
+    }
+
     source.on('addfeature', function (e) {
         flash(e.feature);
     });
@@ -325,3 +352,4 @@ function Map1({}) {
 }
   
 export default Map1;
+
