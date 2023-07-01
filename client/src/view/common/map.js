@@ -1,4 +1,6 @@
 import React,  { useEffect, useState } from 'react';
+
+import axios from 'axios';
 /*
 교육 URL
 https://openlayers.org/en/latest/examples/center.html
@@ -316,14 +318,67 @@ function Map1({}) {
         var geoJsonOri = new GeoJSON().writeFeatures(geom);
         var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
 
-        console.log(geoJsonOri);
+        let response = await axios({
+            method  : 'get',
+            url     : '/api/geomboardSave',
+            params  : {
+                'geom' : geoJsonOri
+            },
+            headers : {
+                'Content-Type' : 'multipart/form-data'
+            },
+        })
         
+        //var datas =  JSON.parse(response.data.results)
+        //var array = Object.values(datas)
+
+
+    }
+
+    /* 저장된 지오메트릭 데이터 불러오기 */
+    const callFeature = async (feature) => {
+
+    //var geoJsonOri = new GeoJSON().writeFeatures(geom);
+
+    let response = await axios({
+        method  : 'get',
+        url     : '/api/geomboardList',
+        params  : {
+            id : "하위하위"
+        },
+        headers : {
+            'Content-Type' : 'multipart/form-data'
+        },
+    })
+        
+    //var datas =  JSON.parse(response.data.results)
+    var datas =  response.data.rows;
+    //var array = Object.values(datas)
+    console.log(datas);
+    console.log(datas.length);
+    /* 피쳐보이기 부터 해보자 */
+    datas.forEach(function(value){
+        //console.log(value.geom_value);
+        //let feature = JSON.stringify(value.geom_value);
+        source.addFeature(feature);
+    });
+    
+    
+
+    
+
+
     }
 
     source.on('addfeature', function (e) {
         flash(e.feature);
     });
     
+    //이벤트 리스너
+    useEffect(() => {
+        callFeature();
+    },  []);
+
     //window.setInterval(addRandomFeature, 3000);
     return (
         <>
