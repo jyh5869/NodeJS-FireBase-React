@@ -418,35 +418,38 @@ function Map1({}) {
                 )
                 */
                 
-                let feature = e.target.getFeatures().getArray()[0];
-                const coordinate = feature.getGeometry().getCoordinates();
+                if(e.target.getFeatures().getLength() != 0){
 
-                console.log(e.target.getFeatures().getArray()[0].getGeometry().getCoordinates());
-                
-                const hdms = toStringHDMS(toLonLat(coordinate));
-                
-                selectPopup.setPosition(coordinate);
-                
-                let popover = Popover.getInstance(selectElement);
-                
-                if (popover) {
-                    popover.dispose();
-                }
-                
-                popover = new Popover(selectElement, {
-                    animation: false,
-                    container: selectElement,
-                    content: '<p>The location you clicked was:</p><code>' + feature.getGeometry().getType() + '</code><br><code>' + feature.getId() + '</code>',
-                    html: true,
-                    placement: 'top',
-                    title: 'Welcome to OpenLayers Select',
-                });
-                popover.show();
-                /* */
+                    let feature = e.target.getFeatures().getArray()[0];
+
+
+                    //const coordinate = feature.getGeometry().getCoordinates();//피쳐 위치
+                    const coordinate= [119.95633585812502, 30.174435266749995]//상단고정
+
+                    console.log(e.target.getFeatures().getArray()[0].getGeometry().getCoordinates());
+                    
+                    const hdms = toStringHDMS(toLonLat(coordinate));
+                    
+                    selectPopup.setPosition(coordinate);
+                    
+                    let popover = Popover.getInstance(selectElement);
+                    
+                    if (popover) {
+                        popover.dispose();
+                    }
+                    
+                    popover = new Popover(selectElement, {
+                        animation: false,
+                        container: selectElement,
+                        content: '<p>The location you clicked was:</p><code>' + feature.getGeometry().getType() + '</code><br><code>' + feature.getId() + '</code>',
+                        html: true,
+                        placement: 'top',
+                        title: 'Welcome to OpenLayers Select',
+                    });
+
+                    popover.show();
+                }      
             });
-
-            
-          
         }
     };
     
