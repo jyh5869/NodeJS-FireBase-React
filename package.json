@@ -8,6 +8,7 @@
     "@tensorflow/tfjs": "^3.16.0",
     "@tensorflow/tfjs-node": "^2.1.0",
     "axios": "^0.26.1",
+    "bootstrap": "^5.3.1",
     "concurrently": "^7.1.0",
     "csv-parser": "^3.0.0",
     "danfojs": "^1.1.1",

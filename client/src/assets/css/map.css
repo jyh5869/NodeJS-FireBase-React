@@ -22,6 +22,7 @@
 }
 
 /* Open layers 기본 CSS(LIB) */
+/*
 :root,
 :host {
   --ol-background-color: white;
@@ -367,3 +368,4 @@
 .ol-overviewmap .ol-overviewmap-box:hover {
   cursor: move;
 }
+ */

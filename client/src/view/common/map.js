@@ -1,5 +1,7 @@
 import React,  { useEffect, useState } from 'react';
 
+import { Button, Table, Form  }   from 'react-bootstrap';
+
 import axios from 'axios';
 /*
 교육 URL
@@ -7,6 +9,7 @@ https://openlayers.org/en/latest/examples/center.html
 https://dev.to/camptocamp-geo/integrating-an-openlayers-map-in-vue-js-a-step-by-step-guide-2n1p
 */
 import '../../assets/css/map.css';
+import 'ol/ol.css';
 import {Map} from 'ol';
 import GeoJSON from 'ol/format/GeoJSON.js';
 //import OSM from 'ol/source/OSM.js';
@@ -19,23 +22,28 @@ import {GeometryCollection, Point, Polygon} from 'ol/geom.js';
 import {circular} from 'ol/geom/Polygon.js';
 import {getDistance} from 'ol/sphere.js';
 import {transform} from 'ol/proj.js';
-import {Circle as CircleStyle, Stroke, Style} from 'ol/style.js';
+import {Circle as CircleStyle, Stroke, Style, Fill} from 'ol/style.js';
 
 import Feature from 'ol/Feature.js';
 import {easeOut} from 'ol/easing.js';
-import {fromLonLat} from 'ol/proj.js';
+import {fromLonLat, toLonLat} from 'ol/proj.js';
 import {getVectorContext} from 'ol/render.js';
 import {unByKey} from 'ol/Observable.js';
+import Overlay from 'ol/Overlay.js';
 
-
-
+import Select from 'ol/interaction/Select.js';
+import {altKeyOnly, click, pointerMove} from 'ol/events/condition.js';
 
 
 
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
+import {toStringHDMS} from 'ol/coordinate.js';
 
 import GeojsonTest from '../../openLayers/examples/data/geojson/switzerland.geojson';
+
+import {Popover} from 'bootstrap';
+
 
 const tileLayer = new TileLayer({
     source: new XYZ({ //source: new OSM()
@@ -64,8 +72,9 @@ const vectorLayer = new VectorLayer({
 function Map1({}) {
 
     const [show, setShow] = useState(false);
+    const [featureInfo, setFeatureInfo] = useState(" 0 selected features ");
     const handleClose = () => setShow(false);
-    
+
     const map = new Map({
         target: 'map',
         layers: [
@@ -75,7 +84,7 @@ function Map1({}) {
         view: new View({
             center: [ 126.97659953, 37.579220423 ], //포인트의 좌표를 리턴함
             projection : 'EPSG:4326',//경위도 좌표계 WGS84
-            zoom: 1,
+            zoom: 6,
         })
     });
 
@@ -176,13 +185,14 @@ function Map1({}) {
             return defaultStyle(feature);
         },
     });
+    
     //console.log(modify);
     modify.on('modifystart', function (event) {
         console.log("수정 시작");
         event.features.forEach(function (feature) {
             const geometry = feature.getGeometry();
             if (geometry.getType() === 'GeometryCollection') {
-            feature.set('modifyGeometry', geometry.clone(), true);
+                feature.set('modifyGeometry', geometry.clone(), true);
             }
         });
     });
@@ -192,8 +202,8 @@ function Map1({}) {
         event.features.forEach(function (feature) {
             const modifyGeometry = feature.get('modifyGeometry');
             if (modifyGeometry) {
-            feature.setGeometry(modifyGeometry);
-            feature.unset('modifyGeometry', true);
+                feature.setGeometry(modifyGeometry);
+                feature.unset('modifyGeometry', true);
             }
         });
 
@@ -240,6 +250,7 @@ function Map1({}) {
             type: value,
             geometryFunction: geometryFunction,
         });
+        
         map.addInteraction(draw);
         snap = new Snap({source: source});
         map.addInteraction(snap);
@@ -259,8 +270,8 @@ function Map1({}) {
     
     const duration = 3000;
     function flash(feature) {
-        console.log("피쳐 추가!");
-        console.log(feature);
+        //console.log("피쳐 추가!");
+        //console.log(feature);
         const start = Date.now();
         const flashGeom = feature.getGeometry().clone();
         const listenerKey = tileLayer.on('postrender', animate);
@@ -295,25 +306,239 @@ function Map1({}) {
             // tell OpenLayers to continue postrender animation
             map.render();
         }
-        saveFeature(feature);
+        //saveFeature(feature);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    const selectPopup = new Overlay({
+        element: document.getElementById('selectPopup'),
+    });
+    map.addOverlay(selectPopup);
+    const selectElement = selectPopup.getElement();
+
+    let select = null; // ref to currently selected interaction
+
+    const selected = new Style({
+        fill: new Fill({
+            color: '#eeeeee',
+        }),
+        stroke: new Stroke({
+            color: 'rgba(255, 255, 255, 0.7)',
+            width: 2,
+        }),
+    });
+
+    function selectStyle(feature) {
+        const color = feature.get('COLOR') || '#eeeeee';
+        selected.getFill().setColor(color);
+        return selected;
+    }
+      
+      // select interaction working on "singleclick"
+    const selectSingleClick = new Select({style: selectStyle});
+      
+      // select interaction working on "click"
+    const selectClick = new Select({
+        condition: click,
+        style: selectStyle,
+    });
+      
+    // select interaction working on "pointermove"
+    const selectPointerMove = new Select({
+        condition: pointerMove,
+        style: selectStyle,
+    });
+      
+    const selectAltClick = new Select({
+        style: selectStyle,
+        condition: function (mapBrowserEvent) {
+            return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
+        },
+    });
+
+    const changeInteraction = function (e) {
+
+        if (select !== null) {
+          map.removeInteraction(select);
+        }
+
+        console.log(e.target.value);
+
+        //const value = selectElement.value;
+        const value = e.target.value;
+
+        
+        if (value == 'singleclick') {
+          select = selectSingleClick;
+        } else if (value == 'click') {
+          select = selectClick;
+        } else if (value == 'pointermove') {
+          select = selectPointerMove;
+        } else if (value == 'altclick') {
+          select = selectAltClick;
+        } else {
+          select = null;
+        }
+        if (select !== null) {
+          map.addInteraction(select);
+            select.on('select', function (e) {
+            
+                document.getElementById('status').innerHTML =
+                '&nbsp;' +
+                e.target.getFeatures().getLength() +
+                ' selected features (last operation selected ' +
+                e.selected.length +
+                ' and deselected ' +
+                e.deselected.length +
+                ' features)';
+            
+                /*
+                setFeatureInfo(
+                    '&nbsp;' +
+                    e.target.getFeatures().getLength() +
+                    ' selected features (last operation selected ' +
+                    e.selected.length +
+                    ' and deselected ' +
+                    e.deselected.length +
+                    ' features)'
+                )
+                */
+                
+                const coordinate = e.target.getFeatures().getArray()[0].getGeometry().getCoordinates();
+
+                console.log(e.target.getFeatures().getArray()[0].getGeometry().getCoordinates());
+                
+                const hdms = toStringHDMS(toLonLat(coordinate));
+                selectPopup.setPosition(coordinate);
+                
+                let popover = Popover.getInstance(selectElement);
+                
+                if (popover) {
+                    popover.dispose();
+                }
+                
+                popover = new Popover(selectElement, {
+                    animation: false,
+                    container: selectElement,
+                    content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
+                    html: true,
+                    placement: 'top',
+                    title: 'Welcome to OpenLayers Select',
+                });
+                popover.show();
+                /* */
+            });
+
+            
+          
+        }
+    };
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*
+    https://openlayers.org/en/latest/examples/overlay.html
+    */
+    const popup = new Overlay({
+        element: document.getElementById('popup'),
+    });
+    map.addOverlay(popup);
+    
+    const element = popup.getElement();
+    
+    map.on('click', function (evt) {
+        const coordinate = evt.coordinate;
+        const hdms = toStringHDMS(toLonLat(coordinate));
+        popup.setPosition(coordinate);
+        
+        let popover = Popover.getInstance(element);
+        
+        if (popover) {
+          popover.dispose();
+        }
+        
+        popover = new Popover(element, {
+            animation: false,
+            container: element,
+            content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
+            html: true,
+            placement: 'top',
+            title: 'Welcome to OpenLayers',
+        });
+        popover.show();
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     
     const saveFeature = async (feature) => {
-        console.log("저장된 피쳐 보기");
+        console.log("저장할 피쳐 보기");
         const featureArr = [];
         var geom = source.getFeatures();
 
         vectorLayer.getSource().forEachFeature(function(feature) {
 
             let cloneFeature = feature.clone();
-            cloneFeature.setId(feature.getId());  // clone does not set the id
+            let featureId = feature.getId();
+            
+            cloneFeature.setId(featureId);  // clone does not set the id
+            
+            if(cloneFeature.getId() == undefined ){//신규 등록
+                console.log("ID : " + cloneFeature.getId()  + "/  인서트!" );
+                cloneFeature.setProperties({"state" : "insert"});
+            }
+            else{//업데이트
+                console.log("ID : "+ cloneFeature.getId()  + "/  업데이트!" );
+                cloneFeature.setProperties({"state" : "update"});
+            }
+            
             featureArr.push(cloneFeature);
-
-            console.log(feature);// 콘솔창에서 prototype 클릭하여 속성 확인용 로그
-            console.log(feature.getGeometry());
         });
-
 
         var geoJsonOri = new GeoJSON().writeFeatures(geom);
         var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
@@ -322,13 +547,16 @@ function Map1({}) {
             method  : 'get',
             url     : '/api/geomboardSave',
             params  : {
-                'geom' : geoJsonOri
+                'geom' : geoJsonClone
             },
             headers : {
                 'Content-Type' : 'multipart/form-data'
             },
         })
-        
+        if(response.status == 200){
+            console.log(response.status);
+            console.log("저장완료!!");
+        } 
         //var datas =  JSON.parse(response.data.results)
         //var array = Object.values(datas)
 
@@ -338,40 +566,49 @@ function Map1({}) {
     /* 저장된 지오메트릭 데이터 불러오기 */
     const callFeature = async (feature) => {
 
-    //var geoJsonOri = new GeoJSON().writeFeatures(geom);
+        //var geoJsonOri = new GeoJSON().writeFeatures(geom);
 
-    let response = await axios({
-        method  : 'get',
-        url     : '/api/geomboardList',
-        params  : {
-            id : "하위하위"
-        },
-        headers : {
-            'Content-Type' : 'multipart/form-data'
-        },
-    })
+        let response = await axios({
+            method  : 'get',
+            url     : '/api/geomboardList',
+            params  : {
+                id : "하위하위"
+            },
+            headers : {
+                'Content-Type' : 'multipart/form-data'
+            },
+        })
+            
+        //var datas =  JSON.parse(response.data.results)
+        var datas =  response.data.rows;
+        //var array = Object.values(datas)
+        console.log(datas);
+        console.log(datas.length);
+        /* 피쳐보이기 부터 해보자 */
+
+        const featureArr = [];
+        datas.forEach(function(value, idx){
+
+            let feature = new GeoJSON().readFeature(value.geom_value);
+            
+            feature.setId(value.id);//ID값 세팅
+            
+            featureArr.push(feature);
+            
+        });
         
-    //var datas =  JSON.parse(response.data.results)
-    var datas =  response.data.rows;
-    //var array = Object.values(datas)
-    console.log(datas);
-    console.log(datas.length);
-    /* 피쳐보이기 부터 해보자 */
-    datas.forEach(function(value){
-        //console.log(value.geom_value);
-        //let feature = JSON.stringify(value.geom_value);
-        source.addFeature(feature);
-    });
-    
-    
-
-    
-
-
+        //var geoJsonOri = new GeoJSON().writeFeatures(featureArr);
+        //console.log(geoJsonOri);
+        source.addFeatures(featureArr);
     }
 
     source.on('addfeature', function (e) {
         flash(e.feature);
+    });
+
+    source.on('selectfeature', function (e) {
+        console.log("피쳐선택!");
+        //flash(e.feature);
     });
     
     //이벤트 리스너
@@ -382,8 +619,13 @@ function Map1({}) {
     //window.setInterval(addRandomFeature, 3000);
     return (
         <>
-            <link rel="stylesheet" href="node_modules/ol/ol.css"></link>
             <div id="map"></div>
+
+            
+
+            <div>
+                <Button variant="outline-success" className="btn_type1" onClick={saveFeature}>저장하기</Button>   
+            </div>
             
             <button id="zoomtoswitzerland" onClick={(e) => { Switzerland();}}>Zoom to Switzerland</button>
             <button id="zoomtolausanne" onClick={(e) => { ZoomToLausanne();}}>Zoom to Lausanne</button>
@@ -402,6 +644,21 @@ function Map1({}) {
                 <option key={5} value="Geodesic">Geodesic Circle</option>
             </select>
             </form>
+
+            <form>
+                <label htmlFor="type">Action type &nbsp;</label>
+                <select id="type" onChange={(e) => { changeInteraction(e);}}  defaultValue={"none"}>
+                    <option key={1} value="click">Click</option>
+                    <option key={2} value="singleclick">Single-click</option>
+                    <option key={3} value="pointermove">Hover</option>
+                    <option key={4} value="altclick">Alt+Click</option>
+                    <option key={5} value="none">None</option>
+                </select>
+                <span id="status">{featureInfo}</span>
+            </form>
+
+            <div id="popup"></div>
+            <div id="selectPopup"></div>
         </>
     );
 }

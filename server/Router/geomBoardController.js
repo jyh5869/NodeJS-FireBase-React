@@ -32,18 +32,36 @@ router.get("/geomboardSave", async (req, res) => {
     geom.forEach((doc) => {
         console.log(doc.type);
         console.log(JSON.stringify(doc.geometry));
-    
-        var modelClassDoc = db.collection("geom_board_list").doc();
-    
-        var postData = {
-            id            : modelClassDoc.id,
-            geom_type     : doc.geometry.type,
-            geom_value    : JSON.stringify(doc.geometry),
-            reg_dt        : Date.now(),
-        };
-        modelClassDoc.set(postData);
-        res.send({rows: "등록완료"});
+        let state = doc.properties.state;
+
+        if(state == "insert"){
+
+            var modelClassDoc = db.collection("geom_board_list").doc();
+            
+            var postData = {
+                id            : modelClassDoc.id,
+                geom_type     : doc.geometry.type,
+                geom_value    : JSON.stringify(doc.geometry),
+                reg_dt        : Date.now(),
+                last_state    : "insert",
+            };
+            modelClassDoc.set(postData);
+        }
+        else if(state == "update"){
+
+            var modelClassDoc = db.collection("geom_board_list").doc(doc.id);
+            
+            var postData = {
+                id            : doc.id,
+                geom_type     : doc.geometry.type,
+                geom_value    : JSON.stringify(doc.geometry),
+                reg_dt        : Date.now(),
+                last_state    : "update",
+            };
+            modelClassDoc.set(postData);
+        }
     });
+    res.send({rows: "등록완료"});
 });
 
 /**
