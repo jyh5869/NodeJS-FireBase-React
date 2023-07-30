@@ -418,11 +418,13 @@ function Map1({}) {
                 )
                 */
                 
-                const coordinate = e.target.getFeatures().getArray()[0].getGeometry().getCoordinates();
+                let feature = e.target.getFeatures().getArray()[0];
+                const coordinate = feature.getGeometry().getCoordinates();
 
                 console.log(e.target.getFeatures().getArray()[0].getGeometry().getCoordinates());
                 
                 const hdms = toStringHDMS(toLonLat(coordinate));
+                
                 selectPopup.setPosition(coordinate);
                 
                 let popover = Popover.getInstance(selectElement);
@@ -434,7 +436,7 @@ function Map1({}) {
                 popover = new Popover(selectElement, {
                     animation: false,
                     container: selectElement,
-                    content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
+                    content: '<p>The location you clicked was:</p><code>' + feature.getGeometry().getType() + '</code><br><code>' + feature.getId() + '</code>',
                     html: true,
                     placement: 'top',
                     title: 'Welcome to OpenLayers Select',
