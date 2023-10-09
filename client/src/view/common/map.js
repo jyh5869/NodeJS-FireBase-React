@@ -187,7 +187,7 @@ function Map1({}) {
                     modifyGeometry.setGeometries(geometries);
                 }
             });
-            
+
             return defaultStyle(feature);
         },
     });
@@ -258,6 +258,7 @@ function Map1({}) {
 
         if (value === 'Geodesic') {//측지선 Circle Feature
             value = 'Circle';
+
             geometryFunction = function (coordinates, geometry, projection) {
 
                 if (!geometry) {
@@ -550,7 +551,35 @@ function Map1({}) {
 
 
     const transeformCircleToSaveFeature = async(feature) => {
-        console.log(feature);
+        console.log(feature.getGeometry());
+
+        let geom = feature.getGeometry()
+        let projection = map.getView().getProjection();
+        let coordinates = geom.getFlatCoordinates();
+        console.log(coordinates);
+        let radius = geom.getRadius();
+        let radiusSquared_ = geom.getRadiusSquared_();
+        let center = geom.getCenter();
+
+        //const center = transform(coordinates[0], projection, 'EPSG:4326');
+        //const last = transform(coordinates[1], projection, 'EPSG:4326');
+        //const radius1 = getDistance(center, last);
+
+        /*
+            저장방식
+            POINT + POLYGONE : 1. 데이터 가 작으나, 2. 축소확대시 별도의 처리 필요
+            POINT + RADIUS : 1.데이터가 크다,  2. 축소 확대시 별도의 처리 필요없음
+        */
+        const circle = circular(center, radius, 128);
+
+        console.log("★★★★★★★★★★★★★★★★★★");
+        console.log("projection="+projection);
+        console.log("coordinates="+coordinates);
+        console.log("radius="+radius);
+        console.log("radiusSquared_="+radiusSquared_);
+        console.log("center="+center);
+        console.log(circle);
+        console.log("★★★★★★★★★★★★★★★★★★");
     }
 
     
@@ -581,10 +610,10 @@ function Map1({}) {
             
             featureArr.push(cloneFeature);
         });
-
+/*
         var geoJsonOri = new GeoJSON().writeFeatures(geom);
         var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
-/*
+
         let response = await axios({
             method  : 'get',
             url     : '/api/geomboardSave',
