@@ -146,42 +146,48 @@ function Map1({}) {
         source: source,
         style: function (feature) {
             feature.get('features').forEach(function (modifyFeature) {
-            const modifyGeometry = modifyFeature.get('modifyGeometry');
-            if (modifyGeometry) {
-                const modifyPoint = feature.getGeometry().getCoordinates();
-                const geometries = modifyFeature.getGeometry().getGeometries();
-                const polygon = geometries[0].getCoordinates()[0];
-                const center = geometries[1].getCoordinates();
-                const projection = map.getView().getProjection();
-                let first, last, radius;
-                if (modifyPoint[0] === center[0] && modifyPoint[1] === center[1]) {
-                // center is being modified
-                // get unchanged radius from diameter between polygon vertices
-                first = transform(polygon[0], projection, 'EPSG:4326');
-                last = transform(
-                    polygon[(polygon.length - 1) / 2],
-                    projection,
-                    'EPSG:4326'
-                );
-                radius = getDistance(first, last) / 2;
-                } else {
-                // radius is being modified
-                first = transform(center, projection, 'EPSG:4326');
-                last = transform(modifyPoint, projection, 'EPSG:4326');
-                radius = getDistance(first, last);
+
+                const modifyGeometry = modifyFeature.get('modifyGeometry');
+
+                if (modifyGeometry) {
+                    const modifyPoint = feature.getGeometry().getCoordinates();
+                    const geometries = modifyFeature.getGeometry().getGeometries();
+                    const polygon = geometries[0].getCoordinates()[0];
+                    const center = geometries[1].getCoordinates();
+                    const projection = map.getView().getProjection();
+                    let first, last, radius;
+
+                    if (modifyPoint[0] === center[0] && modifyPoint[1] === center[1]) {
+                        // center is being modified
+                        // get unchanged radius from diameter between polygon vertices
+                        first = transform(polygon[0], projection, 'EPSG:4326');
+                        last = transform(
+                            polygon[(polygon.length - 1) / 2],
+                            projection,
+                            'EPSG:4326'
+                        );
+                        radius = getDistance(first, last) / 2;
+                    } else {
+                        // radius is being modified
+                        first = transform(center, projection, 'EPSG:4326');
+                        last = transform(modifyPoint, projection, 'EPSG:4326');
+                        radius = getDistance(first, last);
+                    }
+
+                    // update the polygon using new center or radius
+                    const circle = circular(
+                        transform(center, projection, 'EPSG:4326'),
+                        radius,
+                        128
+                    );
+
+                    circle.transform('EPSG:4326', projection);
+                    geometries[0].setCoordinates(circle.getCoordinates());
+                    // save changes to be applied at the end of the interaction
+                    modifyGeometry.setGeometries(geometries);
                 }
-                // update the polygon using new center or radius
-                const circle = circular(
-                transform(center, projection, 'EPSG:4326'),
-                radius,
-                128
-                );
-                circle.transform('EPSG:4326', projection);
-                geometries[0].setCoordinates(circle.getCoordinates());
-                // save changes to be applied at the end of the interaction
-                modifyGeometry.setGeometries(geometries);
-            }
             });
+            
             return defaultStyle(feature);
         },
     });
@@ -210,13 +216,37 @@ function Map1({}) {
 
     });
 
+    //Map 객채에 수정 인터렉션(Interation) 추가
     map.addInteraction(modify);
     
+    //Map 객채에 특정 인터렉션(Interation)을 제거
+    function removeInteraction(interactionType){
+
+        if(interactionType == "draw"){
+            map.removeInteraction(draw);
+        }
+        else if(interactionType == "snap"){
+            map.removeInteraction(snap);
+        }
+    }
+
+    //Map 객채에 특정 인터렉션(Interation)을 추가
+    function addInteraction(interactionType){
+
+        if(interactionType == "draw"){
+            map.addInteraction(draw);
+        }
+        else if(interactionType == "snap"){
+            map.addInteraction(snap);
+        }
+    }
+
     //지도 초기화
     const initMap = async (e) => {
         //console.log(e.target.value)
         map.removeInteraction(draw);
         map.removeInteraction(snap);
+        
         addInteractions(e);
     };
     
@@ -225,36 +255,42 @@ function Map1({}) {
         
         let value = e.target.value;
         let geometryFunction;
-        if (value === 'Geodesic') {
+
+        if (value === 'Geodesic') {//측지선 Circle Feature
             value = 'Circle';
             geometryFunction = function (coordinates, geometry, projection) {
-            if (!geometry) {
-                geometry = new GeometryCollection([
-                new Polygon([]),
-                new Point(coordinates[0]),
-                ]);
-            }
-            const geometries = geometry.getGeometries();
-            const center = transform(coordinates[0], projection, 'EPSG:4326');
-            const last = transform(coordinates[1], projection, 'EPSG:4326');
-            const radius = getDistance(center, last);
-            const circle = circular(center, radius, 128);
-            circle.transform('EPSG:4326', projection);
-            geometries[0].setCoordinates(circle.getCoordinates());
-            geometry.setGeometries(geometries);
-            return geometry;
+
+                if (!geometry) {
+                    geometry = new GeometryCollection([
+                    new Polygon([]),
+                    new Point(coordinates[0]),
+                    ]);
+                }
+
+                const geometries = geometry.getGeometries();
+                const center = transform(coordinates[0], projection, 'EPSG:4326');
+                const last = transform(coordinates[1], projection, 'EPSG:4326');
+                const radius = getDistance(center, last);
+                const circle = circular(center, radius, 128);
+
+                circle.transform('EPSG:4326', projection);
+                geometries[0].setCoordinates(circle.getCoordinates());
+                geometry.setGeometries(geometries);
+
+                return geometry;
             };
         }
+
         draw = new Draw({
             source: source,
             type: value,
             geometryFunction: geometryFunction,
         });
         
-        map.addInteraction(draw);
         snap = new Snap({source: source});
+
+        map.addInteraction(draw);
         map.addInteraction(snap);
-        
     }
 
     /* 랜덤 좌표 찍기 */
@@ -268,6 +304,8 @@ function Map1({}) {
         source.addFeature(feature);
     }
     
+
+    /* 생성한 피쳐를 맵에 추가 */
     const duration = 3000;
     function flash(feature) {
         //console.log("피쳐 추가!");
@@ -307,6 +345,9 @@ function Map1({}) {
             map.render();
         }
         //saveFeature(feature);
+
+        //Draw Interation 종료
+        removeInteraction("draw");
     }
 
 
@@ -373,7 +414,7 @@ function Map1({}) {
     const changeInteraction = function (e) {
 
         if (select !== null) {
-          map.removeInteraction(select);
+            map.removeInteraction(select);
         }
 
         console.log(e.target.value);
@@ -383,16 +424,17 @@ function Map1({}) {
 
         
         if (value == 'singleclick') {
-          select = selectSingleClick;
+            select = selectSingleClick;
         } else if (value == 'click') {
-          select = selectClick;
+            select = selectClick;
         } else if (value == 'pointermove') {
-          select = selectPointerMove;
+            select = selectPointerMove;
         } else if (value == 'altclick') {
-          select = selectAltClick;
+            select = selectAltClick;
         } else {
-          select = null;
+            select = null;
         }
+
         if (select !== null) {
           map.addInteraction(select);
             select.on('select', function (e) {
@@ -405,18 +447,6 @@ function Map1({}) {
                 ' and deselected ' +
                 e.deselected.length +
                 ' features)';
-            
-                /*
-                setFeatureInfo(
-                    '&nbsp;' +
-                    e.target.getFeatures().getLength() +
-                    ' selected features (last operation selected ' +
-                    e.selected.length +
-                    ' and deselected ' +
-                    e.deselected.length +
-                    ' features)'
-                )
-                */
                 
                 if(e.target.getFeatures().getLength() != 0){
 
@@ -494,7 +524,8 @@ function Map1({}) {
             placement: 'top',
             title: 'Welcome to OpenLayers',
         });
-        popover.show();
+        //팝오버 임시 숨기기
+        //popover.show();
     });
 
 
@@ -518,7 +549,9 @@ function Map1({}) {
 
 
 
-
+    const transeformCircleToSaveFeature = async(feature) => {
+        console.log(feature);
+    }
 
     
     const saveFeature = async (feature) => {
@@ -526,19 +559,23 @@ function Map1({}) {
         const featureArr = [];
         var geom = source.getFeatures();
 
+
+
         vectorLayer.getSource().forEachFeature(function(feature) {
 
             let cloneFeature = feature.clone();
             let featureId = feature.getId();
             
             cloneFeature.setId(featureId);  // clone does not set the id
-            
+
+
             if(cloneFeature.getId() == undefined ){//신규 등록
-                console.log("ID : " + cloneFeature.getId()  + "/  인서트!" );
+                //console.log("ID : " + cloneFeature.getId()  + "/  인서트!" );
                 cloneFeature.setProperties({"state" : "insert"});
+                transeformCircleToSaveFeature(cloneFeature);
             }
             else{//업데이트
-                console.log("ID : "+ cloneFeature.getId()  + "/  업데이트!" );
+                //console.log("ID : "+ cloneFeature.getId()  + "/  업데이트!" );
                 cloneFeature.setProperties({"state" : "update"});
             }
             
@@ -547,7 +584,7 @@ function Map1({}) {
 
         var geoJsonOri = new GeoJSON().writeFeatures(geom);
         var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
-
+/*
         let response = await axios({
             method  : 'get',
             url     : '/api/geomboardSave',
@@ -564,8 +601,7 @@ function Map1({}) {
         } 
         //var datas =  JSON.parse(response.data.results)
         //var array = Object.values(datas)
-
-
+*/
     }
 
     /* 저장된 지오메트릭 데이터 불러오기 */
@@ -588,7 +624,7 @@ function Map1({}) {
         var datas =  response.data.rows;
         //var array = Object.values(datas)
         console.log(datas);
-        console.log(datas.length);
+
         /* 피쳐보이기 부터 해보자 */
 
         const featureArr = [];
@@ -646,7 +682,7 @@ function Map1({}) {
                 <option key={2} value="LineString">LineString</option>
                 <option key={3} value="Polygon">Polygon</option>
                 <option key={4}value="Circle">Circle Geometry</option>
-                <option key={5} value="Geodesic">Geodesic Circle</option>
+                <option key={5} value="Geodesic">Geodesic Circle</option> 
             </select>
             </form>
 
