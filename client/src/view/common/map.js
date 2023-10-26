@@ -133,11 +133,6 @@ function Map1({}) {
 
 
 
-
-
-
-
-
     const defaultStyle = new Modify({source: source})
         .getOverlay()
         .getStyleFunction();
