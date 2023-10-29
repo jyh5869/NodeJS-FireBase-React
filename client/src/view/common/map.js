@@ -670,33 +670,34 @@ function Map1({}) {
         const featureArr = [];
         datas.forEach(function(value, idx){
 
-            //let feature = new GeoJSON().readFeature(value.geom_value);
+            let feature = new GeoJSON().readFeature(value.geom_value);
 
             let geometry = new GeoJSON().readFeature(value.geom_value);
-            let properties = value.geom_prop;
+            let properties = JSON.parse(value.geom_prop);
             let geomType = properties.type;
-            let geomValue = geometry.coordinates;
-            let geomId = value.docId;
+            let geomValue = geometry.getGeometry().getCoordinates();
 
             // 원일 경우 center와 Radius를 이용해 추가.
             if (geomType == 'Circle') {
                 console.log('--- Set Circle ---');
                 let radius = properties.radius;
                 let center = geomValue;
+                
+                console.log(radius);
+                console.log(center);
 
-                let feature = new Feature({
+                feature = new Feature({
                     type: 'Feature',
                     geometry: new Circle(center, radius),
                 });
 
-                //feature.setId(geomId);
                 feature.setProperties({ type: geomType, state: 'update' });
                 feature.setId(value.id);//ID값 세팅
             }
-            console.log();
+            
             featureArr.push(feature);
         });
-        //.then((value) => {
+
         console.log(featureArr);
         source.addFeatures(featureArr);
     }
