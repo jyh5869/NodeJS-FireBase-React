@@ -42,6 +42,7 @@ router.get("/geomboardSave", async (req, res) => {
                 id            : modelClassDoc.id,
                 geom_type     : doc.geometry.type,
                 geom_value    : JSON.stringify(doc.geometry),
+                geom_prop     : JSON.stringify(doc.properties),
                 reg_dt        : Date.now(),
                 last_state    : "insert",
             };

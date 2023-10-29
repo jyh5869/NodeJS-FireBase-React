@@ -18,7 +18,7 @@ import View from 'ol/View.js';
 import XYZ from 'ol/source/XYZ';
 
 import {Draw, Modify, Snap} from 'ol/interaction.js';
-import {GeometryCollection, Point, Polygon} from 'ol/geom.js';
+import {GeometryCollection, Point, Polygon, Circle} from 'ol/geom.js';
 import {circular} from 'ol/geom/Polygon.js';
 import {getDistance} from 'ol/sphere.js';
 import {transform} from 'ol/proj.js';
@@ -73,6 +73,7 @@ function Map1({}) {
 
     const [show, setShow] = useState(false);
     const [featureInfo, setFeatureInfo] = useState(" 0 selected features ");
+    
     const handleClose = () => setShow(false);
 
     const map = new Map({
@@ -237,21 +238,23 @@ function Map1({}) {
     }
 
     //지도 초기화
-    const initMap = async (e) => {
+    const initMap =  async (e) => {
         //console.log(e.target.value)
+
         map.removeInteraction(draw);
         map.removeInteraction(snap);
-        
+
         addInteractions(e);
     };
-    
-    let draw, snap; // global so we can remove them later
-    function addInteractions(e) {
+
+    let draw, snap, drawType; // global so we can remove them later
+    async function addInteractions(e) {
         
         let value = e.target.value;
         let geometryFunction;
 
         if (value === 'Geodesic') {//측지선 Circle Feature
+
             value = 'Circle';
 
             geometryFunction = function (coordinates, geometry, projection) {
@@ -282,8 +285,8 @@ function Map1({}) {
             type: value,
             geometryFunction: geometryFunction,
         });
-        
         snap = new Snap({source: source});
+        drawType = e.target.value;
 
         map.addInteraction(draw);
         map.addInteraction(snap);
@@ -304,8 +307,8 @@ function Map1({}) {
     /* 생성한 피쳐를 맵에 추가 */
     const duration = 3000;
     function flash(feature) {
-        //console.log("피쳐 추가!");
-        //console.log(feature);
+        console.log("피쳐 추가!");
+
         const start = Date.now();
         const flashGeom = feature.getGeometry().clone();
         const listenerKey = tileLayer.on('postrender', animate);
@@ -341,6 +344,7 @@ function Map1({}) {
             map.render();
         }
         //saveFeature(feature);
+
 
         //Draw Interation 종료
         removeInteraction("draw");
@@ -412,7 +416,6 @@ function Map1({}) {
         if (select !== null) {
             map.removeInteraction(select);
         }
-
         console.log(e.target.value);
 
         //const value = selectElement.value;
@@ -544,37 +547,31 @@ function Map1({}) {
 
 
 
+    //Circle객체를 저장하기위해 원 객체 반환
+    const transeformCircleToSaveFeature = async(cloneFeature, type) => {
 
-    const transeformCircleToSaveFeature = async(feature) => {
-        console.log(feature.getGeometry());
+        // 1. POINT + RADIUS : 1.데이터가 크다,  2. 축소 확대시 별도의 처리 필요없음
+        if(type == 'Circle'){
 
-        let geom = feature.getGeometry()
-        let projection = map.getView().getProjection();
-        let coordinates = geom.getFlatCoordinates();
-        console.log(coordinates);
-        let radius = geom.getRadius();
-        let radiusSquared_ = geom.getRadiusSquared_();
-        let center = geom.getCenter();
+            let geometry = cloneFeature.getGeometry()
+            let radius = geometry.getRadius();
+            let center = geometry.getCenter();
+    
+            //const circle = circular(center, radius, 128);
+            
+            let feature = new Feature({
+                type: 'Feature',
+                geometry: new Circle(center, radius),
+            });
 
-        //const center = transform(coordinates[0], projection, 'EPSG:4326');
-        //const last = transform(coordinates[1], projection, 'EPSG:4326');
-        //const radius1 = getDistance(center, last);
+            feature.setId(cloneFeature.getId());
 
-        /*
-            저장방식
-            POINT + POLYGONE : 1. 데이터 가 작으나, 2. 축소확대시 별도의 처리 필요
-            POINT + RADIUS : 1.데이터가 크다,  2. 축소 확대시 별도의 처리 필요없음
-        */
-        const circle = circular(center, radius, 128);
+            return feature;
+        }
+        // 2. POINT + POLYGONE : 1. 데이터 가 작으나, 2. 축소확대시 별도의 처리 필요
+        else if(type =='Polygon'){
 
-        console.log("★★★★★★★★★★★★★★★★★★");
-        console.log("projection="+projection);
-        console.log("coordinates="+coordinates);
-        console.log("radius="+radius);
-        console.log("radiusSquared_="+radiusSquared_);
-        console.log("center="+center);
-        console.log(circle);
-        console.log("★★★★★★★★★★★★★★★★★★");
+        }    
     }
 
     
@@ -595,8 +592,27 @@ function Map1({}) {
 
             if(cloneFeature.getId() == undefined ){//신규 등록
                 //console.log("ID : " + cloneFeature.getId()  + "/  인서트!" );
+                let geomType = cloneFeature.getProperties().type;
+
+                if(geomType == "Circle"){
+                    //Circle 객체를 Center와 Radius를 가진 Feature로 변환
+
+                    /* 이함수로 호출하면 왜 리턴 Feature 타입이 뭔가 다를까? */
+                    //cloneFeature = transeformCircleToSaveFeature(cloneFeature, 'Circle');
+
+                    let radius = cloneFeature.getGeometry().getRadius();
+                    let center = cloneFeature.getGeometry().getCenter();
+
+                    let feature = new Feature({
+                        type: geomType,
+                        geometry: new Point(center),
+                        radius: radius,
+                    });
+
+                    cloneFeature = feature;
+                }
+
                 cloneFeature.setProperties({"state" : "insert"});
-                transeformCircleToSaveFeature(cloneFeature);
             }
             else{//업데이트
                 //console.log("ID : "+ cloneFeature.getId()  + "/  업데이트!" );
@@ -605,7 +621,7 @@ function Map1({}) {
             
             featureArr.push(cloneFeature);
         });
-/*
+
         var geoJsonOri = new GeoJSON().writeFeatures(geom);
         var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
 
@@ -625,7 +641,7 @@ function Map1({}) {
         } 
         //var datas =  JSON.parse(response.data.results)
         //var array = Object.values(datas)
-*/
+
     }
 
     /* 저장된 지오메트릭 데이터 불러오기 */
@@ -654,21 +670,59 @@ function Map1({}) {
         const featureArr = [];
         datas.forEach(function(value, idx){
 
-            let feature = new GeoJSON().readFeature(value.geom_value);
-            
-            feature.setId(value.id);//ID값 세팅
-            
+            //let feature = new GeoJSON().readFeature(value.geom_value);
+
+            let geometry = new GeoJSON().readFeature(value.geom_value);
+            let properties = value.geom_prop;
+            let geomType = properties.type;
+            let geomValue = geometry.coordinates;
+            let geomId = value.docId;
+
+            // 원일 경우 center와 Radius를 이용해 추가.
+            if (geomType == 'Circle') {
+                console.log('--- Set Circle ---');
+                let radius = properties.radius;
+                let center = geomValue;
+
+                let feature = new Feature({
+                    type: 'Feature',
+                    geometry: new Circle(center, radius),
+                });
+
+                //feature.setId(geomId);
+                feature.setProperties({ type: geomType, state: 'update' });
+                feature.setId(value.id);//ID값 세팅
+            }
+            console.log();
             featureArr.push(feature);
-            
         });
-        
-        //var geoJsonOri = new GeoJSON().writeFeatures(featureArr);
-        //console.log(geoJsonOri);
+        //.then((value) => {
+        console.log(featureArr);
         source.addFeatures(featureArr);
     }
 
     source.on('addfeature', function (e) {
+
+        //피쳐 추가시 Type Propertiy 세팅
+        if(drawType == 'Geodesic'){ 
+            e.feature.set('realType', 'GeometryCollection');
+            e.feature.set('type'    , 'Geodesic');
+        }
+        else if(drawType == 'Circle'){
+            e.feature.setProperties({'realType':'Circle', 'type':'Circle'})
+        }
+        else if(drawType == 'Polygon'){
+            e.feature.setProperties({'realType':'Polygon', 'type':'Polygon'})
+        }
+        else if(drawType == 'LineString'){
+            e.feature.setProperties({'realType':'LineString', 'type':'LineString'})
+        }
+        else if(drawType == 'Point'){
+            e.feature.setProperties({'realType':'Point', 'type':'Point'})
+        }
+
         flash(e.feature);
+
     });
 
     source.on('selectfeature', function (e) {
@@ -686,8 +740,6 @@ function Map1({}) {
         <>
             <div id="map"></div>
 
-            
-
             <div>
                 <Button variant="outline-success" className="btn_type1" onClick={saveFeature}>저장하기</Button>   
             </div>
@@ -701,7 +753,7 @@ function Map1({}) {
             <form>
             {/* JSX는 JAVASCRIPT 이기 때문에 FOR는 반복을 의미 하므로 LABEL 테그에서 FOR 대신 HTMLFOR을 사용한다. */}
             <label htmlFor="type">Geometry type &nbsp;</label>
-            <select id="type" onChange={(e) => { initMap(e);}} defaultValue={"Geodesic"}>
+            <select id="type" onChange={(e) => { initMap(e);}} value={drawType}>
                 <option key={1} value="Point" >Point</option>
                 <option key={2} value="LineString">LineString</option>
                 <option key={3} value="Polygon">Polygon</option>
@@ -712,7 +764,7 @@ function Map1({}) {
 
             <form>
                 <label htmlFor="type">Action type &nbsp;</label>
-                <select id="type" onChange={(e) => { changeInteraction(e);}}  defaultValue={"none"}>
+                <select id="type2" onChange={(e) => { changeInteraction(e);}}  defaultValue={"none"}>
                     <option key={1} value="click">Click</option>
                     <option key={2} value="singleclick">Single-click</option>
                     <option key={3} value="pointermove">Hover</option>
