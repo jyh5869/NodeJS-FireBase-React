@@ -580,8 +580,6 @@ function Map1({}) {
         const featureArr = [];
         var geom = source.getFeatures();
 
-
-
         vectorLayer.getSource().forEachFeature(function(feature) {
 
             let cloneFeature = feature.clone();
@@ -660,7 +658,6 @@ function Map1({}) {
             },
         })
             
-        //var datas =  JSON.parse(response.data.results)
         var datas =  response.data.rows;
         //var array = Object.values(datas)
         console.log(datas);
