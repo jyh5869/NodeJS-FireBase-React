@@ -584,31 +584,29 @@ function Map1({}) {
 
             let cloneFeature = feature.clone();
             let featureId = feature.getId();
-            
-            cloneFeature.setId(featureId);  // clone does not set the id
+            let geomType = cloneFeature.getProperties().type;
 
+            
+            console.log(cloneFeature.getProperties());
+
+            if(geomType == "Circle"){
+                //Circle 객체를 Center와 Radius 프로퍼티를 가진 Point Feature로 변환
+                let radius = cloneFeature.getGeometry().getRadius();
+                let center = cloneFeature.getGeometry().getCenter();
+
+                let feature = new Feature({
+                    realType : cloneFeature.getProperties().realType,
+                    type: geomType,
+                    geometry: new Point(center),
+                    radius: radius,
+                });
+                cloneFeature = feature;
+            }
+
+            cloneFeature.setId(featureId); // 저장할 Feature에 아이디값 세팅
 
             if(cloneFeature.getId() == undefined ){//신규 등록
                 //console.log("ID : " + cloneFeature.getId()  + "/  인서트!" );
-                let geomType = cloneFeature.getProperties().type;
-
-                if(geomType == "Circle"){
-                    //Circle 객체를 Center와 Radius를 가진 Feature로 변환
-
-                    /* 이함수로 호출하면 왜 리턴 Feature 타입이 뭔가 다를까? */
-                    //cloneFeature = transeformCircleToSaveFeature(cloneFeature, 'Circle');
-
-                    let radius = cloneFeature.getGeometry().getRadius();
-                    let center = cloneFeature.getGeometry().getCenter();
-
-                    let feature = new Feature({
-                        type: geomType,
-                        geometry: new Point(center),
-                        radius: radius,
-                    });
-
-                    cloneFeature = feature;
-                }
 
                 cloneFeature.setProperties({"state" : "insert"});
             }
@@ -636,10 +634,12 @@ function Map1({}) {
         if(response.status == 200){
             console.log(response.status);
             console.log("저장완료!!");
+            /**
+             * 
+             *  저장 후 리로드하지않고 바로 저장시 같은 소스들이 모두 insert로 들어가는데 어떻게할까?
+             * 
+             */
         } 
-        //var datas =  JSON.parse(response.data.results)
-        //var array = Object.values(datas)
-
     }
 
     /* 저장된 지오메트릭 데이터 불러오기 */
@@ -679,23 +679,24 @@ function Map1({}) {
                 console.log('--- Set Circle ---');
                 let radius = properties.radius;
                 let center = geomValue;
-                
-                console.log(radius);
-                console.log(center);
 
                 feature = new Feature({
                     type: 'Feature',
                     geometry: new Circle(center, radius),
                 });
 
-                feature.setProperties({ type: geomType, state: 'update' });
-                feature.setId(value.id);//ID값 세팅
+                //feature.setProperties({ type: geomType, state: 'update' });    
+                
             }
-            
+
+            feature.setId(value.id);//ID값 세팅
+            feature.setProperties(properties);//프로퍼티 값 세팅
             featureArr.push(feature);
+        
+            console.log(feature);
         });
 
-        console.log(featureArr);
+        //console.log(featureArr);
         source.addFeatures(featureArr);
     }
 
