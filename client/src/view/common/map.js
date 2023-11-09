@@ -629,7 +629,7 @@ function Map1({}) {
             },
             headers : {
                 'Content-Type' : 'multipart/form-data'
-            },
+            }, 
         })
         if(response.status == 200){
             console.log(response.status);
