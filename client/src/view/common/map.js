@@ -94,8 +94,16 @@ function Map1({}) {
 
     map.on('click', function(evt) {
         //var lonlat = ol.proj.transform(evt.coordinate, 'EPSG:3857', 'EPSG:4326');
-        let coordinate = evt.coordinate;
-        console.log(coordinate);
+
+        var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+            return feature;
+        });
+
+        //피쳐 없을때만 중심값 출력
+        if (!feature) {
+            let coordinate = evt.coordinate;
+            console.log(coordinate);
+        }
     });
     
     const handleClick = async (zoomType) => {
@@ -506,19 +514,38 @@ function Map1({}) {
     
     map.on('click', function (evt) {
 
-        var feature = map.forEachFeatureAtPixel(evt.pixel,
-            function (feature) {
-                return feature;
-            });
-            
+        var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+            return feature;
+        });
+        
+        let popover = Popover.getInstance(element);
+
         if (feature) {
-            alert("피쳐가 있으니 레이어 팝업을 띄울게요");
+            let geomType = feature.getProperties().type;
+            console.log(feature)
+            //피쳐 추가시 Type Propertiy 세팅
+            if(geomType == 'Geodesic'){ 
+                console.log('Geodesic');
+            }
+            else if(geomType == 'Circle'){
+                console.log('Circle');
+            }
+            else if(geomType == 'Polygon'){
+                console.log('Polygon');
+            }
+            else if(geomType == 'LineString'){
+                console.log('LineString');
+            }
+            else if(geomType == 'Point'){
+                console.log('Point');
+            }
+
 
             const coordinate = evt.coordinate;
             const hdms = toStringHDMS(toLonLat(coordinate));
             popup.setPosition(coordinate);
             
-            let popover = Popover.getInstance(element);
+            
             
             if (popover) {
             popover.dispose();
@@ -534,6 +561,9 @@ function Map1({}) {
             });
             //팝오버 임시 숨기기
             popover.show();
+        }
+        else{
+            popover.hide();
         }
         
     });
@@ -705,7 +735,7 @@ function Map1({}) {
             feature.setProperties(properties);//프로퍼티 값 세팅
             featureArr.push(feature);
         
-            console.log(feature);
+            console.log(properties);
         });
 
         //console.log(featureArr);
