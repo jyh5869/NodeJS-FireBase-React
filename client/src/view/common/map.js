@@ -451,11 +451,11 @@ function Map1({}) {
 
                     let feature = e.target.getFeatures().getArray()[0];
 
-
+                    console.log(feature);
                     //const coordinate = feature.getGeometry().getCoordinates();//피쳐 위치
                     const coordinate= [119.95633585812502, 30.174435266749995]//상단고정
 
-                    console.log(e.target.getFeatures().getArray()[0].getGeometry().getCoordinates());
+                    //console.log(e.target.getFeatures().getArray()[0].getGeometry().getCoordinates());
                     
                     const hdms = toStringHDMS(toLonLat(coordinate));
                     
@@ -505,29 +505,49 @@ function Map1({}) {
     const element = popup.getElement();
     
     map.on('click', function (evt) {
-        const coordinate = evt.coordinate;
-        const hdms = toStringHDMS(toLonLat(coordinate));
-        popup.setPosition(coordinate);
-        
-        let popover = Popover.getInstance(element);
-        
-        if (popover) {
-          popover.dispose();
+
+        var feature = map.forEachFeatureAtPixel(evt.pixel,
+            function (feature) {
+                return feature;
+            });
+            
+        if (feature) {
+            alert("피쳐가 있으니 레이어 팝업을 띄울게요");
+
+            const coordinate = evt.coordinate;
+            const hdms = toStringHDMS(toLonLat(coordinate));
+            popup.setPosition(coordinate);
+            
+            let popover = Popover.getInstance(element);
+            
+            if (popover) {
+            popover.dispose();
+            }
+            
+            popover = new Popover(element, {
+                animation: false,
+                container: element,
+                content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
+                html: true,
+                placement: 'top',
+                title: 'Welcome to OpenLayers',
+            });
+            //팝오버 임시 숨기기
+            popover.show();
         }
         
-        popover = new Popover(element, {
-            animation: false,
-            container: element,
-            content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
-            html: true,
-            placement: 'top',
-            title: 'Welcome to OpenLayers',
-        });
-        //팝오버 임시 숨기기
-        //popover.show();
     });
 
+    //지도 포인트 이동시 이벤트
+    map.on('pointermove', function (e) {
+        if (!e.dragging) {
+            var pixel = map.getEventPixel(e.originalEvent);
+            var hit = map.hasFeatureAtPixel(pixel);
 
+            //console.log(map)
+            //map.getTarget().style.cursor = hit ? 'pointer' : '';
+        }
+    });
 
 
 
@@ -634,18 +654,14 @@ function Map1({}) {
         if(response.status == 200){
             console.log(response.status);
             console.log("저장완료!!");
-            /**
-             * 
-             *  저장 후 리로드하지않고 바로 저장시 같은 소스들이 모두 insert로 들어가는데 어떻게할까?
-             * 
-             */ 
+
+            source.clear();
+            callFeature();
         } 
     }
 
     /* 저장된 지오메트릭 데이터 불러오기 */
     const callFeature = async (feature) => {
-
-        //var geoJsonOri = new GeoJSON().writeFeatures(geom);
 
         let response = await axios({
             method  : 'get',
@@ -672,21 +688,17 @@ function Map1({}) {
             let geometry = new GeoJSON().readFeature(value.geom_value);
             let properties = JSON.parse(value.geom_prop);
             let geomType = properties.type;
-            let geomValue = geometry.getGeometry().getCoordinates();
-
-            // 원일 경우 center와 Radius를 이용해 추가.
+            
+            // 원일 경우 Center와 Radius를 이용해 추가.
             if (geomType == 'Circle') {
                 console.log('--- Set Circle ---');
-                let radius = properties.radius;
-                let center = geomValue;
+                let radius = properties.radius;//반지름
+                let center = geometry.getGeometry().getCoordinates();//중심점 좌표
 
                 feature = new Feature({
                     type: 'Feature',
                     geometry: new Circle(center, radius),
-                });
-
-                //feature.setProperties({ type: geomType, state: 'update' });    
-                
+                });                
             }
 
             feature.setId(value.id);//ID값 세팅
@@ -726,7 +738,7 @@ function Map1({}) {
 
     source.on('selectfeature', function (e) {
         console.log("피쳐선택!");
-        //flash(e.feature);
+        flash(e.feature);
     });
     
     //이벤트 리스너

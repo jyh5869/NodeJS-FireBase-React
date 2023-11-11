@@ -26,7 +26,7 @@ router.get("/geomboardSave", async (req, res) => {
     console.log("진입완료!!!!!!");
     
     var geom = JSON.parse(req.query.geom).features;
-    console.log(geom);
+    //console.log(geom);
     
 
     geom.forEach((doc) => {
