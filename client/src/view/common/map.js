@@ -97,7 +97,7 @@ function Map1({}) {
 
         var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
             return feature;
-        });
+        }); 
 
         //피쳐 없을때만 중심값 출력
         if (!feature) {
