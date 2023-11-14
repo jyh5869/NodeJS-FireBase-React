@@ -99,7 +99,7 @@ function Map1({}) {
             return feature;
         }); 
 
-        //피쳐 없을때만 중심값 출력
+        //피쳐 없을때만 중심값 출력 
         if (!feature) {
             let coordinate = evt.coordinate;
             console.log(coordinate);
