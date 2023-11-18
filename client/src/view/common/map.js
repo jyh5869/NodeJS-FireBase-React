@@ -22,6 +22,7 @@ import {GeometryCollection, Point, Polygon, Circle} from 'ol/geom.js';
 import {circular} from 'ol/geom/Polygon.js';
 import {getDistance} from 'ol/sphere.js';
 import {transform} from 'ol/proj.js';
+import {getCenter} from 'ol/extent';
 import {Circle as CircleStyle, Stroke, Style, Fill} from 'ol/style.js';
 
 import Feature from 'ol/Feature.js';
@@ -72,6 +73,7 @@ const vectorLayer = new VectorLayer({
 function Map1({}) {
 
     const [show, setShow] = useState(false);
+    const [drawFlag, setDrawFalg] = useState(false);//1. true: 피쳐 추가 혹은 수정
     const [featureInfo, setFeatureInfo] = useState(" 0 selected features ");
     
     const handleClose = () => setShow(false);
@@ -89,6 +91,7 @@ function Map1({}) {
         })
     });
 
+    let isDraw = false;
     const view = map.getView();
     const zoom = view.getZoom();
 
@@ -199,6 +202,7 @@ function Map1({}) {
     //console.log(modify);
     modify.on('modifystart', function (event) {
         console.log("수정 시작");
+        isDraw = true;
         event.features.forEach(function (feature) {
             const geometry = feature.getGeometry();
             if (geometry.getType() === 'GeometryCollection') {
@@ -209,6 +213,7 @@ function Map1({}) {
 
     modify.on('modifyend', function (event) {
         console.log("수정 종료");
+        isDraw = false;
         event.features.forEach(function (feature) {
             const modifyGeometry = feature.get('modifyGeometry');
             if (modifyGeometry) {
@@ -216,8 +221,6 @@ function Map1({}) {
                 feature.unset('modifyGeometry', true);
             }
         });
-
-
     });
 
     //Map 객채에 수정 인터렉션(Interation) 추가
@@ -228,6 +231,7 @@ function Map1({}) {
 
         if(interactionType == "draw"){
             map.removeInteraction(draw);
+            isDraw = false;
         }
         else if(interactionType == "snap"){
             map.removeInteraction(snap);
@@ -239,6 +243,7 @@ function Map1({}) {
 
         if(interactionType == "draw"){
             map.addInteraction(draw);
+            isDraw = true;
         }
         else if(interactionType == "snap"){
             map.addInteraction(snap);
@@ -248,7 +253,6 @@ function Map1({}) {
     //지도 초기화
     const initMap =  async (e) => {
         //console.log(e.target.value)
-
         map.removeInteraction(draw);
         map.removeInteraction(snap);
 
@@ -298,6 +302,9 @@ function Map1({}) {
 
         map.addInteraction(draw);
         map.addInteraction(snap);
+        console.log("그려보쟝!");
+
+        isDraw = true;
     }
 
     /* 랜덤 좌표 찍기 */
@@ -512,43 +519,52 @@ function Map1({}) {
     
     const element = popup.getElement();
     
+    /**
+     * 지도에서 클릭해서 피쳐 감지 -> lineString point 감지불가
+     * 피쳐 클릭 이벤트를 통해 팝오버 띄우기 필요
+     */
     map.on('click', function (evt) {
-
-        var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
-            return feature;
-        });
+        //console.log("★★★★★★" + isDraw);
+        if(isDraw == true){ return false}
         
-        let popover = Popover.getInstance(element);
-
+        let popover = Popover.getInstance(element);//팝오버 객체 생성
+        let coordinate = evt.coordinate;
+        let hdms = toStringHDMS(toLonLat(coordinate));
+        //console.log(coordinate);
+        //console.log(hdms);
+        let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {return feature;});//피쳐가 있을시 피쳐를 반환
+    
         if (feature) {
             let geomType = feature.getProperties().type;
-            console.log(feature)
+            let center;
+
             //피쳐 추가시 Type Propertiy 세팅
             if(geomType == 'Geodesic'){ 
                 console.log('Geodesic');
+                center = getCenter(feature.getGeometry().getExtent());
             }
             else if(geomType == 'Circle'){
                 console.log('Circle');
+                center = feature.getGeometry().getCenter();
             }
             else if(geomType == 'Polygon'){
                 console.log('Polygon');
+                center = getCenter(feature.getGeometry().getExtent());
             }
             else if(geomType == 'LineString'){
                 console.log('LineString');
+                center = getCenter(feature.getGeometry().getExtent());
             }
             else if(geomType == 'Point'){
                 console.log('Point');
+                center = feature.getGeometry().getCenter();
             }
-
-
-            const coordinate = evt.coordinate;
-            const hdms = toStringHDMS(toLonLat(coordinate));
-            popup.setPosition(coordinate);
             
-            
-            
+            //popup.setPosition(coordinate);
+            popup.setPosition(center);
+         
             if (popover) {
-            popover.dispose();
+                popover.dispose();
             }
             
             popover = new Popover(element, {
@@ -559,13 +575,16 @@ function Map1({}) {
                 placement: 'top',
                 title: 'Welcome to OpenLayers',
             });
-            //팝오버 임시 숨기기
+
+            //팝오버 표출
             popover.show();
         }
         else{
-            popover.hide();
-        }
-        
+            //팝오버 존재시 숨기기
+            if(popover != null){
+                popover.hide();
+            }
+        } 
     });
 
     //지도 포인트 이동시 이벤트
