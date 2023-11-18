@@ -433,7 +433,6 @@ function Map1({}) {
         }
         console.log(e.target.value);
 
-        //const value = selectElement.value;
         const value = e.target.value;
 
         
@@ -448,9 +447,13 @@ function Map1({}) {
         } else {
             select = null;
         }
+        
+        let popover = Popover.getInstance(element);//팝오버 객체 생성
+
+        console.log(e);
 
         if (select !== null) {
-          map.addInteraction(select);
+            map.addInteraction(select);
             select.on('select', function (e) {
             
                 document.getElementById('status').innerHTML =
@@ -464,34 +467,54 @@ function Map1({}) {
                 
                 if(e.target.getFeatures().getLength() != 0){
 
-                    let feature = e.target.getFeatures().getArray()[0];
+                    e.target.getFeatures().forEach(function(feature, idx){
+                        console.log(feature);
+                        console.log(idx);
 
-                    console.log(feature);
-                    //const coordinate = feature.getGeometry().getCoordinates();//피쳐 위치
-                    const coordinate= [119.95633585812502, 30.174435266749995]//상단고정
-
-                    //console.log(e.target.getFeatures().getArray()[0].getGeometry().getCoordinates());
-                    
-                    const hdms = toStringHDMS(toLonLat(coordinate));
-                    
-                    selectPopup.setPosition(coordinate);
-                    
-                    let popover = Popover.getInstance(selectElement);
-                    
-                    if (popover) {
-                        popover.dispose();
-                    }
-                    
-                    popover = new Popover(selectElement, {
-                        animation: false,
-                        container: selectElement,
-                        content: '<p>The location you clicked was:</p><code>' + feature.getGeometry().getType() + '</code><br><code>' + feature.getId() + '</code>',
-                        html: true,
-                        placement: 'top',
-                        title: 'Welcome to OpenLayers Select',
+                        let geomType = feature.getProperties().type;
+                        let center;
+                        console.log(geomType);
+                        //피쳐 추가시 Type Propertiy 세팅
+                        if(geomType == 'Geodesic'){ 
+                            console.log('Geodesic');
+                            center = getCenter(feature.getGeometry().getExtent());
+                        }
+                        else if(geomType == 'Circle'){
+                            console.log('Circle');
+                            center = feature.getGeometry().getCenter();
+                        }
+                        else if(geomType == 'Polygon'){
+                            console.log('Polygon');
+                            center = getCenter(feature.getGeometry().getExtent());
+                        }
+                        else if(geomType == 'LineString'){
+                            console.log('LineString');
+                            center = getCenter(feature.getGeometry().getExtent());
+                        }
+                        else if(geomType == 'Point'){
+                            console.log('Point');
+                            center = feature.getGeometry().getCoordinates();
+                        }
+                        
+                        //popup.setPosition(coordinate);
+                        popup.setPosition(center);
+                        
+                        if (popover) {
+                            popover.dispose();
+                        }
+                        
+                        popover = new Popover(element, {
+                            animation: false,
+                            container: element,
+                            content: '<p>The location you clicked was:</p><code>' + center + '</code>',
+                            html: true,
+                            placement: 'top',
+                            title: 'Welcome to OpenLayers',
+                        });
+            
+                        //팝오버 표출
+                        popover.show();
                     });
-
-                    popover.show();
                 }      
             });
         }
@@ -526,7 +549,7 @@ function Map1({}) {
     map.on('click', function (evt) {
         //console.log("★★★★★★" + isDraw);
         if(isDraw == true){ return false}
-        
+        /*
         let popover = Popover.getInstance(element);//팝오버 객체 생성
         let coordinate = evt.coordinate;
         let hdms = toStringHDMS(toLonLat(coordinate));
@@ -584,7 +607,8 @@ function Map1({}) {
             if(popover != null){
                 popover.hide();
             }
-        } 
+        }
+        */
     });
 
     //지도 포인트 이동시 이벤트
