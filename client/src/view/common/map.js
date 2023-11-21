@@ -435,7 +435,6 @@ function Map1({}) {
 
         const value = e.target.value;
 
-        
         if (value == 'singleclick') {
             select = selectSingleClick;
         } else if (value == 'click') {
@@ -449,8 +448,6 @@ function Map1({}) {
         }
         
         let popover = Popover.getInstance(element);//팝오버 객체 생성
-
-        console.log(e);
 
         if (select !== null) {
             map.addInteraction(select);
@@ -473,7 +470,7 @@ function Map1({}) {
 
                         let geomType = feature.getProperties().type;
                         let center;
-                        console.log(geomType);
+
                         //피쳐 추가시 Type Propertiy 세팅
                         if(geomType == 'Geodesic'){ 
                             console.log('Geodesic');
@@ -506,7 +503,7 @@ function Map1({}) {
                         popover = new Popover(element, {
                             animation: false,
                             container: element,
-                            content: '<p>The location you clicked was:</p><code>' + center + '</code>',
+                            content: '<p>클릭한 위치의 피쳐 정보:</p><code>' + center + '</code>',
                             html: true,
                             placement: 'top',
                             title: 'Welcome to OpenLayers',
@@ -538,62 +535,44 @@ function Map1({}) {
     const popup = new Overlay({
         element: document.getElementById('popup'),
     });
+    const popupMap = new Overlay({
+        element: document.getElementById('popupMap'),
+    });
+
     map.addOverlay(popup);
+    map.addOverlay(popupMap);
     
     const element = popup.getElement();
+    const elementMap = popupMap.getElement();
     
     /**
-     * 지도에서 클릭해서 피쳐 감지 -> lineString point 감지불가
-     * 피쳐 클릭 이벤트를 통해 팝오버 띄우기 필요
+     * 지도 클릭시 피쳐가 없는 부분에 팝업 띄우기
      */
     map.on('click', function (evt) {
-        //console.log("★★★★★★" + isDraw);
+        
         if(isDraw == true){ return false}
-        /*
-        let popover = Popover.getInstance(element);//팝오버 객체 생성
+        console.log("클릭" + isDraw);
+        let popover = Popover.getInstance(elementMap);//팝오버 객체 생성
         let coordinate = evt.coordinate;
         let hdms = toStringHDMS(toLonLat(coordinate));
-        //console.log(coordinate);
-        //console.log(hdms);
-        let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {return feature;});//피쳐가 있을시 피쳐를 반환
-    
-        if (feature) {
-            let geomType = feature.getProperties().type;
-            let center;
 
-            //피쳐 추가시 Type Propertiy 세팅
-            if(geomType == 'Geodesic'){ 
-                console.log('Geodesic');
-                center = getCenter(feature.getGeometry().getExtent());
-            }
-            else if(geomType == 'Circle'){
-                console.log('Circle');
-                center = feature.getGeometry().getCenter();
-            }
-            else if(geomType == 'Polygon'){
-                console.log('Polygon');
-                center = getCenter(feature.getGeometry().getExtent());
-            }
-            else if(geomType == 'LineString'){
-                console.log('LineString');
-                center = getCenter(feature.getGeometry().getExtent());
-            }
-            else if(geomType == 'Point'){
-                console.log('Point');
-                center = feature.getGeometry().getCenter();
-            }
+        let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {return feature;});//피쳐가 있을시 피쳐를 반환
+        
+        if (feature == undefined) {
+
+            //let center = coordinate;
             
-            //popup.setPosition(coordinate);
-            popup.setPosition(center);
+            popupMap.setPosition(coordinate);
+            //popup.setPosition(center);
          
             if (popover) {
                 popover.dispose();
             }
             
-            popover = new Popover(element, {
+            popover = new Popover(elementMap, {
                 animation: false,
-                container: element,
-                content: '<p>The location you clicked was:</p><code>' + hdms + '</code>',
+                container: elementMap,
+                content: '<p>클릭한 부분의 위치정보</p><code>' + hdms + '</code>',
                 html: true,
                 placement: 'top',
                 title: 'Welcome to OpenLayers',
@@ -608,7 +587,6 @@ function Map1({}) {
                 popover.hide();
             }
         }
-        */
     });
 
     //지도 포인트 이동시 이벤트
@@ -859,6 +837,7 @@ function Map1({}) {
             </form>
 
             <div id="popup"></div>
+            <div id="popupMap"></div>
             <div id="selectPopup"></div>
         </>
     );
