@@ -595,7 +595,6 @@ function Map1({}) {
             var pixel = map.getEventPixel(e.originalEvent);
             var hit = map.hasFeatureAtPixel(pixel);
 
-            //console.log(map)
             //map.getTarget().style.cursor = hit ? 'pointer' : '';
         }
     });
