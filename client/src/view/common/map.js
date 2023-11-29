@@ -431,7 +431,6 @@ function Map1({}) {
         if (select !== null) {
             map.removeInteraction(select);
         }
-        console.log(e.target.value);
 
         const value = e.target.value;
 
@@ -448,11 +447,11 @@ function Map1({}) {
         }
         
         let popover = Popover.getInstance(element);//팝오버 객체 생성
-
+        console.log("이벤트 발생1");
         if (select !== null) {
             map.addInteraction(select);
             select.on('select', function (e) {
-            
+                console.log("이벤트 발생2");
                 document.getElementById('status').innerHTML =
                 '&nbsp;' +
                 e.target.getFeatures().getLength() +
@@ -825,7 +824,7 @@ function Map1({}) {
 
             <form>
                 <label htmlFor="type">Action type &nbsp;</label>
-                <select id="type2" onChange={(e) => { changeInteraction(e);}}  defaultValue={"none"}>
+                <select id="type2" onChange={(e) => { changeInteraction(e);}}  defaultValue={"click"}>
                     <option key={1} value="click">Click</option>
                     <option key={2} value="singleclick">Single-click</option>
                     <option key={3} value="pointermove">Hover</option>
