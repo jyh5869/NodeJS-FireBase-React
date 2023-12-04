@@ -358,8 +358,6 @@ function Map1({}) {
             // tell OpenLayers to continue postrender animation
             map.render();
         }
-        //saveFeature(feature);
-
 
         //Draw Interation 종료
         removeInteraction("draw");
@@ -380,13 +378,7 @@ function Map1({}) {
 
 
 
-    const selectPopup = new Overlay({
-        element: document.getElementById('selectPopup'),
-    });
-    map.addOverlay(selectPopup);
-    const selectElement = selectPopup.getElement();
-
-    let select = null; // ref to currently selected interaction
+    let select = null; // Select 인터렉션 변수 생성
 
     const selected = new Style({
         fill: new Fill({
@@ -404,10 +396,10 @@ function Map1({}) {
         return selected;
     }
       
-      // select interaction working on "singleclick"
+    // select interaction working on "singleclick"
     const selectSingleClick = new Select({style: selectStyle});
       
-      // select interaction working on "click"
+    // select interaction working on "click"
     const selectClick = new Select({
         condition: click,
         style: selectStyle,
@@ -425,14 +417,98 @@ function Map1({}) {
             return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
         },
     });
+    
+    map.addInteraction(selectSingleClick);
+    
 
-    const changeInteraction = function (e) {
+    /*  
+        Overlay PopUp 세팅
+        1. Feature OverlayPop
+        2. Map OverlayPop
+
+        참고 URL : https://openlayers.org/en/latest/examples/overlay.html
+    */
+    const popup = new Overlay({
+        element: document.getElementById('popup'),
+    });
+    const popupMap = new Overlay({
+        element: document.getElementById('popupMap'),
+    });
+
+    map.addOverlay(popup);
+    map.addOverlay(popupMap);
+    
+    const element = popup.getElement();
+    const elementMap = popupMap.getElement();
+
+
+
+    let popover = Popover.getInstance(element);//팝오버 객체 생성
+    
+    
+    select = selectSingleClick;
+    select.on('select', function (e) {
+        selectFeatureInfoBox(e, "FEATURE");
+        
+        if(e.target.getFeatures().getLength() != 0){
+
+            e.target.getFeatures().forEach(function(feature, idx){
+
+                let geomType = feature.getProperties().type;
+                let center;
+
+                //피쳐 추가시 Type Propertiy 세팅
+                if(geomType == 'Geodesic'){ 
+                    console.log('Geodesic');
+                    center = getCenter(feature.getGeometry().getExtent());
+                }
+                else if(geomType == 'Circle'){
+                    console.log('Circle');
+                    center = feature.getGeometry().getCenter();
+                }
+                else if(geomType == 'Polygon'){
+                    console.log('Polygon');
+                    center = getCenter(feature.getGeometry().getExtent());
+                }
+                else if(geomType == 'LineString'){
+                    console.log('LineString');
+                    center = getCenter(feature.getGeometry().getExtent());
+                }
+                else if(geomType == 'Point'){
+                    console.log('Point');
+                    center = feature.getGeometry().getCoordinates();
+                }
+                
+                //popup.setPosition(coordinate);
+                popup.setPosition(center);
+                
+                if (popover) {
+                    popover.dispose();
+                }
+                
+                popover = new Popover(element, {
+                    animation: false,
+                    container: element,
+                    content: '<p>클릭한 위치의 피쳐 정보:</p><code>' + center + '</code>',
+                    html: true,
+                    placement: 'top',
+                    title: 'Welcome to OpenLayers',
+                });
+    
+                //팝오버 표출
+                popover.show();
+            });
+        }      
+    });
+
+
+    const changeInteraction = function (clickType) {
 
         if (select !== null) {
             map.removeInteraction(select);
         }
 
-        const value = e.target.value;
+        const value = clickType;
 
         if (value == 'singleclick') {
             select = selectSingleClick;
@@ -443,33 +519,24 @@ function Map1({}) {
         } else if (value == 'altclick') {
             select = selectAltClick;
         } else {
-            select = null;
+            select = selectClick;
         }
         
-        let popover = Popover.getInstance(element);//팝오버 객체 생성
-        console.log("이벤트 발생1");
         if (select !== null) {
             map.addInteraction(select);
+
             select.on('select', function (e) {
-                console.log("이벤트 발생2");
-                document.getElementById('status').innerHTML =
-                '&nbsp;' +
-                e.target.getFeatures().getLength() +
-                ' selected features (last operation selected ' +
-                e.selected.length +
-                ' and deselected ' +
-                e.deselected.length +
-                ' features)';
+
+                selectFeatureInfoBox(e, "MAP");
+                console.log("이벤트 발생 Value : " + value);
                 
                 if(e.target.getFeatures().getLength() != 0){
-
+        
                     e.target.getFeatures().forEach(function(feature, idx){
-                        console.log(feature);
-                        console.log(idx);
-
+        
                         let geomType = feature.getProperties().type;
                         let center;
-
+        
                         //피쳐 추가시 Type Propertiy 세팅
                         if(geomType == 'Geodesic'){ 
                             console.log('Geodesic');
@@ -492,7 +559,6 @@ function Map1({}) {
                             center = feature.getGeometry().getCoordinates();
                         }
                         
-                        //popup.setPosition(coordinate);
                         popup.setPosition(center);
                         
                         if (popover) {
@@ -515,34 +581,7 @@ function Map1({}) {
             });
         }
     };
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /*
-    https://openlayers.org/en/latest/examples/overlay.html
-    */
-    const popup = new Overlay({
-        element: document.getElementById('popup'),
-    });
-    const popupMap = new Overlay({
-        element: document.getElementById('popupMap'),
-    });
 
-    map.addOverlay(popup);
-    map.addOverlay(popupMap);
-    
-    const element = popup.getElement();
-    const elementMap = popupMap.getElement();
     
     /**
      * 지도 클릭시 피쳐가 없는 부분에 팝업 띄우기
@@ -550,25 +589,24 @@ function Map1({}) {
     map.on('click', function (evt) {
         
         if(isDraw == true){ return false}
-        console.log("클릭" + isDraw);
-        let popover = Popover.getInstance(elementMap);//팝오버 객체 생성
+
+        console.log("지도 클릭시 위치정보 Overlay : " + isDraw);
+        let popoverMap = Popover.getInstance(elementMap);//팝오버 객체 생성
         let coordinate = evt.coordinate;
         let hdms = toStringHDMS(toLonLat(coordinate));
-
         let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {return feature;});//피쳐가 있을시 피쳐를 반환
         
         if (feature == undefined) {
-
-            //let center = coordinate;
             
+            selectFeatureInfoBox(evt, "MAP");
+
             popupMap.setPosition(coordinate);
-            //popup.setPosition(center);
          
-            if (popover) {
-                popover.dispose();
+            if (popoverMap) {
+                popoverMap.dispose();
             }
             
-            popover = new Popover(elementMap, {
+            popoverMap = new Popover(elementMap, {
                 animation: false,
                 container: elementMap,
                 content: '<p>클릭한 부분의 위치정보</p><code>' + hdms + '</code>',
@@ -577,24 +615,44 @@ function Map1({}) {
                 title: 'Welcome to OpenLayers',
             });
 
-            //팝오버 표출
-            popover.show();
-        }
-        else{
-            //팝오버 존재시 숨기기
+            //지도클릭 팝오버 표출 및 피쳐 팝오버 비활성화
+            popoverMap.show();
             if(popover != null){
                 popover.hide();
             }
         }
+        else{
+            //팝오버 존재시 숨기기
+            if(popoverMap != null){
+                popoverMap.hide();
+            }
+        }
     });
 
-    //지도 포인트 이동시 이벤트
+
+    /* Select 이벤트 발생시 해당 이벤트의 정보 */
+    const selectFeatureInfoBox = async(event, selectType) => {
+
+        if(selectType == "FEATURE"){
+            document.getElementById('status').innerHTML =
+            '&nbsp;' +
+            event.target.getFeatures().getLength() +
+            ' selected features (last operation selected ' +
+            event.selected.length +
+            ' and deselected ' +
+            event.deselected.length +
+            ' features)';
+        }
+        else{
+            document.getElementById('status').innerHTML = "지도 클릭 선택된 피쳐가 없습니다."
+        }
+    };
+
+    /* 지도 포인트 이동시 이벤트 */
     map.on('pointermove', function (e) {
         if (!e.dragging) {
             var pixel = map.getEventPixel(e.originalEvent);
             var hit = map.hasFeatureAtPixel(pixel);
-
-            //map.getTarget().style.cursor = hit ? 'pointer' : '';
         }
     });
 
@@ -789,9 +847,9 @@ function Map1({}) {
         console.log("피쳐선택!");
         flash(e.feature);
     });
-    
+
     //이벤트 리스너
-    useEffect(() => {
+    useEffect((easeOut) => {
         callFeature();
     },  []);
 
@@ -824,7 +882,7 @@ function Map1({}) {
 
             <form>
                 <label htmlFor="type">Action type &nbsp;</label>
-                <select id="type2" onChange={(e) => { changeInteraction(e);}}  defaultValue={"click"}>
+                <select id="type2" onChange={(e) => { changeInteraction(e.target.value);}} defaultValue={"none"}>
                     <option key={1} value="click">Click</option>
                     <option key={2} value="singleclick">Single-click</option>
                     <option key={3} value="pointermove">Hover</option>
