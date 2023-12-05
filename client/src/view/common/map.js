@@ -44,6 +44,7 @@ import {toStringHDMS} from 'ol/coordinate.js';
 import GeojsonTest from '../../openLayers/examples/data/geojson/switzerland.geojson';
 
 import {Popover} from 'bootstrap';
+import { inherits } from 'util';
 
 
 const tileLayer = new TileLayer({
@@ -382,16 +383,16 @@ function Map1({}) {
 
     const selected = new Style({
         fill: new Fill({
-            color: '#eeeeee',
+            color: 'rgba(255, 255, 255, 0.6)'
         }),
         stroke: new Stroke({
-            color: 'rgba(255, 255, 255, 0.7)',
+            color: '#f19ca3',
             width: 2,
         }),
     });
 
     function selectStyle(feature) {
-        const color = feature.get('COLOR') || '#eeeeee';
+        const color = feature.get('COLOR') || 'rgba(255, 255, 255, 0.6)';
         selected.getFill().setColor(color);
         return selected;
     }
