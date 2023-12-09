@@ -1,6 +1,6 @@
 import React,  { useEffect, useState } from 'react';
 
-import { Button, Table, Form  }   from 'react-bootstrap';
+import { Button, Table, Form, Badge, Stack, Container, Row, Col }   from 'react-bootstrap';
 
 import axios from 'axios';
 /*
@@ -53,9 +53,10 @@ const tileLayer = new TileLayer({
     })
 });
 
+//url: '/client/src/data/movie/geogson/switzerland.geojson',
 const source = new VectorSource({
-    //url: GeojsonTest,
-    //format: new GeoJSON(),
+    url: GeojsonTest,
+    format: new GeoJSON(),
 });
 
 const vectorLayer = new VectorLayer({
@@ -125,14 +126,15 @@ function Map1({}) {
         const polygon = feature.getGeometry();
 
         view.fit(polygon, {padding: [170, 50, 30, 150]});
-
     };
 
     const ZoomToLausanne = async () => {
         const feature = source.getFeatures()[1];
         const point   = feature.getGeometry();
 
-        view.fit(point, {padding: [170, 50, 30, 150], minResolution: 50});
+        view.fit(point, {padding:  [170, 50, 30, 150]});
+        view.setZoom(13);
+
     };
 
     const CenterOnLausanne = async () => {
@@ -142,7 +144,6 @@ function Map1({}) {
 
         view.centerOn(point.getCoordinates(), size, [570, 500]);
     };
-
 
 
 
@@ -307,6 +308,11 @@ function Map1({}) {
 
         isDraw = true;
     }
+
+    /* Feature Draw시 동학하며 마지막 포인트를 없애 이전으로 돌아간다. */
+    const removeLastPoint = async () => {
+        draw.removeLastPoint();
+    };
 
     /* 랜덤 좌표 찍기 */
     function addRandomFeature() {
@@ -844,6 +850,7 @@ function Map1({}) {
 
     });
 
+      
     source.on('selectfeature', function (e) {
         console.log("피쳐선택!");
         flash(e.feature);
@@ -856,42 +863,73 @@ function Map1({}) {
 
     //window.setInterval(addRandomFeature, 3000);
     return (
-        <>
+        <>  
+            <Row className='mb-3'>
+                <Col>
+                    <Stack direction="horizontal" gap={2}>
+                        <Badge bg="primary">Primary</Badge>
+                        <Badge bg="secondary">Secondary</Badge>
+                        <Badge bg="success">Success</Badge>
+                        <Badge bg="danger">Danger</Badge>
+                        <Badge bg="warning" text="dark">Warning</Badge>
+                        <Badge bg="info">Info</Badge>
+                        <Badge bg="light" text="dark">Light</Badge>
+                        <Badge bg="dark">Dark</Badge>
+                    </Stack>
+                </Col>
+            </Row>
+
+            <Row className='mb-3'>
+                <Col className="text-center" id="status" >{featureInfo}</Col>
+            </Row>
+
             <div id="map"></div>
 
-            <div>
-                <Button variant="outline-success" className="btn_type1" onClick={saveFeature}>저장하기</Button>   
-            </div>
-            
-            <button id="zoomtoswitzerland" onClick={(e) => { Switzerland();}}>Zoom to Switzerland</button>
-            <button id="zoomtolausanne" onClick={(e) => { ZoomToLausanne();}}>Zoom to Lausanne</button>
-            <button id="centerlausanne" onClick={(e) => { CenterOnLausanne();}}>Center on Lausanne</button><br/><br/>
-            <button id="zoom-out" onClick={(e) => { handleClick('zoomOut');}}>Zoom out</button>
-            <button id="zoom-in" onClick={(e) => { handleClick('zoomIn');}}>Zoom in</button>
+            <Row className='mb-3'>
+                <Col>
+                    <Button variant="outline-success" className="btn_type1" onClick={saveFeature}>저장하기</Button>   
+                </Col>
+            </Row>
 
-            <form>
-            {/* JSX는 JAVASCRIPT 이기 때문에 FOR는 반복을 의미 하므로 LABEL 테그에서 FOR 대신 HTMLFOR을 사용한다. */}
-            <label htmlFor="type">Geometry type &nbsp;</label>
-            <select id="type" onChange={(e) => { initMap(e);}} value={drawType}>
-                <option key={1} value="Point" >Point</option>
-                <option key={2} value="LineString">LineString</option>
-                <option key={3} value="Polygon">Polygon</option>
-                <option key={4}value="Circle">Circle Geometry</option>
-                <option key={5} value="Geodesic">Geodesic Circle</option> 
-            </select>
-            </form>
+            <Row className='mb-3'>
+                <Col>
+                    <div className="input-group">
+                        <label className="input-group-text" htmlFor="type">Geometry type</label>
+                        <Form.Select id="type" onChange={(e) => { initMap(e);}} value={drawType}>
+                            <option key={1} value="Point" >Point</option>
+                            <option key={2} value="LineString">LineString</option>
+                            <option key={3} value="Polygon">Polygon</option>
+                            <option key={4}value="Circle">Circle Geometry</option>
+                            <option key={5} value="Geodesic">Geodesic Circle</option> 
+                        </Form.Select>
+                        <Button variant="outline-primary" onClick={(e) => { removeLastPoint();}}>이전으로</Button>
+                    </div>
+                </Col>
+                <Col>
+                    <div className="input-group">
+                        <label className="input-group-text" htmlFor="type2">Action type &nbsp;</label>
+                        <Form.Select id="type2" onChange={(e) => { changeInteraction(e.target.value);}} defaultValue={"none"}>
+                            <option key={1} value="click">Click</option>
+                            <option key={2} value="singleclick">Single-click</option>
+                            <option key={3} value="pointermove">Hover</option>
+                            <option key={4} value="altclick">Alt+Click</option>
+                            <option key={5} value="none">None</option>
+                        </Form.Select>
+                    </div>
+                </Col>
+            </Row>
 
-            <form>
-                <label htmlFor="type">Action type &nbsp;</label>
-                <select id="type2" onChange={(e) => { changeInteraction(e.target.value);}} defaultValue={"none"}>
-                    <option key={1} value="click">Click</option>
-                    <option key={2} value="singleclick">Single-click</option>
-                    <option key={3} value="pointermove">Hover</option>
-                    <option key={4} value="altclick">Alt+Click</option>
-                    <option key={5} value="none">None</option>
-                </select>
-                <span id="status">{featureInfo}</span>
-            </form>
+            <Row className='mb-3'>
+                <Col className="d-grid gap-2"><Button variant="outline-danger" id="zoomtoswitzerland" onClick={(e) => { Switzerland();}}>Zoom to Switzerland</Button></Col>
+                <Col className="d-grid gap-2"><Button variant="outline-danger" id="zoomtolausanne" onClick={(e) => { ZoomToLausanne();}}>Zoom to Lausanne</Button></Col>
+                <Col className="d-grid gap-2"><Button variant="outline-danger" id="centerlausanne" onClick={(e) => { CenterOnLausanne();}}>Center on Lausanne</Button></Col>
+            </Row>
+
+            <Row>
+                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-out" onClick={(e) => { handleClick('zoomOut');}}>Zoom out</Button></Col>
+                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-in" onClick={(e) => { handleClick('zoomIn');}}>Zoom in</Button></Col>
+            </Row>
+
 
             <div id="popup"></div>
             <div id="popupMap"></div>
