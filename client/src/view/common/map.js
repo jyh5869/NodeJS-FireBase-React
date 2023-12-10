@@ -112,12 +112,13 @@ function Map1({}) {
     });
     
     const handleClick = async (zoomType) => {
-        
+        let currentZoom = view.getZoom();
+
         if(zoomType == 'zoomIn'){
-          view.setZoom(zoom + 1);
+          view.setZoom(currentZoom + 1);
         }
         else if(zoomType == 'zoomOut'){
-          view.setZoom(zoom - 1);
+          view.setZoom(currentZoom - 1);
         }
     };
 
@@ -793,7 +794,6 @@ function Map1({}) {
         console.log(datas);
 
         /* 피쳐보이기 부터 해보자 */
-
         const featureArr = [];
         datas.forEach(function(value, idx){
 
@@ -802,7 +802,10 @@ function Map1({}) {
             let geometry = new GeoJSON().readFeature(value.geom_value);
             let properties = JSON.parse(value.geom_prop);
             let geomType = properties.type;
-            
+
+            // 지오메트릭 타입별로 카운팅 
+            cntOfFeatureType(geomType);
+
             // 원일 경우 Center와 Radius를 이용해 추가.
             if (geomType == 'Circle') {
                 console.log('--- Set Circle ---');
@@ -817,13 +820,33 @@ function Map1({}) {
 
             feature.setId(value.id);//ID값 세팅
             feature.setProperties(properties);//프로퍼티 값 세팅
+
             featureArr.push(feature);
         
             console.log(properties);
         });
 
-        //console.log(featureArr);
         source.addFeatures(featureArr);
+    }
+
+    /* 지오메트릭 타입별 갯수 표출 함수 https://dori-coding.tistory.com/entry/React-Ref-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-DOM-%EC%9A%94%EC%86%8C%EC%97%90-%EC%A0%91%EA%B7%BC%ED%95%98%EA%B8%B0-useRef */
+    const cntOfFeatureType = async (featureType) => {
+
+        if(featureType == 'Geodesic'){ 
+
+        }
+        else if(featureType == 'Circle'){
+
+        }
+        else if(featureType == 'Polygon'){
+
+        }
+        else if(featureType == 'LineString'){
+
+        }
+        else if(featureType == 'Point'){
+
+        }
     }
 
     source.on('addfeature', function (e) {
