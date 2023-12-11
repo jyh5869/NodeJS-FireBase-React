@@ -18,7 +18,7 @@ import View from 'ol/View.js';
 import XYZ from 'ol/source/XYZ';
 
 import {Draw, Modify, Snap} from 'ol/interaction.js';
-import {GeometryCollection, Point, Polygon, Circle} from 'ol/geom.js';
+import {GeometryCollection, Point, Polygon, Circle, LineString} from 'ol/geom.js';
 import {circular} from 'ol/geom/Polygon.js';
 import {getDistance} from 'ol/sphere.js';
 import {transform} from 'ol/proj.js';
@@ -72,12 +72,18 @@ const vectorLayer = new VectorLayer({
     },
 });
 
-function Map1({}) {
+const Map1 = () => {
 
     const [show, setShow] = useState(false);
     const [drawFlag, setDrawFalg] = useState(false);//1. true: 피쳐 추가 혹은 수정
     const [featureInfo, setFeatureInfo] = useState(" 0 selected features ");
     
+    const [circleCnt      , setCircleCnt    ] = useState("0");
+    const [polygonCnt     , setPolygonCnt   ] = useState("0");
+    const [pointCnt       , setPointCnt     ] = useState("0");
+    const [lineStringCnt  , setLineStringCnt] = useState("0");
+    const [geodesicCnt    , setGeodesicCnt  ] = useState("0");
+
     const handleClose = () => setShow(false);
 
     const map = new Map({
@@ -829,24 +835,25 @@ function Map1({}) {
         source.addFeatures(featureArr);
     }
 
-    /* 지오메트릭 타입별 갯수 표출 함수 https://dori-coding.tistory.com/entry/React-Ref-%EC%82%AC%EC%9A%A9%ED%95%98%EC%97%AC-DOM-%EC%9A%94%EC%86%8C%EC%97%90-%EC%A0%91%EA%B7%BC%ED%95%98%EA%B8%B0-useRef */
+    /* 지오메트릭 타입별 갯수 표출 함수 */
     const cntOfFeatureType = async (featureType) => {
 
         if(featureType == 'Geodesic'){ 
-
+            setGeodesicCnt(Number(geodesicCnt + 1));
         }
         else if(featureType == 'Circle'){
-
+            setCircleCnt(Number(circleCnt + 1));
         }
         else if(featureType == 'Polygon'){
-
+            setPolygonCnt(Number(polygonCnt + 1));
         }
         else if(featureType == 'LineString'){
-
+            setLineStringCnt(Number(lineStringCnt + 1))
         }
         else if(featureType == 'Point'){
-
+            setPointCnt(Number(pointCnt + 1));
         }
+
     }
 
     source.on('addfeature', function (e) {
@@ -890,11 +897,11 @@ function Map1({}) {
             <Row className='mb-3'>
                 <Col>
                     <Stack direction="horizontal" gap={2}>
-                        <Badge bg="primary">Primary</Badge>
-                        <Badge bg="secondary">Secondary</Badge>
-                        <Badge bg="success">Success</Badge>
-                        <Badge bg="danger">Danger</Badge>
-                        <Badge bg="warning" text="dark">Warning</Badge>
+                        <Badge bg="primary">polygone {polygonCnt}</Badge>
+                        <Badge bg="secondary">LineString: {lineStringCnt}</Badge>
+                        <Badge bg="success">Point: {pointCnt}</Badge>
+                        <Badge bg="danger">Circle: {circleCnt}</Badge>
+                        <Badge bg="warning" text="dark">Geodesic: {geodesicCnt}</Badge>
                         <Badge bg="info">Info</Badge>
                         <Badge bg="light" text="dark">Light</Badge>
                         <Badge bg="dark">Dark</Badge>
