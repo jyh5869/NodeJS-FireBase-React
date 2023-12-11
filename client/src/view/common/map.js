@@ -78,11 +78,12 @@ const Map1 = () => {
     const [drawFlag, setDrawFalg] = useState(false);//1. true: 피쳐 추가 혹은 수정
     const [featureInfo, setFeatureInfo] = useState(" 0 selected features ");
     
-    const [circleCnt      , setCircleCnt    ] = useState("0");
-    const [polygonCnt     , setPolygonCnt   ] = useState("0");
-    const [pointCnt       , setPointCnt     ] = useState("0");
-    const [lineStringCnt  , setLineStringCnt] = useState("0");
-    const [geodesicCnt    , setGeodesicCnt  ] = useState("0");
+    const [circleCnt      , setCircleCnt    ] = useState(0);
+    const [polygonCnt     , setPolygonCnt   ] = useState(0);
+    const [pointCnt       , setPointCnt     ] = useState(0);
+    const [lineStringCnt  , setLineStringCnt] = useState(0);
+    const [geodesicCnt    , setGeodesicCnt  ] = useState(0);
+    const [totalCnt       , setTotalCnt     ] = useState(0);
 
     const handleClose = () => setShow(false);
 
@@ -796,22 +797,21 @@ const Map1 = () => {
         })
             
         var datas =  response.data.rows;
-        //var array = Object.values(datas)
+        var array = Object.values(datas)
         console.log(datas);
 
         /* 피쳐보이기 부터 해보자 */
         const featureArr = [];
-        datas.forEach(function(value, idx){
+        //datas.forEach(async function(value, index){
+        //for (const [idx, value] of datas.entries()) {
+        const promises = datas.map(async (value, index) => {
 
             let feature = new GeoJSON().readFeature(value.geom_value);
 
             let geometry = new GeoJSON().readFeature(value.geom_value);
             let properties = JSON.parse(value.geom_prop);
             let geomType = properties.type;
-
-            // 지오메트릭 타입별로 카운팅 
-            cntOfFeatureType(geomType);
-
+            console.log( "11111111111  "+ index);
             // 원일 경우 Center와 Radius를 이용해 추가.
             if (geomType == 'Circle') {
                 console.log('--- Set Circle ---');
@@ -823,37 +823,45 @@ const Map1 = () => {
                     geometry: new Circle(center, radius),
                 });                
             }
-
+            console.log("22222222222222  " + index);
             feature.setId(value.id);//ID값 세팅
             feature.setProperties(properties);//프로퍼티 값 세팅
 
             featureArr.push(feature);
         
             console.log(properties);
+            console.log("333333333333  " + index);
+            // 지오메트릭 타입별로 카운팅 
+            cntOfFeatureType(geomType, index);
+            console.log("444444444444  " + index);
         });
+
+        await Promise.all(promises);
 
         source.addFeatures(featureArr);
     }
 
     /* 지오메트릭 타입별 갯수 표출 함수 */
-    const cntOfFeatureType = async (featureType) => {
+    const cntOfFeatureType = async (featureType, idx) => {
+
+        setTotalCnt(totalCnt + 1);
 
         if(featureType == 'Geodesic'){ 
-            setGeodesicCnt(Number(geodesicCnt + 1));
+            setGeodesicCnt(geodesicCnt + 1);
         }
         else if(featureType == 'Circle'){
-            setCircleCnt(Number(circleCnt + 1));
+            setCircleCnt(circleCnt + 1);
         }
         else if(featureType == 'Polygon'){
-            setPolygonCnt(Number(polygonCnt + 1));
+            setPolygonCnt(polygonCnt + 1);
         }
         else if(featureType == 'LineString'){
-            setLineStringCnt(Number(lineStringCnt + 1))
+            setLineStringCnt(lineStringCnt + 1);
         }
         else if(featureType == 'Point'){
-            setPointCnt(Number(pointCnt + 1));
+            setPointCnt(pointCnt + 1);
         }
-
+        console.log(totalCnt + "  :  " + idx);
     }
 
     source.on('addfeature', function (e) {
@@ -897,14 +905,12 @@ const Map1 = () => {
             <Row className='mb-3'>
                 <Col>
                     <Stack direction="horizontal" gap={2}>
-                        <Badge bg="primary">polygone {polygonCnt}</Badge>
+                        <Badge bg="info">Total: {totalCnt}</Badge>
+                        <Badge bg="primary">polygone: {polygonCnt}</Badge>
                         <Badge bg="secondary">LineString: {lineStringCnt}</Badge>
                         <Badge bg="success">Point: {pointCnt}</Badge>
                         <Badge bg="danger">Circle: {circleCnt}</Badge>
                         <Badge bg="warning" text="dark">Geodesic: {geodesicCnt}</Badge>
-                        <Badge bg="info">Info</Badge>
-                        <Badge bg="light" text="dark">Light</Badge>
-                        <Badge bg="dark">Dark</Badge>
                     </Stack>
                 </Col>
             </Row>
