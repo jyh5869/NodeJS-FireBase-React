@@ -44,8 +44,6 @@ import {toStringHDMS} from 'ol/coordinate.js';
 import GeojsonTest from '../../openLayers/examples/data/geojson/switzerland.geojson';
 
 import {Popover} from 'bootstrap';
-import { inherits } from 'util';
-
 
 const tileLayer = new TileLayer({
     source: new XYZ({ //source: new OSM()
@@ -844,24 +842,23 @@ const Map1 = () => {
     /* 지오메트릭 타입별 갯수 표출 함수 */
     const cntOfFeatureType = async (featureType, idx) => {
 
-        setTotalCnt(totalCnt + 1);
+        setTotalCnt(totalCnt => totalCnt + 1);
 
         if(featureType == 'Geodesic'){ 
-            setGeodesicCnt(geodesicCnt + 1);
+            setGeodesicCnt(geodesicCnt => geodesicCnt + 1);
         }
         else if(featureType == 'Circle'){
-            setCircleCnt(circleCnt + 1);
+            setCircleCnt(circleCnt => circleCnt + 1);
         }
         else if(featureType == 'Polygon'){
-            setPolygonCnt(polygonCnt + 1);
+            setPolygonCnt(polygonCnt => polygonCnt + 1);
         }
         else if(featureType == 'LineString'){
-            setLineStringCnt(lineStringCnt + 1);
+            setLineStringCnt(lineStringCnt => lineStringCnt + 1);
         }
         else if(featureType == 'Point'){
-            setPointCnt(pointCnt + 1);
+            setPointCnt(pointCnt => pointCnt + 1);
         }
-        console.log(totalCnt + "  :  " + idx);
     }
 
     source.on('addfeature', function (e) {
@@ -910,7 +907,13 @@ const Map1 = () => {
                         <Badge bg="secondary">LineString: {lineStringCnt}</Badge>
                         <Badge bg="success">Point: {pointCnt}</Badge>
                         <Badge bg="danger">Circle: {circleCnt}</Badge>
-                        <Badge bg="warning" text="dark">Geodesic: {geodesicCnt}</Badge>
+                        <Badge bg="warning">Geodesic: {geodesicCnt}</Badge>
+                    </Stack>
+                </Col>
+                <Col> 
+                    <Stack className="float-end" direction="horizontal" gap={2}>
+                        <Badge bg="light" text="dark">추가 : </Badge>
+                        <Badge bg="dark" text="light">변경 : </Badge>
                     </Stack>
                 </Col>
             </Row>
