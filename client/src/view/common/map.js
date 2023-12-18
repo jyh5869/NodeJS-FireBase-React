@@ -84,6 +84,21 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     const [isDraw, setIsDraw] = useState(false);
     const [view, setView] = useState();
     const [zoom, setZoom] = useState();
+    const [drawType, setDrawType] = useState();
+
+    const [draw, setDraw] = useState();
+    
+
+    const [popupFeature, setPopupFeature] = useState();
+    const [popupMap, setPopupMap] = useState();
+
+    const [elementFeature, setElementFeature] = useState();
+    const [elementMap, setElementMap] = useState();
+
+    const [popoverFeature, setPopoverFeature] = useState();
+    const [popoverMap, setPopoverMap] = useState();
+
+    
 
 
     
@@ -106,12 +121,48 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         const zoom = view.getZoom();
 
         
+
+
+        const popupFeature = new Overlay({
+            element: document.getElementById('popup'),
+        });
+        const popupMap = new Overlay({
+            element: document.getElementById('popupMap'),
+        });
+
+        map.addOverlay(popupFeature);
+        map.addOverlay(popupMap);
+
+        const elementFeature = popupFeature.getElement();
+        const elementMap = popupMap.getElement();
+
+        const popoverFeature = Popover.getInstance(elementFeature);//팝오버 객체 생성
+        const popoverMap = Popover.getInstance(elementMap);//팝오버 객체 생성
+
         setMap(map);
         setView(view);
         setZoom(zoom);
 
+        setElementMap(elementMap);
+        setElementFeature(elementFeature);
+
+        setPopoverFeature(popoverFeature);
+        setPopoverMap(popoverMap);
+
         return ()=> null
     },  []);
+
+
+    
+
+    
+    
+
+    /* Feature Draw시 동학하며 마지막 포인트를 없애 이전으로 돌아간다. */
+    const removeLastPoint = async () => {
+        draw.removeLastPoint();
+    };
+
 
     //지도 초기화
     const initMap =  async (e) => {
@@ -122,12 +173,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         addInteractions(e);
     };
 
-    /* Feature Draw시 동학하며 마지막 포인트를 없애 이전으로 돌아간다. */
-    const removeLastPoint = async () => {
-        draw.removeLastPoint();
-    };
-
-    let draw, snap, drawType; // global so we can remove them later
+    let snap;
     async function addInteractions(e) {
         
         let value = e.target.value;
@@ -160,25 +206,88 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
             };
         }
 
-        draw = new Draw({
+        let draw = new Draw({
             source: source,
             type: value,
             geometryFunction: geometryFunction,
         });
         snap = new Snap({source: source});
-        drawType = e.target.value;
-
+        
         mapObj.addInteraction(draw);
         mapObj.addInteraction(snap);
 
-
+        setDraw(draw);
+        setDrawType(e.target.value);
         setIsDraw(true);
     }
-    /*
+
+    //Map 객채에 특정 인터렉션(Interation)을 제거
+    function removeInteraction(interactionType){
+
+        if(interactionType == "draw"){
+            mapObj.removeInteraction(draw);
+            setIsDraw(false);
+        }
+        else if(interactionType == "snap"){
+            mapObj.removeInteraction(snap);
+        }
+    }
+
+
+
+
+
+
+    let select = null; // Select 인터렉션 변수 생성
+
+    const selected = new Style({
+        fill: new Fill({
+            color: 'rgba(255, 255, 255, 0.6)'
+        }),
+        stroke: new Stroke({
+            color: '#f19ca3',
+            width: 2,
+        }),
+    });
+
+    function selectStyle(feature) {
+        const color = feature.get('COLOR') || 'rgba(255, 255, 255, 0.6)';
+        selected.getFill().setColor(color);
+        return selected;
+    }
+      
+    // select interaction working on "singleclick"
+    const selectSingleClick = new Select({style: selectStyle});
+      
+    // select interaction working on "click"
+    const selectClick = new Select({
+        condition: click,
+        style: selectStyle,
+    });
+      
+    // select interaction working on "pointermove"
+    const selectPointerMove = new Select({
+        condition: pointerMove,
+        style: selectStyle,
+    });
+      
+    const selectAltClick = new Select({
+        style: selectStyle,
+        condition: function (mapBrowserEvent) {
+            return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
+        },
+    });
+
+
+
+
+
+
+
     const changeInteraction = function (clickType) {
 
         if (select !== null) {
-            map.removeInteraction(select);
+            mapObj.removeInteraction(select);
         }
 
         const value = clickType;
@@ -196,7 +305,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         }
         
         if (select !== null) {
-            map.addInteraction(select);
+            mapObj.addInteraction(select);
 
             select.on('select', function (e) {
 
@@ -232,15 +341,15 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                             center = feature.getGeometry().getCoordinates();
                         }
                         
-                        popup.setPosition(center);
+                        popupFeature.setPosition(center);
                         
-                        if (popover) {
-                            popover.dispose();
+                        if (popoverFeature) {
+                            popoverFeature.dispose();
                         }
                         
-                        popover = new Popover(element, {
+                        setPopoverFeature = new Popover(elementFeature, {
                             animation: false,
-                            container: element,
+                            container: elementFeature,
                             content: '<p>클릭한 위치의 피쳐 정보:</p><code>' + center + '</code>',
                             html: true,
                             placement: 'top',
@@ -248,13 +357,101 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                         });
             
                         //팝오버 표출
-                        popover.show();
+                        popupFeature.show();
                     });
                 }      
             });
         }
     };
-    */
+
+    /* Select 이벤트 발생시 해당 이벤트의 정보 */
+    const selectFeatureInfoBox = async(event, selectType) => {
+
+        if(selectType == "FEATURE"){
+            document.getElementById('status').innerHTML =
+            '&nbsp;' +
+            event.target.getFeatures().getLength() +
+            ' selected features (last operation selected ' +
+            event.selected.length +
+            ' and deselected ' +
+            event.deselected.length +
+            ' features)';
+        }
+        else{
+            document.getElementById('status').innerHTML = "지도 클릭 선택된 피쳐가 없습니다."
+        }
+    };
+    
+    source.on('addfeature', function (e) {
+
+        //피쳐 추가시 Type Propertiy 세팅
+        if(drawType == 'Geodesic'){ 
+            e.feature.set('realType', 'GeometryCollection');
+            e.feature.set('type'    , 'Geodesic');
+        }
+        else if(drawType == 'Circle'){
+            e.feature.setProperties({'realType':'Circle', 'type':'Circle'})
+        }
+        else if(drawType == 'Polygon'){
+            e.feature.setProperties({'realType':'Polygon', 'type':'Polygon'})
+        }
+        else if(drawType == 'LineString'){
+            e.feature.setProperties({'realType':'LineString', 'type':'LineString'})
+        }
+        else if(drawType == 'Point'){
+            e.feature.setProperties({'realType':'Point', 'type':'Point'})
+        }
+
+        if(drawType != undefined){
+            flash(e.feature);
+        } 
+    });
+    
+    /* 생성한 피쳐를 맵에 추가 */
+    const duration = 3000;
+    const  flash = async(feature) => {
+        console.log("피쳐 추가!");
+
+        const start = Date.now();
+        const flashGeom = feature.getGeometry().clone();
+        const listenerKey = tileLayerXYZ.on('postrender', animate);
+        
+        function animate(event) {
+            const frameState = event.frameState;
+            const elapsed = frameState.time - start;
+            
+            if (elapsed >= duration) {
+                unByKey(listenerKey);
+                return;
+            }
+
+            const vectorContext = getVectorContext(event);
+            const elapsedRatio = elapsed / duration;
+            // radius will be 5 at start and 30 at end.
+            const radius = easeOut(elapsedRatio) * 25 + 5;
+            const opacity = easeOut(1 - elapsedRatio);
+        
+            const style = new Style({
+                image: new CircleStyle({
+                    radius: radius,
+                    stroke: new Stroke({
+                    color: 'rgba(255, 0, 0, ' + opacity + ')',
+                    width: 0.25 + opacity,
+                    }),
+                }),
+            });
+        
+            vectorContext.setStyle(style);
+            vectorContext.drawGeometry(flashGeom);
+
+            // tell OpenLayers to continue postrender animation
+            //mapObj.render();
+        }
+
+        //Draw Interation 종료
+        removeInteraction("draw");
+    }
+
     return (
         <>
             {/* <div ref={mapId} className='map'>
