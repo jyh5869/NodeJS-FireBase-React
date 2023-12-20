@@ -75,9 +75,47 @@ const vectorLayer = new VectorLayer({
 });
 
 
+const selected = new Style({
+    fill: new Fill({
+        color: 'rgba(255, 255, 255, 0.6)'
+    }),
+    stroke: new Stroke({
+        color: '#f19ca3',
+        width: 2,
+    }),
+});
+
+function selectStyle(feature) {
+    const color = feature.get('COLOR') || 'rgba(255, 255, 255, 0.6)';
+    selected.getFill().setColor(color);
+    return selected;
+}
+
+// select interaction working on "singleclick"
+const selectSingleClick = new Select({style: selectStyle});
+
+// select interaction working on "click"
+const selectClick = new Select({
+    condition: click,
+    style: selectStyle,
+});
+
+// select interaction working on "pointermove"
+const selectPointerMove = new Select({
+    condition: pointerMove,
+    style: selectStyle,
+});
+
+const selectAltClick = new Select({
+    style: selectStyle,
+    condition: function (mapBrowserEvent) {
+        return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
+    },
+});
 
 const snap = new Snap({source: source});
 
+let select = selectSingleClick;
 export const Map1 = (/*{ children, zoom, center }*/) => {
 
     const [mapObj, setMap] = useState();
@@ -97,10 +135,6 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
 
     const [popoverFeature, setPopoverFeature] = useState();
     const [popoverMap, setPopoverMap] = useState();
-
-    
-
-
     
     //이벤트 리스너
     useEffect(() => {
@@ -148,6 +182,10 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
 
         setPopoverFeature(popoverFeature);
         setPopoverMap(popoverMap);
+
+
+
+        map.addInteraction(selectSingleClick);
 
         return ()=> null
     },  []);
@@ -233,137 +271,6 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         }
     }
 
-
-
-
-
-
-    let select = null; // Select 인터렉션 변수 생성
-
-    const selected = new Style({
-        fill: new Fill({
-            color: 'rgba(255, 255, 255, 0.6)'
-        }),
-        stroke: new Stroke({
-            color: '#f19ca3',
-            width: 2,
-        }),
-    });
-
-    function selectStyle(feature) {
-        const color = feature.get('COLOR') || 'rgba(255, 255, 255, 0.6)';
-        selected.getFill().setColor(color);
-        return selected;
-    }
-      
-    // select interaction working on "singleclick"
-    const selectSingleClick = new Select({style: selectStyle});
-      
-    // select interaction working on "click"
-    const selectClick = new Select({
-        condition: click,
-        style: selectStyle,
-    });
-      
-    // select interaction working on "pointermove"
-    const selectPointerMove = new Select({
-        condition: pointerMove,
-        style: selectStyle,
-    });
-      
-    const selectAltClick = new Select({
-        style: selectStyle,
-        condition: function (mapBrowserEvent) {
-            return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
-        },
-    });
-
-
-
-
-
-
-
-    const changeInteraction = function (clickType) {
-
-        if (select !== null) {
-            mapObj.removeInteraction(select);
-        }
-
-        const value = clickType;
-
-        if (value == 'singleclick') {
-            select = selectSingleClick;
-        } else if (value == 'click') {
-            select = selectClick;
-        } else if (value == 'pointermove') {
-            select = selectPointerMove;
-        } else if (value == 'altclick') {
-            select = selectAltClick;
-        } else {
-            select = selectClick;
-        }
-        
-        if (select !== null) {
-            mapObj.addInteraction(select);
-
-            select.on('select', function (e) {
-
-                selectFeatureInfoBox(e, "MAP");
-                console.log("이벤트 발생 Value : " + value);
-                
-                if(e.target.getFeatures().getLength() != 0){
-        
-                    e.target.getFeatures().forEach(function(feature, idx){
-        
-                        let geomType = feature.getProperties().type;
-                        let center;
-        
-                        //피쳐 추가시 Type Propertiy 세팅
-                        if(geomType == 'Geodesic'){ 
-                            console.log('Geodesic');
-                            center = getCenter(feature.getGeometry().getExtent());
-                        }
-                        else if(geomType == 'Circle'){
-                            console.log('Circle');
-                            center = feature.getGeometry().getCenter();
-                        }
-                        else if(geomType == 'Polygon'){
-                            console.log('Polygon');
-                            center = getCenter(feature.getGeometry().getExtent());
-                        }
-                        else if(geomType == 'LineString'){
-                            console.log('LineString');
-                            center = getCenter(feature.getGeometry().getExtent());
-                        }
-                        else if(geomType == 'Point'){
-                            console.log('Point');
-                            center = feature.getGeometry().getCoordinates();
-                        }
-                        
-                        popupFeature.setPosition(center);
-                        
-                        if (popoverFeature) {
-                            popoverFeature.dispose();
-                        }
-                        
-                        setPopoverFeature = new Popover(elementFeature, {
-                            animation: false,
-                            container: elementFeature,
-                            content: '<p>클릭한 위치의 피쳐 정보:</p><code>' + center + '</code>',
-                            html: true,
-                            placement: 'top',
-                            title: 'Welcome to OpenLayers',
-                        });
-            
-                        //팝오버 표출
-                        popupFeature.show();
-                    });
-                }      
-            });
-        }
-    };
-
     /* Select 이벤트 발생시 해당 이벤트의 정보 */
     const selectFeatureInfoBox = async(event, selectType) => {
 
@@ -445,12 +352,151 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
             vectorContext.drawGeometry(flashGeom);
 
             // tell OpenLayers to continue postrender animation
-            //mapObj.render();
+            mapObj.render();
         }
 
         //Draw Interation 종료
         removeInteraction("draw");
     }
+
+
+    select.on('select', function (e) {
+        if(isDraw == false){ return false}
+
+        selectFeatureInfoBox(e, "FEATURE");
+
+        if(e.target.getFeatures().getLength() != 0){
+
+            e.target.getFeatures().forEach(function(feature, idx){
+
+                let geomType = feature.getProperties().type;
+                let center;
+
+                //피쳐 추가시 Type Propertiy 세팅
+                if(geomType == 'Geodesic'){ 
+                    console.log('Geodesic');
+                    center = getCenter(feature.getGeometry().getExtent());
+                }
+                else if(geomType == 'Circle'){
+                    console.log('Circle');
+                    center = feature.getGeometry().getCenter();
+                }
+                else if(geomType == 'Polygon'){
+                    console.log('Polygon');
+                    center = getCenter(feature.getGeometry().getExtent());
+                }
+                else if(geomType == 'LineString'){
+                    console.log('LineString');
+                    center = getCenter(feature.getGeometry().getExtent());
+                }
+                else if(geomType == 'Point'){
+                    console.log('Point');
+                    center = feature.getGeometry().getCoordinates();
+                }
+                
+                //popup.setPosition(coordinate);
+                popupFeature.setPosition(center);
+                
+                if (popoverFeature) {
+                    popoverFeature.dispose();
+                }
+                
+                popoverFeature = new Popover(elementFeature, {
+                    animation: false,
+                    container: elementFeature,
+                    content: '<p>클릭한 위치의 피쳐 정보:</p><code>' + center + '</code>',
+                    html: true,
+                    placement: 'top',
+                    title: 'Welcome to OpenLayers',
+                });
+    
+                //팝오버 표출
+                popoverFeature.show();
+            });
+        }      
+    });
+
+
+    const changeInteraction = function (clickType) {
+        console.log(select);
+        if (select !== null) {
+            mapObj.removeInteraction(select);
+        }
+
+        const value = clickType;
+
+        if (value == 'singleclick') {
+            select = selectSingleClick;
+        } else if (value == 'click') {
+            select = selectClick;
+        } else if (value == 'pointermove') {
+            select = selectPointerMove;
+        } else if (value == 'altclick') {
+            select = selectAltClick;
+        } else {
+            select = selectClick;
+        }
+        
+        if (select !== null) {
+            mapObj.addInteraction(select);
+
+            select.on('select', function (e) {
+
+                selectFeatureInfoBox(e, "MAP");
+                console.log("이벤트 발생 Value : " + value);
+                
+                if(e.target.getFeatures().getLength() != 0){
+        
+                    e.target.getFeatures().forEach(function(feature, idx){
+        
+                        let geomType = feature.getProperties().type;
+                        let center;
+        
+                        //피쳐 추가시 Type Propertiy 세팅
+                        if(geomType == 'Geodesic'){ 
+                            console.log('Geodesic');
+                            center = getCenter(feature.getGeometry().getExtent());
+                        }
+                        else if(geomType == 'Circle'){
+                            console.log('Circle');
+                            center = feature.getGeometry().getCenter();
+                        }
+                        else if(geomType == 'Polygon'){
+                            console.log('Polygon');
+                            center = getCenter(feature.getGeometry().getExtent());
+                        }
+                        else if(geomType == 'LineString'){
+                            console.log('LineString');
+                            center = getCenter(feature.getGeometry().getExtent());
+                        }
+                        else if(geomType == 'Point'){
+                            console.log('Point');
+                            center = feature.getGeometry().getCoordinates();
+                        }
+                        
+                        popupFeature.setPosition(center);
+                        
+                        if (popoverFeature) {
+                            popoverFeature.dispose();
+                        }
+                        
+                        popoverFeature = new Popover(elementFeature, {
+                            animation: false,
+                            container: elementFeature,
+                            content: '<p>클릭한 위치의 피쳐 정보:</p><code>' + center + '</code>',
+                            html: true,
+                            placement: 'top',
+                            title: 'Welcome to OpenLayers',
+                        });
+            
+                        //팝오버 표출
+                        popoverFeature.show();
+                    });
+                }      
+            });
+        }
+    };
+
 
     return (
         <>
@@ -478,13 +524,13 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                     <div className="input-group">
                         <label className="input-group-text" htmlFor="type2">Action type &nbsp;</label>
 
-                        {/* <Form.Select id="type2" onChange={(e) => { changeInteraction(e.target.value);}} defaultValue={"none"}>
+                        <Form.Select id="type2" onChange={(e) => { changeInteraction(e.target.value);}} defaultValue={"none"}>
                             <option key={1} value="click">Click</option>
                             <option key={2} value="singleclick">Single-click</option>
                             <option key={3} value="pointermove">Hover</option>
                             <option key={4} value="altclick">Alt+Click</option>
                             <option key={5} value="none">None</option>
-                        </Form.Select> */}
+                        </Form.Select>
                     </div>
                 </Col>
             </Row>
