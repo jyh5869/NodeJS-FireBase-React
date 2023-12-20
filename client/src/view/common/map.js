@@ -125,7 +125,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     const [drawType, setDrawType] = useState();
 
     const [draw, setDraw] = useState();
-    
+    const [modify, setModify] = useState();
 
     const [popupFeature, setPopupFeature] = useState();
     const [popupMap, setPopupMap] = useState();
@@ -173,7 +173,6 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         const popoverFeature = Popover.getInstance(elementFeature);//팝오버 객체 생성
         const popoverMap = Popover.getInstance(elementMap);//팝오버 객체 생성
 
-        setMap(map);
         setView(view);
         setZoom(zoom);
 
@@ -184,8 +183,91 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         setPopoverMap(popoverMap);
 
 
-
         map.addInteraction(selectSingleClick);
+        console.log("로드시 isdraw : " + isDraw);
+
+        const defaultStyle = new Modify({source: source})
+        .getOverlay()
+        .getStyleFunction();
+
+        const modify = new Modify({
+            source: source,
+            style: function (feature) {
+                feature.get('features').forEach(function (modifyFeature) {
+
+                    const modifyGeometry = modifyFeature.get('modifyGeometry');
+
+                    if (modifyGeometry) {
+                        const modifyPoint = feature.getGeometry().getCoordinates();
+                        const geometries = modifyFeature.getGeometry().getGeometries();
+                        const polygon = geometries[0].getCoordinates()[0];
+                        const center = geometries[1].getCoordinates();
+                        const projection = map.getView().getProjection();
+                        let first, last, radius;
+
+                        if (modifyPoint[0] === center[0] && modifyPoint[1] === center[1]) {
+                            // center is being modified
+                            // get unchanged radius from diameter between polygon vertices
+                            first = transform(polygon[0], projection, 'EPSG:4326');
+                            last = transform(
+                                polygon[(polygon.length - 1) / 2],
+                                projection,
+                                'EPSG:4326'
+                            );
+                            radius = getDistance(first, last) / 2;
+                        } else {
+                            // radius is being modified
+                            first = transform(center, projection, 'EPSG:4326');
+                            last = transform(modifyPoint, projection, 'EPSG:4326');
+                            radius = getDistance(first, last);
+                        }
+
+                        // update the polygon using new center or radius
+                        const circle = circular(
+                            transform(center, projection, 'EPSG:4326'),
+                            radius,
+                            128
+                        );
+
+                        circle.transform('EPSG:4326', projection);
+                        geometries[0].setCoordinates(circle.getCoordinates());
+                        // save changes to be applied at the end of the interaction
+                        modifyGeometry.setGeometries(geometries);
+                    }
+                });
+
+                return defaultStyle(feature);
+            },
+        });
+
+        //Map 객채에 수정 인터렉션(Interation) 추가
+        map.addInteraction(modify);
+        setModify(modify);
+
+        modify.on('modifystart', function (event) {
+            console.log("수정 시작");
+            setIsDraw(true);
+            event.features.forEach(function (feature) {
+                const geometry = feature.getGeometry();
+                if (geometry.getType() === 'GeometryCollection') {
+                    feature.set('modifyGeometry', geometry.clone(), true);
+                }
+            });
+        });
+    
+        modify.on('modifyend', function (event) {
+            console.log("수정 종료");
+            setIsDraw(false);
+            event.features.forEach(function (feature) {
+                const modifyGeometry = feature.get('modifyGeometry');
+                if (modifyGeometry) {
+                    feature.setGeometry(modifyGeometry);
+                    feature.unset('modifyGeometry', true);
+                }
+            });
+        });
+        
+        setMap(map);
 
         return ()=> null
     },  []);
@@ -203,16 +285,24 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
 
 
     //지도 초기화
-    const initMap =  async (e) => {
+    /**
+     * 
+     *  ??? isDraw 왜자꾸 안바꼉?
+     */
+    const initMap = async (e) => {
+        
+
 
         mapObj.removeInteraction(draw);
         mapObj.removeInteraction(snap);
-
-        addInteractions(e);
+        console.log("remove draw!!  " +  isDraw);
+        setIsDraw(true);
+        //setTimeout(() =>console.log("3초 지연!") , 3000);
+        addInteractions(e)
     };
 
     let snap;
-    async function addInteractions(e) {
+    function addInteractions(e) {
         
         let value = e.target.value;
         let geometryFunction;
@@ -256,7 +346,8 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
 
         setDraw(draw);
         setDrawType(e.target.value);
-        setIsDraw(true);
+        
+        console.log('isDraw = ' + isDraw);
     }
 
     //Map 객채에 특정 인터렉션(Interation)을 제거
@@ -357,10 +448,13 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
 
         //Draw Interation 종료
         removeInteraction("draw");
+        console.log("isdraw: 그리기종료 후 :  " + isDraw);
     }
 
 
     select.on('select', function (e) {
+        console.log("select isdraw = " + isDraw);
+
         if(isDraw == false){ return false}
 
         selectFeatureInfoBox(e, "FEATURE");
@@ -498,6 +592,13 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     };
 
 
+    
+        
+    //console.log(modify);
+    
+
+
+
     return (
         <>
             {/* <div ref={mapId} className='map'>
@@ -510,7 +611,8 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                 <Col>
                     <div className="input-group">
                         <label className="input-group-text" htmlFor="type">Geometry type</label>
-                        <Form.Select id="type" onChange={(e) => { initMap(e);}} value={drawType}>
+                        <Form.Select id="type" onChange={(e) => { initMap(e); } } value={drawType}>
+                            <option key={0} value="" >선택하세요</option>
                             <option key={1} value="Point" >Point</option>
                             <option key={2} value="LineString">LineString</option>
                             <option key={3} value="Polygon">Polygon</option>
