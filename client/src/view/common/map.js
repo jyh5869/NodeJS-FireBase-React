@@ -62,7 +62,7 @@ const source = new VectorSource({
 });
 
 const vectorLayer = new VectorLayer({
-    source: source,
+    //source: source,
     style: {
         'fill-color': 'rgba(255, 255, 255, 0.6)',
         'stroke-width': 1,
@@ -119,7 +119,7 @@ let select = selectSingleClick;
 export const Map1 = (/*{ children, zoom, center }*/) => {
 
     const [mapObj, setMap] = useState();
-    const [isDraw, setIsDraw] = useState(false);
+    const [isDraw, setIsDraw] = useState();
     const [view, setView] = useState();
     const [zoom, setZoom] = useState();
     const [drawType, setDrawType] = useState();
@@ -184,6 +184,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
 
 
         map.addInteraction(selectSingleClick);
+        setIsDraw(false);
         console.log("로드시 isdraw : " + isDraw);
 
         const defaultStyle = new Modify({source: source})
@@ -291,11 +292,9 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
      */
     const initMap = async (e) => {
         
-
-
         mapObj.removeInteraction(draw);
         mapObj.removeInteraction(snap);
-        console.log("remove draw!!  " +  isDraw);
+
         setIsDraw(true);
         //setTimeout(() =>console.log("3초 지연!") , 3000);
         addInteractions(e)
@@ -452,10 +451,9 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     }
 
 
-    select.on('select', function (e) {
-        console.log("select isdraw = " + isDraw);
-
-        if(isDraw == false){ return false}
+    source.on('selectfeature', function (e) {
+        console.log("피쳐선택!");
+        //flash(e.feature);
 
         selectFeatureInfoBox(e, "FEATURE");
 
@@ -507,10 +505,19 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                 //팝오버 표출
                 popoverFeature.show();
             });
-        }      
+        }   
+        flash(e.feature);   
     });
 
+    select.on('select', function (e) {
+        console.log("select isdraw = " + isDraw);
 
+        //if(isDraw == false){ return false}
+
+        
+    });
+
+/*
     const changeInteraction = function (clickType) {
         console.log(select);
         if (select !== null) {
