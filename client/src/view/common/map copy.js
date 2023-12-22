@@ -461,12 +461,13 @@ const Map1 = () => {
     
     select = selectSingleClick;
     select.on('select', function (e) {
+        console.log("셀렉트이벤트 발생!11" + e.target.getFeatures().getLength());
         selectFeatureInfoBox(e, "FEATURE");
         
         if(e.target.getFeatures().getLength() != 0){
-
+            console.log("셀렉트이벤트 발생!222" + e.target.getFeatures().getLength());
             e.target.getFeatures().forEach(function(feature, idx){
-
+               
                 let geomType = feature.getProperties().type;
                 let center;
 
@@ -491,7 +492,7 @@ const Map1 = () => {
                     console.log('Point');
                     center = feature.getGeometry().getCoordinates();
                 }
-                
+                console.log("셀렉트이벤트 발생!333" +center);
                 //popup.setPosition(coordinate);
                 popup.setPosition(center);
                 
@@ -830,7 +831,7 @@ const Map1 = () => {
             console.log(properties);
             console.log("333333333333  " + index);
             // 지오메트릭 타입별로 카운팅 
-            cntOfFeatureType(geomType, index);
+            //cntOfFeatureType(geomType, index);
             console.log("444444444444  " + index);
         });
 

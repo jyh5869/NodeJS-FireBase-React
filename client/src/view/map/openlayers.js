@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Table, Form  } from 'react-bootstrap';
 import axios from 'axios';
 
+//import Map1 from '../common/map copy';
 import Map1 from '../common/map';
 
 import '../../assets/css/flower.css';
@@ -38,7 +39,7 @@ function Openlayers() {
         }),
       });
     */
-    //이벤트 리스너
+    //이벤트 리스너G
     useEffect(() => {       
     },  []);
     
