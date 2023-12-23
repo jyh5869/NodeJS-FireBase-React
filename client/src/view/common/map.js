@@ -57,7 +57,7 @@ const tileLayerOSM = new TileLayer({
 });
 
 const source = new VectorSource({
-    url: GeojsonTest,
+    //url: GeojsonTest,
     format: new GeoJSON(),
 });
 
@@ -119,6 +119,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     const [isDraw, setIsDraw] = useState(false);
     const [view, setView] = useState();
     const [zoom, setZoom] = useState();
+    
     //const [drawType, setDrawType] = useState();
     //const [select, setSelect] = useState(selectSingleClick);
 
@@ -128,7 +129,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     //const [modify, setModify] = useState();
 
 
-        /*
+    /*
     const [popupFeature, setPopupFeature] = useState();
     const [popupMap, setPopupMap] = useState();
 
@@ -164,10 +165,6 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
 
 
     //지도 초기화
-    /**
-     * 
-     *  ??? isDraw 왜자꾸 안바꼉?
-     */
     const initMap = async (e) => {
         
         mapObj.removeInteraction(draw);
@@ -260,7 +257,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     };
     let drawType;
     source.on('addfeature', function (e) {
-        //console.log("피쳐추가 시작11 :  draw Type : " + drawType);
+        
         //피쳐 추가시 Type Propertiy 세팅
         if(drawType == 'Geodesic'){ 
             console.log("피쳐추가 Geodesic");
@@ -285,16 +282,14 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         }
 
         if(drawType != undefined){
-            flash(e);
+            flash(e.feature);
         } 
     });
     
     /* 생성한 피쳐를 맵에 추가 */
     const duration = 3000;
-    const  flash = async(e) => {
+    const  flash = async(feature) => {
         //console.log("피쳐 추가!22");
-
-        let feature = e.feature;
 
         const start = Date.now();
         const flashGeom = feature.getGeometry().clone();
@@ -336,7 +331,6 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         removeInteraction("draw");
         select.set("drawYn","N");
         //console.log("isdraw: 그리기종료 후 :  " + select.get("drawYn"));
-
     }
 
 
@@ -528,65 +522,14 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         flash(e.feature);
     });
 
-    console.log("로드시 isdraw : " + isDraw);
+    
 
-    const defaultStyle = new Modify({source: source})
-    .getOverlay()
-    .getStyleFunction();
-
-    let modify = new Modify({
-        source: source,
-        style: function (feature) {
-            feature.get('features').forEach(function (modifyFeature) {
-
-                const modifyGeometry = modifyFeature.get('modifyGeometry');
-
-                if (modifyGeometry) {
-                    const modifyPoint = feature.getGeometry().getCoordinates();
-                    const geometries = modifyFeature.getGeometry().getGeometries();
-                    const polygon = geometries[0].getCoordinates()[0];
-                    const center = geometries[1].getCoordinates();
-                    const projection = mapObj.getView().getProjection();
-                    let first, last, radius;
-
-                    if (modifyPoint[0] === center[0] && modifyPoint[1] === center[1]) {
-                        // center is being modified
-                        // get unchanged radius from diameter between polygon vertices
-                        first = transform(polygon[0], projection, 'EPSG:4326');
-                        last = transform(
-                            polygon[(polygon.length - 1) / 2],
-                            projection,
-                            'EPSG:4326'
-                        );
-                        radius = getDistance(first, last) / 2;
-                    } else {
-                        // radius is being modified
-                        first = transform(center, projection, 'EPSG:4326');
-                        last = transform(modifyPoint, projection, 'EPSG:4326');
-                        radius = getDistance(first, last);
-                    }
-
-                    // update the polygon using new center or radius
-                    const circle = circular(
-                        transform(center, projection, 'EPSG:4326'),
-                        radius,
-                        128
-                    );
-
-                    circle.transform('EPSG:4326', projection);
-                    geometries[0].setCoordinates(circle.getCoordinates());
-                    // save changes to be applied at the end of the interaction
-                    modifyGeometry.setGeometries(geometries);
-                }
-            });
-
-            return defaultStyle(feature);
-        },
-    });
-
+    /**
+     * 
+     * USER EFECT 이벤트 리스너
+     * 
+     */
     useEffect(() => {
-
-        callFeature();
 
         const map = new OlMap({
             layers: [
@@ -595,12 +538,14 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
             ],
             target: 'map', 
             view: new View({
-                projection: getProjection('EPSG:3857'),
-                center: fromLonLat([126.752, 37.4713], getProjection('EPSG:3857')),
+                //projection: getProjection('EPSG:3857'),
+                //center: fromLonLat([126.752, 37.4713], getProjection('EPSG:3857')),
+                center: [ 126.97659953, 37.579220423 ], //포인트의 좌표를 리턴함
+                projection : 'EPSG:4326',//경위도 좌표계 WGS84
                 zoom: 6
             })
-        })
-        console.log("맵세팅!");
+        });
+
         const view = map.getView();
         const zoom = view.getZoom();
 
@@ -608,7 +553,6 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         setZoom(zoom);
 
         setMap(map);
-
 
         /*
         setPopupFeature(popupFeature);
@@ -625,8 +569,64 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         
 
         //Map 객채에 수정 인터렉션(Interation) 추가
-        map.addInteraction(modify);
+
         //setModify(modify);
+
+
+        const defaultStyle = new Modify({source: source})
+        .getOverlay()
+        .getStyleFunction();
+
+        let modify = new Modify({
+            source: source,
+            style: function (feature) {
+                feature.get('features').forEach(function (modifyFeature) {
+
+                    const modifyGeometry = modifyFeature.get('modifyGeometry');
+
+                    if (modifyGeometry) {
+                        const modifyPoint = feature.getGeometry().getCoordinates();
+                        const geometries = modifyFeature.getGeometry().getGeometries();
+                        const polygon = geometries[0].getCoordinates()[0];
+                        const center = geometries[1].getCoordinates();
+                        const projection = map.getView().getProjection();
+                        let first, last, radius;
+
+                        if (modifyPoint[0] === center[0] && modifyPoint[1] === center[1]) {
+                            // center is being modified
+                            // get unchanged radius from diameter between polygon vertices
+                            first = transform(polygon[0], projection, 'EPSG:4326');
+                            last = transform(
+                                polygon[(polygon.length - 1) / 2],
+                                projection,
+                                'EPSG:4326'
+                            );
+                            radius = getDistance(first, last) / 2;
+                        } else {
+                            // radius is being modified
+                            first = transform(center, projection, 'EPSG:4326');
+                            last = transform(modifyPoint, projection, 'EPSG:4326');
+                            radius = getDistance(first, last);
+                        }
+
+                        // update the polygon using new center or radius
+                        const circle = circular(
+                            transform(center, projection, 'EPSG:4326'),
+                            radius,
+                            128
+                        );
+
+                        circle.transform('EPSG:4326', projection);
+                        geometries[0].setCoordinates(circle.getCoordinates());
+                        // save changes to be applied at the end of the interaction
+                        modifyGeometry.setGeometries(geometries);
+                    }
+                });
+
+                return defaultStyle(feature);
+            },
+        });
+
 
         modify.on('modifystart', function (event) {
             setIsDraw(true);
@@ -653,7 +653,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
             });
         });
         
-
+        map.addInteraction(modify);
 
         /*
         let draw = new Draw({
@@ -744,15 +744,12 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         });
 
         
+        callFeature();
 
-        
         return ()=> null
     },  []);
 
     
-
-
-
     /* 저장된 지오메트릭 데이터 불러오기 */
     const callFeature = async (feature) => {
 
@@ -769,12 +766,10 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
             
         var datas =  response.data.rows;
         var array = Object.values(datas)
-        //console.log(datas);
 
         /* 피쳐보이기 부터 해보자 */
         const featureArr = [];
-        //datas.forEach(async function(value, index){
-        //for (const [idx, value] of datas.entries()) {
+
         const promises = datas.map(async (value, index) => {
 
             let feature = new GeoJSON().readFeature(value.geom_value);
@@ -782,10 +777,10 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
             let geometry = new GeoJSON().readFeature(value.geom_value);
             let properties = JSON.parse(value.geom_prop);
             let geomType = properties.type;
-            //console.log( "11111111111  "+ index);
+
             // 원일 경우 Center와 Radius를 이용해 추가.
             if (geomType == 'Circle') {
-                console.log('--- Set Circle ---');
+                //console.log('--- Set Circle ---');
                 let radius = properties.radius;//반지름
                 let center = geometry.getGeometry().getCoordinates();//중심점 좌표
 
@@ -794,25 +789,87 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                     geometry: new Circle(center, radius),
                 });                
             }
-            //console.log("22222222222222  " + index);
+
             feature.setId(value.id);//ID값 세팅
             feature.setProperties(properties);//프로퍼티 값 세팅
 
             featureArr.push(feature);
         
-            //console.log(properties);
-            //console.log("333333333333  " + index);
             // 지오메트릭 타입별로 카운팅 
             cntOfFeatureType(geomType, index);
-            //console.log("444444444444  " + index);
+
+
         });
         
         await Promise.all(promises);
-
         
-        console.log(source);
         source.addFeatures(featureArr);
 
+    }
+
+    const saveFeature = async (feature) => {
+        console.log("데이터 저장하기");
+        const featureArr = [];
+        var geom = source.getFeatures();
+
+        vectorLayer.getSource().forEachFeature(function(feature) {
+
+            let cloneFeature = feature.clone();
+            let featureId = feature.getId();
+            let geomType = cloneFeature.getProperties().type;
+
+            
+            console.log(cloneFeature.getProperties());
+
+            if(geomType == "Circle"){
+                //Circle 객체를 Center와 Radius 프로퍼티를 가진 Point Feature로 변환
+                let radius = cloneFeature.getGeometry().getRadius();
+                let center = cloneFeature.getGeometry().getCenter();
+
+                let feature = new Feature({
+                    realType : cloneFeature.getProperties().realType,
+                    type: geomType,
+                    geometry: new Point(center),
+                    radius: radius,
+                });
+                cloneFeature = feature;
+            }
+
+            cloneFeature.setId(featureId); // 저장할 Feature에 아이디값 세팅
+
+            if(cloneFeature.getId() == undefined ){//신규 등록
+                //console.log("ID : " + cloneFeature.getId()  + "/  인서트!" );
+
+                cloneFeature.setProperties({"state" : "insert"});
+            }
+            else{//업데이트
+                //console.log("ID : "+ cloneFeature.getId()  + "/  업데이트!" );
+                cloneFeature.setProperties({"state" : "update"});
+            }
+            
+            featureArr.push(cloneFeature);
+        });
+
+        var geoJsonOri = new GeoJSON().writeFeatures(geom);
+        var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
+
+        let response = await axios({
+            method  : 'get',
+            url     : '/api/geomboardSave',
+            params  : {
+                'geom' : geoJsonClone
+            },
+            headers : {
+                'Content-Type' : 'multipart/form-data'
+            }, 
+        })
+        if(response.status == 200){
+            console.log(response.status);
+            console.log("저장완료!!");
+
+            source.clear();
+            callFeature();
+        } 
     }
 
     /* 지오메트릭 타입별 갯수 표출 함수 */
@@ -866,8 +923,15 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
             </div> */}
 
             <div id="map" value={mapObj} style={{height:'50rem'}}></div>
+            
             <Row className='mb-3'>
                 <Col className="text-center" id="status" >{featureInfo}</Col>
+            </Row>
+
+            <Row className='mb-3'>
+                <Col>
+                    <Button variant="outline-success" className="btn_type1" onClick={saveFeature}>저장하기</Button>   
+                </Col>
             </Row>
 
             <Row className='mb-3'>
