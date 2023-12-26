@@ -123,7 +123,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     //const [drawType, setDrawType] = useState();
     //const [select, setSelect] = useState(selectSingleClick);
 
-    const [featureInfo, setFeatureInfo] = useState(" 0 selected features ");
+    const [featureInfo, setFeatureInfo] = useState(" 선택된 공간데이터가 없습니다. ");
 
     //const [draw, setDraw] = useState();
     //const [modify, setModify] = useState();
@@ -139,9 +139,6 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     const [popoverFeature, setPopoverFeature] = useState();
     const [popoverMap, setPopoverMap] = useState();
 
-    //이벤트 리스너
-    
-    
 
     const [circleCnt      , setCircleCnt    ] = useState(0);
     const [polygonCnt     , setPolygonCnt   ] = useState(0);
@@ -161,6 +158,18 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     /* Feature Draw시 동학하며 마지막 포인트를 없애 이전으로 돌아간다. */
     const removeLastPoint = async () => {
         draw.removeLastPoint();
+    };
+    
+    /* 셀렉트박스 이벤트 헨들러 */
+    const handleClick = async (zoomType) => {
+        let currentZoom = view.getZoom();
+
+        if(zoomType == 'zoomIn'){
+          view.setZoom(currentZoom + 1);
+        }
+        else if(zoomType == 'zoomOut'){
+          view.setZoom(currentZoom - 1);
+        }
     };
 
 
@@ -242,19 +251,17 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     const selectFeatureInfoBox = async(event, selectType) => {
 
         if(selectType == "FEATURE"){
+
             document.getElementById('status').innerHTML =
-            '&nbsp;' +
-            event.target.getFeatures().getLength() +
-            ' selected features (last operation selected ' +
-            event.selected.length +
-            ' and deselected ' +
-            event.deselected.length +
-            ' features)';
+            event.target.getFeatures().getLength() +'개의 공간데이터가 선택되었습니다. (마지막 작업에서 ' +
+            event.selected.length +'개가 선택되었고 ' +
+            event.deselected.length +'개가 선택 취소 되었습니다.)';
         }
         else{
             document.getElementById('status').innerHTML = "지도 클릭 선택된 피쳐가 없습니다."
         }
     };
+
     let drawType;
     source.on('addfeature', function (e) {
         
@@ -344,19 +351,15 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
 
     let select = selectSingleClick;
     select.on('select', function (e) {
-        //console.log("피쳐 선택! drawYn = " + select.get("drawYn") + "       /           " + drawType);
-
-        //if(select.get("drawYn") == 'Y'){ return false};
-
-        selectFeatureInfoBox(e, "FEATURE");
         
         if(e.target.getFeatures().getLength() != 0){
+            //셀렉트 이벤트시 피쳐가 있을때 정보표출
+            selectFeatureInfoBox(e, "FEATURE");
 
             e.target.getFeatures().forEach(function(feature, idx){
 
                 let geomType = feature.getProperties().type;
                 let center;
-                //console.log(feature);
 
                 //피쳐 추가시 Type Propertiy 세팅
                 if(geomType == 'Geodesic'){ 
@@ -421,9 +424,8 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     /**
      * 지도 클릭시 피쳐가 없는 부분에 팝업 띄우기
      */
-
     const changeInteraction = function (clickType) {
-
+        console.log("지도 클릭 이벤트!");
         if (select !== null) {
             mapObj.removeInteraction(select);
         }
@@ -453,12 +455,11 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
             mapObj.addInteraction(select);
 
             select.on('select', function (e) {
-
-                selectFeatureInfoBox(e, "MAP");
-                console.log("이벤트 발생 Value : " + value);
                 
                 if(e.target.getFeatures().getLength() != 0){
-        
+                    //셀렉트 이벤트시 피쳐가 있을때 정보표출
+                    selectFeatureInfoBox(e, "MAP");
+
                     e.target.getFeatures().forEach(function(feature, idx){
         
                         let geomType = feature.getProperties().type;
@@ -678,10 +679,10 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
 
 
         map.on('click', function (evt) {
-        
+            
             if(isDraw == true){ return false}
 
-            console.log("지도 클릭시 위치정보 Overlay : " + isDraw);
+            console.log("지도 클릭시 위치정보 Overlay : " + evt.pixel);
             let popupMap = new Overlay({
                 element: document.getElementById('popupMap'),
             });
@@ -749,7 +750,9 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
         return ()=> null
     },  []);
 
+    /* 
     
+    */
     /* 저장된 지오메트릭 데이터 불러오기 */
     const callFeature = async (feature) => {
 
@@ -918,13 +921,11 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                 </Col>
             </Row>
 
-            {/* <div ref={mapId} className='map'>
-                {children}
-            </div> */}
-
-            <div id="map" value={mapObj} style={{height:'50rem'}}></div>
+            <Row>
+                <div id="map" value={mapObj} style={{height:'50rem'}}></div> 
+            </Row>
             
-            <Row className='mb-3'>
+            <Row className='my-3'>
                 <Col className="text-center" id="status" >{featureInfo}</Col>
             </Row>
 
@@ -962,6 +963,11 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                         </Form.Select>
                     </div>
                 </Col>
+            </Row>
+
+            <Row>
+                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-out" onClick={(e) => { handleClick('zoomOut');}}>Zoom out</Button></Col>
+                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-in" onClick={(e) => { handleClick('zoomIn');}}>Zoom in</Button></Col>
             </Row>
 
             <div id="popup"></div>
