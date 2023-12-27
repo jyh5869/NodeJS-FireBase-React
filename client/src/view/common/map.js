@@ -118,12 +118,14 @@ export const Map = forwardRef((props, forwardedRef) => {
 
     useImperativeHandle(forwardedRef, () => ({
         // 부모에서 사용하고 싶었던 함수
-        willBeUsedInParentComponent
+        willBeUsedInParentComponent,
     }));
 
     function willBeUsedInParentComponent() {
         console.log('Hi Parent');
         console.log(forwardedRef);
+
+        handleClick('zoomIn');
     }
 
       
