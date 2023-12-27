@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 
-import { Button, Table, Form  } from 'react-bootstrap';
+import { Button, Table, Form, Badge, Stack, Container, Row, Col }   from 'react-bootstrap';
 import axios from 'axios';
 
 //import Map1 from '../common/map copy';
-import Map1 from '../common/map';
+import Map from '../common/map';
 
 import '../../assets/css/flower.css';
 import '../../assets/css/common.css';
@@ -16,30 +16,19 @@ import '../../assets/css/common.css';
 const formData = new FormData();//이미지 데이터 저장 Form
 function Openlayers() {
 
-    const [list , setList] = useState([]);//해당꽃에대한 검색결과 리스트
-    const [obj  , setObj ] = useState();//업로드 이미지 분석 결과 객체
-    const [loading, setLoading]   = useState(false);//로딩 스피너
-    const [imageSrc, setImageSrc] = useState('');//아마자 태그 변경시 실시간 미리보기
-    const [flwInfo , setFlwInfo]  = useState([]);//해당꽃에대한 검색결과 리스트
-    const [flwGrwInfo , setFlwGrwInfo] = useState([]);//해당꽃에대한 검색결과 리스트
-    const color = [];
-    
-    
-    /*
-      const map = new Map({
-        target: 'map',
-        layers: [
-          new TileLayer({
-            source: new OSM(),
-          }),
-        ],
-        view: new View({
-          center: [0, 0],
-          zoom: 2,
-        }),
-      });
-    */
-    //이벤트 리스너G
+    const [zoomLevel , setZoomLevel] = useState(6);
+
+    const handleClick = async (zoomType) => {
+
+        if(zoomType == 'zoomIn'){
+          setZoomLevel(zoomLevel+1);
+        }
+        else if(zoomType == 'zoomOut'){
+          setZoomLevel(zoomLevel-1);
+        }
+    };
+
+    //이벤트 리스너
     useEffect(() => {       
     },  []);
     
@@ -49,10 +38,13 @@ function Openlayers() {
         <React.Fragment>
             <h1>오픈 레이어스</h1>
             <div className="my-3">
-                <Map1/>
-                {/* <div id="map"></div> */}
-                {/* <script type="module" src="../common/map.js"></script> */}
+                <Map zoomLevel={zoomLevel}/>
             </div>  
+
+            <Row>
+                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-out" onClick={(e) => { handleClick('zoomOut');}}>Zoom out</Button></Col>
+                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-in" onClick={(e) => { handleClick('zoomIn');}}>Zoom in</Button></Col>
+            </Row> 
         </React.Fragment>
     )
 }

@@ -113,13 +113,14 @@ const selectAltClick = new Select({
     },
 });
 
-export const Map1 = (/*{ children, zoom, center }*/) => {
+export const Map = (props) => {
 
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
     const [view, setView] = useState();
-    const [zoom, setZoom] = useState();
     
+    const [zoom, setZoom] = useState();
+    const [zoomLevel, setZoomLevel] = useState();
     //const [drawType, setDrawType] = useState();
     //const [select, setSelect] = useState(selectSingleClick);
 
@@ -150,6 +151,232 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     
 
 
+    /**
+     * 
+     * USER EFECT 이벤트 리스너
+     * 
+     */
+    useEffect(() => {
+        console.log(props.zoomLevel);
+        setZoomLevel(props.zoomLevel);
+
+        const map = new OlMap({
+            layers: [
+                tileLayerXYZ,
+                vectorLayer
+            ],
+            target: 'map', 
+            view: new View({
+                //projection: getProjection('EPSG:3857'),
+                //center: fromLonLat([126.752, 37.4713], getProjection('EPSG:3857')),
+                center: [ 126.97659953, 37.579220423 ], //포인트의 좌표를 리턴함
+                projection : 'EPSG:4326',//경위도 좌표계 WGS84
+                zoom: 6
+            })
+        });
+
+        const view = map.getView();
+        const zoom = view.getZoom();
+
+        setView(view);
+        setZoom(zoom);
+
+        setMap(map);
+
+        /*
+        setPopupFeature(popupFeature);
+        setPopupMap(popupMap);
+        
+        setElementMap(elementMap);
+        setElementFeature(elementFeature);
+
+        setPopoverFeature(popoverFeature);
+        setPopoverMap(popoverMap);
+        */
+
+        map.addInteraction(selectSingleClick);
+        
+
+        //Map 객채에 수정 인터렉션(Interation) 추가
+
+        //setModify(modify);
+
+
+        const defaultStyle = new Modify({source: source})
+        .getOverlay()
+        .getStyleFunction();
+
+        let modify = new Modify({
+            source: source,
+            style: function (feature) {
+                feature.get('features').forEach(function (modifyFeature) {
+
+                    const modifyGeometry = modifyFeature.get('modifyGeometry');
+
+                    if (modifyGeometry) {
+                        const modifyPoint = feature.getGeometry().getCoordinates();
+                        const geometries = modifyFeature.getGeometry().getGeometries();
+                        const polygon = geometries[0].getCoordinates()[0];
+                        const center = geometries[1].getCoordinates();
+                        const projection = map.getView().getProjection();
+                        let first, last, radius;
+
+                        if (modifyPoint[0] === center[0] && modifyPoint[1] === center[1]) {
+                            // center is being modified
+                            // get unchanged radius from diameter between polygon vertices
+                            first = transform(polygon[0], projection, 'EPSG:4326');
+                            last = transform(
+                                polygon[(polygon.length - 1) / 2],
+                                projection,
+                                'EPSG:4326'
+                            );
+                            radius = getDistance(first, last) / 2;
+                        } else {
+                            // radius is being modified
+                            first = transform(center, projection, 'EPSG:4326');
+                            last = transform(modifyPoint, projection, 'EPSG:4326');
+                            radius = getDistance(first, last);
+                        }
+
+                        // update the polygon using new center or radius
+                        const circle = circular(
+                            transform(center, projection, 'EPSG:4326'),
+                            radius,
+                            128
+                        );
+
+                        circle.transform('EPSG:4326', projection);
+                        geometries[0].setCoordinates(circle.getCoordinates());
+                        // save changes to be applied at the end of the interaction
+                        modifyGeometry.setGeometries(geometries);
+                    }
+                });
+
+                return defaultStyle(feature);
+            },
+        });
+
+
+        modify.on('modifystart', function (event) {
+            setIsDraw(true);
+            console.log("수정 시작" + isDraw);
+            
+            event.features.forEach(function (feature) {
+                const geometry = feature.getGeometry();
+                if (geometry.getType() === 'GeometryCollection') {
+                    feature.set('modifyGeometry', geometry.clone(), true);
+                }
+            });
+        });
+    
+        modify.on('modifyend', function (event) {
+            
+            setIsDraw(false);
+            console.log("수정 종료" + isDraw);
+            event.features.forEach(function (feature) {
+                const modifyGeometry = feature.get('modifyGeometry');
+                if (modifyGeometry) {
+                    feature.setGeometry(modifyGeometry);
+                    feature.unset('modifyGeometry', true);
+                }
+            });
+        });
+        
+        map.addInteraction(modify);
+
+        /*
+        let draw = new Draw({
+            source: source,
+            type: "Polygon"
+        });
+        setDraw(draw);
+
+
+
+        draw.on('drawstart', function (e) {
+            console.log("그리기 시작");
+        }); 
+
+        draw.on('drawend', function (e) {
+            select.set("drawYn", "N");
+            console.log("그리기 끝");
+            map.removeInteraction(draw);
+        }); 
+*/
+
+
+
+        map.on('click', function (evt) {
+            
+            if(isDraw == true){ return false}
+
+            console.log("지도 클릭시 위치정보 Overlay : " + evt.pixel);
+            let popupMap = new Overlay({
+                element: document.getElementById('popupMap'),
+            });
+            map.addOverlay(popupMap);
+            let elementMap = popupMap.getElement();
+            let popoverMap = Popover.getInstance(elementMap);//팝오버 객체 생성
+    
+
+
+
+            let coordinate = evt.coordinate;
+            let hdms = toStringHDMS(toLonLat(coordinate));
+            let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {return feature;});//피쳐가 있을시 피쳐를 반환
+            
+            if (feature == undefined) {
+                
+                selectFeatureInfoBox(evt, "MAP");
+    
+                popupMap.setPosition(coordinate);
+             
+                if (popoverMap) {
+                    popoverMap.dispose();
+                }
+                
+                popoverMap = new Popover(elementMap, {
+                    animation: false,
+                    container: elementMap,
+                    content: '<p>클릭한 부분의 위치정보</p><code>' + hdms + '</code>',
+                    html: true,
+                    placement: 'top',
+                    title: 'Welcome to OpenLayers',
+                });
+    
+                //지도클릭 팝오버 표출 및 피쳐 팝오버 비활성화
+                popoverMap.show();
+
+
+                let popupFeature = new Overlay({
+                    element: document.getElementById('popup'),
+                });
+                map.addOverlay(popupFeature);
+                let elementFeature = popupFeature.getElement();
+                let popoverFeature = Popover.getInstance(elementFeature);//팝오버 객체 생성
+
+            }
+            else{
+                //팝오버 존재시 숨기기
+                if(popoverMap != null){
+                    popoverMap.hide();
+                }
+            }
+        });
+
+        /* 지도 포인트 이동시 이벤트 */
+        map.on('pointermove', function (e) {
+            if (!e.dragging) {
+                var pixel = map.getEventPixel(e.originalEvent);
+                var hit = map.hasFeatureAtPixel(pixel);
+            }
+        });
+
+        
+        callFeature();
+
+        return ()=> null
+    },  []);
     
 
     
@@ -518,237 +745,14 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     };
 
     source.on('selectfeature', function (e) {
-        console.log("피쳐선택!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
         select.set("drawYn","N");
         flash(e.feature);
     });
 
     
 
-    /**
-     * 
-     * USER EFECT 이벤트 리스너
-     * 
-     */
-    useEffect(() => {
-
-        const map = new OlMap({
-            layers: [
-                tileLayerXYZ,
-                vectorLayer
-            ],
-            target: 'map', 
-            view: new View({
-                //projection: getProjection('EPSG:3857'),
-                //center: fromLonLat([126.752, 37.4713], getProjection('EPSG:3857')),
-                center: [ 126.97659953, 37.579220423 ], //포인트의 좌표를 리턴함
-                projection : 'EPSG:4326',//경위도 좌표계 WGS84
-                zoom: 6
-            })
-        });
-
-        const view = map.getView();
-        const zoom = view.getZoom();
-
-        setView(view);
-        setZoom(zoom);
-
-        setMap(map);
-
-        /*
-        setPopupFeature(popupFeature);
-        setPopupMap(popupMap);
-        
-        setElementMap(elementMap);
-        setElementFeature(elementFeature);
-
-        setPopoverFeature(popoverFeature);
-        setPopoverMap(popoverMap);
-        */
-
-        map.addInteraction(selectSingleClick);
-        
-
-        //Map 객채에 수정 인터렉션(Interation) 추가
-
-        //setModify(modify);
-
-
-        const defaultStyle = new Modify({source: source})
-        .getOverlay()
-        .getStyleFunction();
-
-        let modify = new Modify({
-            source: source,
-            style: function (feature) {
-                feature.get('features').forEach(function (modifyFeature) {
-
-                    const modifyGeometry = modifyFeature.get('modifyGeometry');
-
-                    if (modifyGeometry) {
-                        const modifyPoint = feature.getGeometry().getCoordinates();
-                        const geometries = modifyFeature.getGeometry().getGeometries();
-                        const polygon = geometries[0].getCoordinates()[0];
-                        const center = geometries[1].getCoordinates();
-                        const projection = map.getView().getProjection();
-                        let first, last, radius;
-
-                        if (modifyPoint[0] === center[0] && modifyPoint[1] === center[1]) {
-                            // center is being modified
-                            // get unchanged radius from diameter between polygon vertices
-                            first = transform(polygon[0], projection, 'EPSG:4326');
-                            last = transform(
-                                polygon[(polygon.length - 1) / 2],
-                                projection,
-                                'EPSG:4326'
-                            );
-                            radius = getDistance(first, last) / 2;
-                        } else {
-                            // radius is being modified
-                            first = transform(center, projection, 'EPSG:4326');
-                            last = transform(modifyPoint, projection, 'EPSG:4326');
-                            radius = getDistance(first, last);
-                        }
-
-                        // update the polygon using new center or radius
-                        const circle = circular(
-                            transform(center, projection, 'EPSG:4326'),
-                            radius,
-                            128
-                        );
-
-                        circle.transform('EPSG:4326', projection);
-                        geometries[0].setCoordinates(circle.getCoordinates());
-                        // save changes to be applied at the end of the interaction
-                        modifyGeometry.setGeometries(geometries);
-                    }
-                });
-
-                return defaultStyle(feature);
-            },
-        });
-
-
-        modify.on('modifystart', function (event) {
-            setIsDraw(true);
-            console.log("수정 시작" + isDraw);
-            
-            event.features.forEach(function (feature) {
-                const geometry = feature.getGeometry();
-                if (geometry.getType() === 'GeometryCollection') {
-                    feature.set('modifyGeometry', geometry.clone(), true);
-                }
-            });
-        });
     
-        modify.on('modifyend', function (event) {
-            
-            setIsDraw(false);
-            console.log("수정 종료" + isDraw);
-            event.features.forEach(function (feature) {
-                const modifyGeometry = feature.get('modifyGeometry');
-                if (modifyGeometry) {
-                    feature.setGeometry(modifyGeometry);
-                    feature.unset('modifyGeometry', true);
-                }
-            });
-        });
-        
-        map.addInteraction(modify);
-
-        /*
-        let draw = new Draw({
-            source: source,
-            type: "Polygon"
-        });
-        setDraw(draw);
-
-
-
-        draw.on('drawstart', function (e) {
-            console.log("그리기 시작");
-        }); 
-
-        draw.on('drawend', function (e) {
-            select.set("drawYn", "N");
-            console.log("그리기 끝");
-            map.removeInteraction(draw);
-        }); 
-*/
-
-
-
-        map.on('click', function (evt) {
-            
-            if(isDraw == true){ return false}
-
-            console.log("지도 클릭시 위치정보 Overlay : " + evt.pixel);
-            let popupMap = new Overlay({
-                element: document.getElementById('popupMap'),
-            });
-            map.addOverlay(popupMap);
-            let elementMap = popupMap.getElement();
-            let popoverMap = Popover.getInstance(elementMap);//팝오버 객체 생성
-    
-
-
-
-            let coordinate = evt.coordinate;
-            let hdms = toStringHDMS(toLonLat(coordinate));
-            let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {return feature;});//피쳐가 있을시 피쳐를 반환
-            
-            if (feature == undefined) {
-                
-                selectFeatureInfoBox(evt, "MAP");
-    
-                popupMap.setPosition(coordinate);
-             
-                if (popoverMap) {
-                    popoverMap.dispose();
-                }
-                
-                popoverMap = new Popover(elementMap, {
-                    animation: false,
-                    container: elementMap,
-                    content: '<p>클릭한 부분의 위치정보</p><code>' + hdms + '</code>',
-                    html: true,
-                    placement: 'top',
-                    title: 'Welcome to OpenLayers',
-                });
-    
-                //지도클릭 팝오버 표출 및 피쳐 팝오버 비활성화
-                popoverMap.show();
-
-
-                let popupFeature = new Overlay({
-                    element: document.getElementById('popup'),
-                });
-                map.addOverlay(popupFeature);
-                let elementFeature = popupFeature.getElement();
-                let popoverFeature = Popover.getInstance(elementFeature);//팝오버 객체 생성
-
-            }
-            else{
-                //팝오버 존재시 숨기기
-                if(popoverMap != null){
-                    popoverMap.hide();
-                }
-            }
-        });
-
-        /* 지도 포인트 이동시 이벤트 */
-        map.on('pointermove', function (e) {
-            if (!e.dragging) {
-                var pixel = map.getEventPixel(e.originalEvent);
-                var hit = map.hasFeatureAtPixel(pixel);
-            }
-        });
-
-        
-        callFeature();
-
-        return ()=> null
-    },  []);
 
     /* 
     
@@ -915,7 +919,7 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                 </Col>
                 <Col> 
                     <Stack className="float-end" direction="horizontal" gap={2}>
-                        <Badge bg="light" text="dark">추가 : </Badge>
+                        <Badge bg="light" text="dark">추가 : {zoomLevel}</Badge>
                         <Badge bg="dark" text="light">변경 : </Badge>
                     </Stack>
                 </Col>
@@ -965,10 +969,10 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
                 </Col>
             </Row>
 
-            <Row>
+            {/* <Row>
                 <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-out" onClick={(e) => { handleClick('zoomOut');}}>Zoom out</Button></Col>
                 <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-in" onClick={(e) => { handleClick('zoomIn');}}>Zoom in</Button></Col>
-            </Row>
+            </Row> */}
 
             <div id="popup"></div>
             <div id="popupMap"></div>
@@ -977,5 +981,5 @@ export const Map1 = (/*{ children, zoom, center }*/) => {
     );
 }
   
-export default Map1;
+export default Map;
 
