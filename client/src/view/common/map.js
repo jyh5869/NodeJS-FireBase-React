@@ -114,13 +114,19 @@ const selectAltClick = new Select({
 });
 
 //export const Map =  (props) => {
-export const Map = forwardRef((props, ref) => {
+export const Map = forwardRef((props, forwardedRef) => {
 
-    useImperativeHandle(ref, () => ({
+    useImperativeHandle(forwardedRef, () => ({
         // 부모에서 사용하고 싶었던 함수
-        handleClick
+        willBeUsedInParentComponent
     }));
 
+    function willBeUsedInParentComponent() {
+        console.log('Hi Parent');
+        console.log(forwardedRef);
+    }
+
+      
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
     const [view, setView] = useState();

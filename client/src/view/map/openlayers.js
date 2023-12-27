@@ -19,9 +19,11 @@ function Openlayers() {
 
     const [zoomLevel , setZoomLevel] = useState(6);
 
-    const sampleRef = useRef({});
+    const childComponentRef = useRef({"type":"1"});
+
     //이거공부하자 ------------------------> https://velog.io/@ahsy92/React-%EB%B6%80%EB%AA%A8%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8%EC%97%90%EC%84%9C-%EC%9E%90%EC%8B%9D%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8-%ED%95%A8%EC%88%98-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0
-    const handleClick = async (zoomType) => {
+    
+    const handleClick2 = async (e,zoomType) => {
 
         if(zoomType == 'zoomIn'){
             setZoomLevel(zoomLevel+1);
@@ -32,7 +34,8 @@ function Openlayers() {
     };
 
     //이벤트 리스너
-    useEffect(() => {       
+    useEffect(() => {
+        childComponentRef.current.willBeUsedInParentComponent();       
     }, []);
     
     
@@ -41,12 +44,12 @@ function Openlayers() {
         <React.Fragment>
             <h1>오픈 레이어스</h1>
             <div className="my-3">
-                <Map zoomLevel={zoomLevel} ref={sampleRef}/>
+                <Map zoomLevel={zoomLevel} ref={childComponentRef}/>
             </div>  
 
             <Row>
-                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-out" onClick={(e) => { handleClick('zoomOut');}}>Zoom out</Button></Col>
-                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-in" onClick={(e) => { handleClick('zoomIn');}}>Zoom in</Button></Col>
+                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-out" onClick={(e) => { handleClick2(e,'zoomOut');}}>Zoom out</Button></Col>
+                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-in" onClick={(e) => { handleClick2(e,'zoomIn');}}>Zoom in</Button></Col>
             </Row> 
         </React.Fragment>
     )
