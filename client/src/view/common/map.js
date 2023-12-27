@@ -1,4 +1,4 @@
-import React,  { useEffect, useRef ,useState } from 'react';
+import React,  { useEffect, useRef ,useState, forwardRef, useImperativeHandle } from 'react';
 
 import { Button, Table, Form, Badge, Stack, Container, Row, Col }   from 'react-bootstrap';
 
@@ -113,7 +113,13 @@ const selectAltClick = new Select({
     },
 });
 
-export const Map = (props) => {
+//export const Map =  (props) => {
+export const Map = forwardRef((props, ref) => {
+
+    useImperativeHandle(ref, () => ({
+        // 부모에서 사용하고 싶었던 함수
+        handleClick
+    }));
 
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
@@ -389,6 +395,7 @@ export const Map = (props) => {
     
     /* 셀렉트박스 이벤트 헨들러 */
     const handleClick = async (zoomType) => {
+        console.log("줌조정");
         let currentZoom = view.getZoom();
 
         if(zoomType == 'zoomIn'){
@@ -979,7 +986,7 @@ export const Map = (props) => {
             <div id="selectPopup"></div>
         </>
     );
-}
+});
   
 export default Map;
 

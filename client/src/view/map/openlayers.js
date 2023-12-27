@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import { Button, Table, Form, Badge, Stack, Container, Row, Col }   from 'react-bootstrap';
 import axios from 'axios';
@@ -14,23 +14,26 @@ import '../../assets/css/common.css';
  * @returns 꽃 종류 분석 HTML
 **/
 const formData = new FormData();//이미지 데이터 저장 Form
+
 function Openlayers() {
 
     const [zoomLevel , setZoomLevel] = useState(6);
 
+    const sampleRef = useRef({});
+    //이거공부하자 ------------------------> https://velog.io/@ahsy92/React-%EB%B6%80%EB%AA%A8%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8%EC%97%90%EC%84%9C-%EC%9E%90%EC%8B%9D%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8-%ED%95%A8%EC%88%98-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0
     const handleClick = async (zoomType) => {
 
         if(zoomType == 'zoomIn'){
-          setZoomLevel(zoomLevel+1);
+            setZoomLevel(zoomLevel+1);
         }
         else if(zoomType == 'zoomOut'){
-          setZoomLevel(zoomLevel-1);
+            setZoomLevel(zoomLevel-1);
         }
     };
 
     //이벤트 리스너
     useEffect(() => {       
-    },  []);
+    }, []);
     
     
     //JSX 식으로 리스트 파싱
@@ -38,7 +41,7 @@ function Openlayers() {
         <React.Fragment>
             <h1>오픈 레이어스</h1>
             <div className="my-3">
-                <Map zoomLevel={zoomLevel}/>
+                <Map zoomLevel={zoomLevel} ref={sampleRef}/>
             </div>  
 
             <Row>
