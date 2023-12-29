@@ -30,7 +30,7 @@ function Openlayers() {
         }
         else if(zoomType == 'zoomOut'){
             setZoomLevel(zoomLevel-1);
-        }
+        }  
     };
 
     //이벤트 리스너
