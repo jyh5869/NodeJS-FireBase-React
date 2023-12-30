@@ -120,21 +120,29 @@ export const Map = forwardRef((props, forwardedRef) => {
         // 부모에서 사용하고 싶었던 함수
         willBeUsedInParentComponent,
     }));
+    
 
     function willBeUsedInParentComponent() {
-        console.log('Hi Parent');
-        console.log(forwardedRef);
 
-        handleClick('zoomIn');
+        console.log(forwardedRef);
+        console.log(props);
+        handleClick(props.zoomType);
     }
 
-      
+    source.addFeatures(props.arrSource);
+
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
     const [view, setView] = useState();
     
     const [zoom, setZoom] = useState();
-    const [zoomLevel, setZoomLevel] = useState();
+
+    const sendSourceToParents = () => {
+        props.getSource(vectorLayer).then(function(){
+            source.clear();
+        });
+    }
+    
     //const [drawType, setDrawType] = useState();
     //const [select, setSelect] = useState(selectSingleClick);
 
@@ -162,8 +170,14 @@ export const Map = forwardRef((props, forwardedRef) => {
     const [geodesicCnt    , setGeodesicCnt  ] = useState(0);
     const [totalCnt       , setTotalCnt     ] = useState(0);
 
-    
 
+
+    const mapControlHandler = async (actionType) => {
+        
+        if(actionType == 'clearSource'){
+
+        }
+    };
 
     /**
      * 
@@ -171,9 +185,7 @@ export const Map = forwardRef((props, forwardedRef) => {
      * 
      */
     useEffect(() => {
-        console.log(props.zoomLevel);
-        setZoomLevel(props.zoomLevel);
-
+        
         const map = new OlMap({
             layers: [
                 tileLayerXYZ,
@@ -387,13 +399,12 @@ export const Map = forwardRef((props, forwardedRef) => {
         });
 
         
-        callFeature();
+        //callFeature();
 
         return ()=> null
     },  []);
     
 
-    
     
 
     /* Feature Draw시 동학하며 마지막 포인트를 없애 이전으로 돌아간다. */
@@ -766,12 +777,6 @@ export const Map = forwardRef((props, forwardedRef) => {
     });
 
     
-
-    
-
-    /* 
-    
-    */
     /* 저장된 지오메트릭 데이터 불러오기 */
     const callFeature = async (feature) => {
 
@@ -819,80 +824,22 @@ export const Map = forwardRef((props, forwardedRef) => {
         
             // 지오메트릭 타입별로 카운팅 
             cntOfFeatureType(geomType, index);
-
+            
 
         });
         
         await Promise.all(promises);
         
+
         source.addFeatures(featureArr);
-
     }
 
-    const saveFeature = async (feature) => {
-        console.log("데이터 저장하기");
-        const featureArr = [];
-        var geom = source.getFeatures();
+    
 
-        vectorLayer.getSource().forEachFeature(function(feature) {
 
-            let cloneFeature = feature.clone();
-            let featureId = feature.getId();
-            let geomType = cloneFeature.getProperties().type;
+    
 
-            
-            console.log(cloneFeature.getProperties());
-
-            if(geomType == "Circle"){
-                //Circle 객체를 Center와 Radius 프로퍼티를 가진 Point Feature로 변환
-                let radius = cloneFeature.getGeometry().getRadius();
-                let center = cloneFeature.getGeometry().getCenter();
-
-                let feature = new Feature({
-                    realType : cloneFeature.getProperties().realType,
-                    type: geomType,
-                    geometry: new Point(center),
-                    radius: radius,
-                });
-                cloneFeature = feature;
-            }
-
-            cloneFeature.setId(featureId); // 저장할 Feature에 아이디값 세팅
-
-            if(cloneFeature.getId() == undefined ){//신규 등록
-                //console.log("ID : " + cloneFeature.getId()  + "/  인서트!" );
-
-                cloneFeature.setProperties({"state" : "insert"});
-            }
-            else{//업데이트
-                //console.log("ID : "+ cloneFeature.getId()  + "/  업데이트!" );
-                cloneFeature.setProperties({"state" : "update"});
-            }
-            
-            featureArr.push(cloneFeature);
-        });
-
-        var geoJsonOri = new GeoJSON().writeFeatures(geom);
-        var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
-
-        let response = await axios({
-            method  : 'get',
-            url     : '/api/geomboardSave',
-            params  : {
-                'geom' : geoJsonClone
-            },
-            headers : {
-                'Content-Type' : 'multipart/form-data'
-            }, 
-        })
-        if(response.status == 200){
-            console.log(response.status);
-            console.log("저장완료!!");
-
-            source.clear();
-            callFeature();
-        } 
-    }
+    
 
     /* 지오메트릭 타입별 갯수 표출 함수 */
     const cntOfFeatureType = async (featureType, idx) => {
@@ -934,7 +881,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                 </Col>
                 <Col> 
                     <Stack className="float-end" direction="horizontal" gap={2}>
-                        <Badge bg="light" text="dark">추가 : {zoomLevel}</Badge>
+                        <Badge bg="light" text="dark">추가 : </Badge>
                         <Badge bg="dark" text="light">변경 : </Badge>
                     </Stack>
                 </Col>
@@ -950,7 +897,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
             <Row className='mb-3'>
                 <Col>
-                    <Button variant="outline-success" className="btn_type1" onClick={saveFeature}>저장하기</Button>   
+                    <Button variant="outline-success" className="btn_type1" onClick={sendSourceToParents}>저장하기</Button>   
                 </Col>
             </Row>
 
