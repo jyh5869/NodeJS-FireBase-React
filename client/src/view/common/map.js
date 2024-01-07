@@ -93,7 +93,7 @@ function selectStyle(feature) {
 
 // select interaction working on "singleclick"
 const selectSingleClick = new Select({style: selectStyle});
-
+ 
 // select interaction working on "click"
 const selectClick = new Select({
     condition: click,
