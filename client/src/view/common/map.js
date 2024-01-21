@@ -90,7 +90,7 @@ function selectStyle(feature) {
     selected.getFill().setColor(color);
     return selected;
 }
-
+  
 // select interaction working on "singleclick"
 const selectSingleClick = new Select({style: selectStyle});
  
