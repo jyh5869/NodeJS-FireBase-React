@@ -99,7 +99,7 @@ const selectClick = new Select({
     condition: click,
     style: selectStyle,
 }); 
-
+ 
 // select interaction working on "pointermove"
 const selectPointerMove = new Select({
     condition: pointerMove,
