@@ -116,11 +116,6 @@ const selectAltClick = new Select({
 //export const Map =  (props) => {
 export const Map = forwardRef((props, forwardedRef) => {
 
-    const [state, setState] = useState(() => {
-        console.log(props);
-        return null;
-    });
-
     useImperativeHandle(forwardedRef, () => ({
         // 부모에서 사용하고 싶었던 함수
         willBeUsedInParentComponent,
@@ -134,12 +129,8 @@ export const Map = forwardRef((props, forwardedRef) => {
         handleClick(props.zoomType);
     }
 
+
     source.addFeatures(props.arrSource);
-    props.arrSource.forEach(function(feature, idx){
-
-    });
-
-
 
 
     const [mapObj, setMap] = useState();

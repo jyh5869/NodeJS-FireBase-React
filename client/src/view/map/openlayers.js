@@ -24,10 +24,7 @@ function Openlayers() {
     const [zoomType , setZoomType] = useState();
     const [actionType , setActionType] = useState();
     //const [arrSource, setArrSource] = useState([]);
-    const [arrSource, setArrSource] = useState(() => {
-
-        return [];
-    });
+    const [arrSource, setArrSource] = useState(() => { return [];});
 
     const [circleCnt      , setCircleCnt    ] = useState(0);
     const [polygonCnt     , setPolygonCnt   ] = useState(0);
