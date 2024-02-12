@@ -116,6 +116,11 @@ const selectAltClick = new Select({
 //export const Map =  (props) => {
 export const Map = forwardRef((props, forwardedRef) => {
 
+    const [state, setState] = useState(() => {
+        console.log(props);
+        return null;
+    });
+
     useImperativeHandle(forwardedRef, () => ({
         // 부모에서 사용하고 싶었던 함수
         willBeUsedInParentComponent,
@@ -130,6 +135,12 @@ export const Map = forwardRef((props, forwardedRef) => {
     }
 
     source.addFeatures(props.arrSource);
+    props.arrSource.forEach(function(feature, idx){
+
+    });
+
+
+
 
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
@@ -163,12 +174,7 @@ export const Map = forwardRef((props, forwardedRef) => {
     const [popoverMap, setPopoverMap] = useState();
 
 
-    const [circleCnt      , setCircleCnt    ] = useState(0);
-    const [polygonCnt     , setPolygonCnt   ] = useState(0);
-    const [pointCnt       , setPointCnt     ] = useState(0);
-    const [lineStringCnt  , setLineStringCnt] = useState(0);
-    const [geodesicCnt    , setGeodesicCnt  ] = useState(0);
-    const [totalCnt       , setTotalCnt     ] = useState(0);
+    
 
 
 
@@ -400,6 +406,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
         
         //callFeature();
+        //cntOfFeatureType("","");
 
         return ()=> null
     },  []);
@@ -823,7 +830,7 @@ export const Map = forwardRef((props, forwardedRef) => {
             featureArr.push(feature);
         
             // 지오메트릭 타입별로 카운팅 
-            cntOfFeatureType(geomType, index);
+            //cntOfFeatureType(geomType, index);
             
 
         });
@@ -841,52 +848,13 @@ export const Map = forwardRef((props, forwardedRef) => {
 
     
 
-    /* 지오메트릭 타입별 갯수 표출 함수 */
-    const cntOfFeatureType = async (featureType, idx) => {
-
-        setTotalCnt(totalCnt => totalCnt + 1);
-
-        if(featureType == 'Geodesic'){ 
-            setGeodesicCnt(geodesicCnt => geodesicCnt + 1);
-        }
-        else if(featureType == 'Circle'){
-            setCircleCnt(circleCnt => circleCnt + 1);
-        }
-        else if(featureType == 'Polygon'){
-            setPolygonCnt(polygonCnt => polygonCnt + 1);
-        }
-        else if(featureType == 'LineString'){
-            setLineStringCnt(lineStringCnt => lineStringCnt + 1);
-        }
-        else if(featureType == 'Point'){
-            setPointCnt(pointCnt => pointCnt + 1);
-        }
-    }
+    
 
 
 
 
     return (
         <>
-            <Row className='mb-3'>
-                <Col>
-                    <Stack direction="horizontal" gap={2}>
-                        <Badge bg="info">Total: {totalCnt}</Badge>
-                        <Badge bg="primary">polygone: {polygonCnt}</Badge>
-                        <Badge bg="secondary">LineString: {lineStringCnt}</Badge>
-                        <Badge bg="success">Point: {pointCnt}</Badge>
-                        <Badge bg="danger">Circle: {circleCnt}</Badge>
-                        <Badge bg="warning">Geodesic: {geodesicCnt}</Badge>
-                    </Stack>
-                </Col>
-                <Col> 
-                    <Stack className="float-end" direction="horizontal" gap={2}>
-                        <Badge bg="light" text="dark">추가 : </Badge>
-                        <Badge bg="dark" text="light">변경 : </Badge>
-                    </Stack>
-                </Col>
-            </Row>
-
             <Row>
                 <div id="map" value={mapObj} style={{height:'50rem'}}></div> 
             </Row>
@@ -910,7 +878,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                             <option key={1} value="Point" >Point</option>
                             <option key={2} value="LineString">LineString</option>
                             <option key={3} value="Polygon">Polygon</option>
-                            <option key={4}value="Circle">Circle Geometry</option>
+                            <option key={4} value="Circle">Circle Geometry</option>
                             <option key={5} value="Geodesic">Geodesic Circle</option> 
                         </Form.Select>
                         <Button variant="outline-primary" onClick={(e) => { removeLastPoint();}}>이전으로</Button>

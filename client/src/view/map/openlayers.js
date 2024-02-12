@@ -23,8 +23,19 @@ function Openlayers() {
 
     const [zoomType , setZoomType] = useState();
     const [actionType , setActionType] = useState();
-    const [arrSource, setArrSource] = useState([]);
+    //const [arrSource, setArrSource] = useState([]);
+    const [arrSource, setArrSource] = useState(() => {
 
+        return [];
+    });
+
+    const [circleCnt      , setCircleCnt    ] = useState(0);
+    const [polygonCnt     , setPolygonCnt   ] = useState(0);
+    const [pointCnt       , setPointCnt     ] = useState(0);
+    const [lineStringCnt  , setLineStringCnt] = useState(0);
+    const [geodesicCnt    , setGeodesicCnt  ] = useState(0);
+    const [totalCnt       , setTotalCnt     ] = useState(0);
+    
     const childComponentRef = useRef({"type":"1"});
 
     //const [source, setSource] = useState();
@@ -36,7 +47,7 @@ function Openlayers() {
 
     //이거공부하자 ------------------------> https://velog.io/@ahsy92/React-%EB%B6%80%EB%AA%A8%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8%EC%97%90%EC%84%9C-%EC%9E%90%EC%8B%9D%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8-%ED%95%A8%EC%88%98-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0
     
-    const handleClick = async (e,zoomType) => {
+    const handleClick = async (e, zoomType) => {
         
         if(zoomType == 'zoomIn'){
             await setZoomType('zoomIn');
@@ -55,6 +66,27 @@ function Openlayers() {
             childComponentRef.current.willBeUsedInParentComponent();
         }
     };
+
+    const cntOfFeatureType = async (featureType, idx) => {
+        //console.log(props);
+        setTotalCnt(totalCnt => totalCnt + 1);
+
+        if(featureType == 'Geodesic'){ 
+            setGeodesicCnt(geodesicCnt => geodesicCnt + 1);
+        }
+        else if(featureType == 'Circle'){
+            setCircleCnt(circleCnt => circleCnt + 1);
+        }
+        else if(featureType == 'Polygon'){
+            setPolygonCnt(polygonCnt => polygonCnt + 1);
+        }
+        else if(featureType == 'LineString'){
+            setLineStringCnt(lineStringCnt => lineStringCnt + 1);
+        }
+        else if(featureType == 'Point'){
+            setPointCnt(pointCnt => pointCnt + 1);
+        }
+    }
 
     /* 저장된 지오메트릭 데이터 불러오기 */
     const callFeature = async (feature) => {
@@ -102,9 +134,9 @@ function Openlayers() {
             featureArr.push(feature);
         
             // 지오메트릭 타입별로 카운팅 
-            //cntOfFeatureType(geomType, index);
+            cntOfFeatureType(geomType, index);
             
-
+            
         });
         
         await Promise.all(promises);
@@ -178,9 +210,11 @@ function Openlayers() {
         } 
     }
 
-    //이벤트 리스너
+    //이벤트 리스너 페이지 로드
     useEffect(() => {
+
         callFeature();
+        
     }, []);
     
     
@@ -188,6 +222,25 @@ function Openlayers() {
     return (
         <React.Fragment>
             <h1>오픈 레이어스</h1>
+            <Row className='mb-3'>
+                <Col>
+                    <Stack direction="horizontal" gap={2}>
+                        <Badge bg="info">Total: {totalCnt}</Badge>
+                        <Badge bg="primary">polygone: {polygonCnt}</Badge>
+                        <Badge bg="secondary">LineString: {lineStringCnt}</Badge>
+                        <Badge bg="success">Point: {pointCnt}</Badge>
+                        <Badge bg="danger">Circle: {circleCnt}</Badge>
+                        <Badge bg="warning">Geodesic: {geodesicCnt}</Badge>
+                    </Stack>
+                </Col>
+                <Col> 
+                    <Stack className="float-end" direction="horizontal" gap={2}>
+                        <Badge bg="light" text="dark">추가 : </Badge>
+                        <Badge bg="dark" text="light">변경 : </Badge>
+                    </Stack>
+                </Col>
+            </Row>
+
             <div className="my-3">
                 <Map zoomType={zoomType} arrSource={arrSource} getSource={getSource} actionType={actionType} ref={childComponentRef}/>
             </div>  
