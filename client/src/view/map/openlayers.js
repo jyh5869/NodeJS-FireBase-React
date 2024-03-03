@@ -23,7 +23,6 @@ function Openlayers() {
 
     const [zoomType , setZoomType] = useState();
     const [actionType , setActionType] = useState();
-    //const [arrSource, setArrSource] = useState([]);
     const [arrSource, setArrSource] = useState(() => { return [];});
 
     const [circleCnt      , setCircleCnt    ] = useState(0);
@@ -185,7 +184,6 @@ function Openlayers() {
             featureArr.push(cloneFeature);
         });
 
-        //var geoJsonOri = new GeoJSON().writeFeatures(geom);
         var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
 
         let response = await axios({
