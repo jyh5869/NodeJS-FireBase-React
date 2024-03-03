@@ -124,8 +124,6 @@ export const Map = forwardRef((props, forwardedRef) => {
 
     function willBeUsedInParentComponent() {
 
-        console.log(forwardedRef);
-        console.log(props);
         handleClick(props.zoomType);
     }
 
@@ -136,45 +134,19 @@ export const Map = forwardRef((props, forwardedRef) => {
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
     const [view, setView] = useState();
-    
     const [zoom, setZoom] = useState();
+    const [featureInfo, setFeatureInfo] = useState(" 선택된 공간데이터가 없습니다. ");
+    const [popoverFeature, setPopoverFeature] = useState();
+    const [popoverMap, setPopoverMap] = useState();
 
     const sendSourceToParents = () => {
         props.getSource(vectorLayer).then(function(){
             source.clear();
         });
     }
-    
-    //const [drawType, setDrawType] = useState();
-    //const [select, setSelect] = useState(selectSingleClick);
-
-    const [featureInfo, setFeatureInfo] = useState(" 선택된 공간데이터가 없습니다. ");
-
-    //const [draw, setDraw] = useState();
-    //const [modify, setModify] = useState();
-
-
-    /*
-    const [popupFeature, setPopupFeature] = useState();
-    const [popupMap, setPopupMap] = useState();
-
-    const [elementFeature, setElementFeature] = useState();
-    const [elementMap, setElementMap] = useState();
-    */
-    const [popoverFeature, setPopoverFeature] = useState();
-    const [popoverMap, setPopoverMap] = useState();
-
-
-    
 
 
 
-    const mapControlHandler = async (actionType) => {
-        
-        if(actionType == 'clearSource'){
-
-        }
-    };
 
     /**
      * 
@@ -203,28 +175,13 @@ export const Map = forwardRef((props, forwardedRef) => {
 
         setView(view);
         setZoom(zoom);
-
         setMap(map);
 
-        /*
-        setPopupFeature(popupFeature);
-        setPopupMap(popupMap);
-        
-        setElementMap(elementMap);
-        setElementFeature(elementFeature);
-
-        setPopoverFeature(popoverFeature);
-        setPopoverMap(popoverMap);
-        */
-
+        //Set Default Single Click Interaction 
         map.addInteraction(selectSingleClick);
         
 
         //Map 객채에 수정 인터렉션(Interation) 추가
-
-        //setModify(modify);
-
-
         const defaultStyle = new Modify({source: source})
         .getOverlay()
         .getStyleFunction();
@@ -293,9 +250,9 @@ export const Map = forwardRef((props, forwardedRef) => {
         });
     
         modify.on('modifyend', function (event) {
-            
             setIsDraw(false);
             console.log("수정 종료" + isDraw);
+
             event.features.forEach(function (feature) {
                 const modifyGeometry = feature.get('modifyGeometry');
                 if (modifyGeometry) {
@@ -338,13 +295,11 @@ export const Map = forwardRef((props, forwardedRef) => {
                 element: document.getElementById('popupMap'),
             });
             map.addOverlay(popupMap);
+
             let elementMap = popupMap.getElement();
             let popoverMap = Popover.getInstance(elementMap);//팝오버 객체 생성
-    
-
-
-
             let coordinate = evt.coordinate;
+
             let hdms = toStringHDMS(toLonLat(coordinate));
             let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {return feature;});//피쳐가 있을시 피쳐를 반환
             
@@ -387,6 +342,7 @@ export const Map = forwardRef((props, forwardedRef) => {
             }
         });
 
+        
         /* 지도 포인트 이동시 이벤트 */
         map.on('pointermove', function (e) {
             if (!e.dragging) {
@@ -394,10 +350,6 @@ export const Map = forwardRef((props, forwardedRef) => {
                 var hit = map.hasFeatureAtPixel(pixel);
             }
         });
-
-        
-        //callFeature();
-        //cntOfFeatureType("","");
 
         return ()=> null
     },  []);
@@ -432,6 +384,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
         addInteractions(e)
     };
+
 
     let snap; let draw;
     const addInteractions = async (e) => {
@@ -476,16 +429,16 @@ export const Map = forwardRef((props, forwardedRef) => {
         mapObj.addInteraction(draw);
         mapObj.addInteraction(snap);
 
-        //setDraw(draw);
-        //setDrawType(e.target.value);
         drawType = e.target.value;
         setIsDraw(true);
+        
         select.set("drawYn","Y")
 
         console.log('isDraw = ' + drawType);
     }
 
-    //Map 객채에 특정 인터렉션(Interation)을 제거
+
+    /* Map 객채에 특정 인터렉션(Interation)을 제거 */
     function removeInteraction(interactionType){
 
         if(interactionType == "draw"){
@@ -588,18 +541,12 @@ export const Map = forwardRef((props, forwardedRef) => {
         //Draw Interation 종료             
         removeInteraction("draw");
         select.set("drawYn","N");
-        //console.log("isdraw: 그리기종료 후 :  " + select.get("drawYn"));
     }
 
 
-
-
-
-
-
-
-
-
+    /**
+     * 지도 클릭시 피쳐가 있을경우 해당 피쳐의 정보 표출
+     */
     let select = selectSingleClick;
     select.on('select', function (e) {
         
@@ -647,7 +594,6 @@ export const Map = forwardRef((props, forwardedRef) => {
 
                 //popup.setPosition(coordinate);
                 popupFeature.setPosition(center);
-                //console.log(center);
                 
                 setPopoverFeature(popoverFeature);
 
@@ -666,7 +612,6 @@ export const Map = forwardRef((props, forwardedRef) => {
                 
                 //팝오버 표출
                 popoverFeature.show();
-
             });
         }      
     });
@@ -682,7 +627,6 @@ export const Map = forwardRef((props, forwardedRef) => {
         }
 
         const value = clickType;
-
 
         if (value == 'singleclick') {
             select = selectSingleClick;
@@ -775,14 +719,14 @@ export const Map = forwardRef((props, forwardedRef) => {
     });
 
     
-    /* 저장된 지오메트릭 데이터 불러오기 */
+    /* ※미사용※ 저장된 지오메트릭 데이터 불러오기 (부모 컴포넌트로 이동시킴) */
     const callFeature = async (feature) => {
 
         let response = await axios({
             method  : 'get',
             url     : '/api/geomboardList',
             params  : {
-                id : "하위하위"
+                id : "Fature Call!"
             },
             headers : {
                 'Content-Type' : 'multipart/form-data'
@@ -819,31 +763,15 @@ export const Map = forwardRef((props, forwardedRef) => {
             feature.setProperties(properties);//프로퍼티 값 세팅
 
             featureArr.push(feature);
-        
-            // 지오메트릭 타입별로 카운팅 
-            //cntOfFeatureType(geomType, index);
-            
-
         });
         
         await Promise.all(promises);
         
-
         source.addFeatures(featureArr);
     }
 
-    
 
-
-    
-
-    
-
-    
-
-
-
-
+    /* 지도 맵 컨트롤 HTML */
     return (
         <>
             <Row>
@@ -889,11 +817,6 @@ export const Map = forwardRef((props, forwardedRef) => {
                     </div>
                 </Col>
             </Row>
-
-            {/* <Row>
-                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-out" onClick={(e) => { handleClick('zoomOut');}}>Zoom out</Button></Col>
-                <Col className="d-grid gap-2"><Button variant="outline-success" id="zoom-in" onClick={(e) => { handleClick('zoomIn');}}>Zoom in</Button></Col>
-            </Row> */}
 
             <div id="popup"></div>
             <div id="popupMap"></div>
