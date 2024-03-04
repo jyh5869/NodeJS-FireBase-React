@@ -141,6 +141,7 @@ export const Map = forwardRef((props, forwardedRef) => {
     const [featureInfo, setFeatureInfo] = useState(" 선택된 공간데이터가 없습니다. ");
     const [popoverFeature, setPopoverFeature] = useState();
     const [popoverMap, setPopoverMap] = useState();
+    const [statusArr , setStatusArr] = useState([]);//신규, 변경 현황을 표출하기위한 배열
 
     const sendSourceToParents = () => {
         props.getSource(vectorLayer).then(function(){
@@ -149,14 +150,17 @@ export const Map = forwardRef((props, forwardedRef) => {
     }
 
     const sendRegAndModifyStatus = (status, feature) => {
-        
+        console.log(feature.ol_uid);
         if(status == "Insert"){
             props.setRegAndModifyStatus(status).then(function(){});
         }
         else if(status == "Update"){
-            console.log(feature.getId());
+            
             props.setRegAndModifyStatus(status).then(function(){});
         }
+        setStatusArr(statusArr.push(feature.ol_uid));
+
+        console.log(statusArr);
     }
 
 
@@ -554,7 +558,7 @@ export const Map = forwardRef((props, forwardedRef) => {
         }
             
         removeInteraction("draw");// Draw Interation 종료
-        sendRegAndModifyStatus("Insert");// 현황판(부모 컴포넌트)에 결과 전달
+        sendRegAndModifyStatus("Insert", feature);// 현황판(부모 컴포넌트)에 결과 전달
         select.set("drawYn","N");// Draw Inteeraction 종료 변수 추가
     }
 
