@@ -21,9 +21,9 @@ const formData = new FormData();//이미지 데이터 저장 Form
 
 function Openlayers() {
 
-    const [zoomType , setZoomType] = useState();
+    const [zoomType   , setZoomType]   = useState();
     const [actionType , setActionType] = useState();
-    const [arrSource, setArrSource] = useState(() => { return [];});
+    const [arrSource  , setArrSource]  = useState(() => { return []});
 
     const [circleCnt      , setCircleCnt    ] = useState(0);
     const [polygonCnt     , setPolygonCnt   ] = useState(0);
@@ -31,13 +31,15 @@ function Openlayers() {
     const [lineStringCnt  , setLineStringCnt] = useState(0);
     const [geodesicCnt    , setGeodesicCnt  ] = useState(0);
     const [totalCnt       , setTotalCnt     ] = useState(0);
+    const [insertCnt      , setInsertCnt    ] = useState(0);
+    const [updateCnt      , setUpdateCnt    ] = useState(0);
+
     
     const childComponentRef = useRef({"type":"1"});
 
     //const [source, setSource] = useState();
   
     const getSource = async source => {
-        //setSource(source);
         saveFeature(source);
     };
 
@@ -143,9 +145,6 @@ function Openlayers() {
         console.log("데이터 저장하기");
         const featureArr = [];
 
-        //var geom = source.getFeatures();
-        //console.log(geom);
-
         vectorLayer.getSource().forEachFeature(function(feature) {
 
             let cloneFeature = feature.clone();
@@ -205,6 +204,19 @@ function Openlayers() {
         } 
     }
 
+    
+    /* 공간 데이터 현황 업데이트 (1. 추가, 2. 변경) */
+    const setRegAndModifyStatus = async (status) => {
+
+        if(status == "Insert"){
+            setInsertCnt(insertCnt => insertCnt + 1);
+        }
+        else if(status == "Update"){
+            setUpdateCnt(updateCnt => updateCnt + 1);
+        }
+    }
+    
+    
     //이벤트 리스너 페이지 로드
     useEffect(() => {
 
@@ -230,14 +242,14 @@ function Openlayers() {
                 </Col>
                 <Col> 
                     <Stack className="float-end" direction="horizontal" gap={2}>
-                        <Badge bg="light" text="dark">추가 : </Badge>
-                        <Badge bg="dark" text="light">변경 : </Badge>
+                        <Badge bg="light" text="dark">추가 : {insertCnt}</Badge>
+                        <Badge bg="dark" text="light">변경 : {updateCnt}</Badge>
                     </Stack>
                 </Col>
             </Row>
 
             <div className="my-3">
-                <Map zoomType={zoomType} arrSource={arrSource} getSource={getSource} actionType={actionType} ref={childComponentRef}/>
+                <Map zoomType={zoomType} arrSource={arrSource} actionType={actionType} ref={childComponentRef} getSource={getSource} setRegAndModifyStatus={setRegAndModifyStatus}  />
             </div>  
 
             <Row>

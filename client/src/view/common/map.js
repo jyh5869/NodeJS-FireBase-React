@@ -3,17 +3,11 @@ import React,  { useEffect, useRef ,useState, forwardRef, useImperativeHandle } 
 import { Button, Table, Form, Badge, Stack, Container, Row, Col }   from 'react-bootstrap';
 
 import axios from 'axios';
-/*
-교육 URL
-https://openlayers.org/en/latest/examples/center.html
-https://dev.to/camptocamp-geo/integrating-an-openlayers-map-in-vue-js-a-step-by-step-guide-2n1p
-*/
+
 import '../../assets/css/map.css';
 import 'ol/ol.css';
 import {Map as OlMap} from 'ol';
 import GeoJSON from 'ol/format/GeoJSON.js';
-//import OSM from 'ol/source/OSM.js';
-//import TileLayer from 'ol/layer/Tile.js';
 import View from 'ol/View.js';
 import XYZ from 'ol/source/XYZ';
 
@@ -41,11 +35,12 @@ import {get as getProjection } from 'ol/proj.js'; //위경도
 import {OSM, Vector as VectorSource} from 'ol/source.js';
 import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
 import {toStringHDMS} from 'ol/coordinate.js';
+import {Popover} from 'bootstrap';
 
 import GeojsonTest from '../../openLayers/examples/data/geojson/switzerland.geojson';
 
-import {Popover} from 'bootstrap';
 
+/* START - 오픈레이어스 Map 객체 생성 (TILE, SOURCE, LAYER) */
 const tileLayerXYZ = new TileLayer({
     source: new XYZ({ //source: new OSM()
         url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
@@ -73,8 +68,11 @@ const vectorLayer = new VectorLayer({
         'circle-stroke-color': '#319FD3',
     },
 });
+/* END - 오픈레이어스 Map 객체 생성 (TILE, SOURCE, LAYER) */
 
 
+/* START - 셀렉트 객체및 이벤트 생성 */
+// Select 객체 생성
 const selected = new Style({
     fill: new Fill({
         color: 'rgba(255, 255, 255, 0.6)'
@@ -85,35 +83,40 @@ const selected = new Style({
     }),
 });
 
+// Select 스타일
 function selectStyle(feature) {
     const color = feature.get('COLOR') || 'rgba(255, 255, 255, 0.6)';
     selected.getFill().setColor(color);
     return selected;
 }
   
-// select interaction working on "singleclick"
-const selectSingleClick = new Select({style: selectStyle});
+// Single Click 이벤트
+const selectSingleClick = new Select({
+    style: selectStyle
+});
  
-// select interaction working on "click"
+// Click 이벤트
 const selectClick = new Select({
     condition: click,
     style: selectStyle,
 }); 
  
-// select interaction working on "pointermove"
+// Hover 이벤트
 const selectPointerMove = new Select({
     condition: pointerMove,
     style: selectStyle,
 });
 
+// Alt + Click 이벤트
 const selectAltClick = new Select({
     style: selectStyle,
     condition: function (mapBrowserEvent) {
         return click(mapBrowserEvent) && altKeyOnly(mapBrowserEvent);
     },
 });
+/* END - 셀렉트 객체및 이벤트 생성 */
 
-//export const Map =  (props) => {
+
 export const Map = forwardRef((props, forwardedRef) => {
 
     useImperativeHandle(forwardedRef, () => ({
@@ -145,7 +148,16 @@ export const Map = forwardRef((props, forwardedRef) => {
         });
     }
 
-
+    const sendRegAndModifyStatus = (status, feature) => {
+        
+        if(status == "Insert"){
+            props.setRegAndModifyStatus(status).then(function(){});
+        }
+        else if(status == "Update"){
+            console.log(feature.getId());
+            props.setRegAndModifyStatus(status).then(function(){});
+        }
+    }
 
 
     /**
@@ -259,6 +271,8 @@ export const Map = forwardRef((props, forwardedRef) => {
                     feature.setGeometry(modifyGeometry);
                     feature.unset('modifyGeometry', true);
                 }
+
+                sendRegAndModifyStatus("Update", feature);//현황판(부모 컴포넌트)에 결과 전달
             });
         });
         
@@ -362,6 +376,7 @@ export const Map = forwardRef((props, forwardedRef) => {
         draw.removeLastPoint();
     };
     
+
     /* 셀렉트박스 이벤트 헨들러 */
     const handleClick = async (zoomType) => {
         console.log("줌조정");
@@ -537,10 +552,10 @@ export const Map = forwardRef((props, forwardedRef) => {
             // tell OpenLayers to continue postrender animation
             mapObj.render();
         }
-
-        //Draw Interation 종료             
-        removeInteraction("draw");
-        select.set("drawYn","N");
+            
+        removeInteraction("draw");// Draw Interation 종료
+        sendRegAndModifyStatus("Insert");// 현황판(부모 컴포넌트)에 결과 전달
+        select.set("drawYn","N");// Draw Inteeraction 종료 변수 추가
     }
 
 
