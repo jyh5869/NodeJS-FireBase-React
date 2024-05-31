@@ -59,6 +59,7 @@ test_data = keras.preprocessing.sequence.pad_sequences( test_data,
                                                         maxlen=256)
 
 
+print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★")
 # print(len(train_data[0]), len(train_data[1]))
 print(print(train_data[0]))
 
@@ -101,16 +102,20 @@ model.fit(
 
 # 테스트 데이터를 통한 모델 평가 (result 에 정확도 반환)
 results = model.evaluate(test_data,  test_labels, verbose=0)
+print("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★")
 print(results)
  
 
 
 max_len = 256
 def sentiment_predict(new_sentence):
+
+    print("Function: sentiment_predict 종료")
+	
     # 알파벳과 숫자를 제외하고 모두 제거 및 알파벳 소문자화
     # new_sentence = re.sub('[^0-9a-zA-Z ]', '', new_sentence).lower()
     encoded = []
-
+    
     # 띄어쓰기 단위 토큰화 후 정수 인코딩
     for word in new_sentence.split():
         try :
@@ -125,29 +130,30 @@ def sentiment_predict(new_sentence):
                 # 단어 집합에 없는 단어는 <unk> 토큰으로 변환.
         except KeyError:
           encoded.append(2)
+	
+	
+    test_data = pad_sequences([encoded],
+                              value=word_index["<PAD>"],
+                              padding='post',
+                              maxlen=256)
 
 
+    pad_sequence = pad_sequences([encoded], maxlen=max_len)
+    score = float(model.predict(pad_sequence)) # 예측
 
-test_data = pad_sequences([encoded],
-              value=word_index["<PAD>"],
-              padding='post',
-              maxlen=256)
-
-
-pad_sequence = pad_sequences([encoded], maxlen=max_len)
-score = float(model.predict(pad_sequence)) # 예측
-
-print(new_sentence)
-print(encoded)
-print(test_data)
-print(pad_sequence) 
-print(score)
+    print(new_sentence)
+    print(encoded)
+    print(test_data)
+    print(pad_sequence) 
+    print(score)
 
 
-if(score > 0.5): 
-    print(base64.b64encode(("{:.2f}% 확률로 긍정적 리뷰 입니다.(Positive)".format(score * 100)).encode('utf-8')))
-else:   
-    print(base64.b64encode(("{:.2f}% 확률로 부정적 리뷰 입니다.(Positive)".format((1 - score) * 100)).encode('utf-8')))
+    if(score > 0.5): 
+            print(base64.b64encode(("{:.2f}% 확률로 긍정적 리뷰 입니다.(Positive)".format(score * 100)).encode('utf-8')))
+    else:   
+            print(base64.b64encode(("{:.2f}% 확률로 부정적 리뷰 입니다.(Positive)".format((1 - score) * 100)).encode('utf-8')))
+
+    print("Function: sentiment_predict 종료")
 
 
 # 부정 리뷰
@@ -162,69 +168,5 @@ test_input = "<START> This movie wasn't good. Just don't look no fun and it's th
 # test_input ="<START> This movie was so much fun. The acting of the actors was impressive, and although there were some shortcomings, I think it was a very good movie time. I recommend it."
 
 # test_input = "<START> this film was just brilliant casting location scenery story direction everyone's really suited the part they played and you could just imagine being there robert <UNK> is an amazing actor and now the same being director <UNK> father came from the same scottish island as myself so i loved the fact there was a real connection with this film the witty remarks throughout the film were great it was just brilliant so much that i bought the film as soon as it was released for <UNK> and would recommend it to everyone to watch and the fly fishing was amazing really cried at the end it was so sad and you know what they say if you cry at a film it must have been good and this definitely was also <UNK> to the two little boy's that played the <UNK> of norman and paul they were just brilliant children are often left out of the <UNK> list i think because the stars that play them all grown up are such a big profile for the whole film but these children are amazing and should be praised for what they have done don't you think the whole story was so lovely because it was true and was someone's life after all that was shared with us all"
-
+print("테스트를 시작 할게")
 sentiment_predict(test_input)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# history = model.fit(partial_x_train,
-#                     partial_y_train,
-#                     epochs=40,
-#                     batch_size=512,
-#                     validation_data=(x_val, y_val),
-#                     verbose=1)
-
-# print(history)
-
-# history_dict = history.history
-# history_dict.keys()
-
-
-# import matplotlib.pyplot as plt
-
-# acc = history_dict['accuracy']
-# val_acc = history_dict['val_accuracy']
-# loss = history_dict['loss']
-# val_loss = history_dict['val_loss']
-
-# epochs = range(1, len(acc) + 1)
-
-# # "bo"는 "파란색 점"입니다
-# plt.plot(epochs, loss, 'bo', label='Training loss')
-# # b는 "파란 실선"입니다
-# plt.plot(epochs, val_loss, 'b', label='Validation loss')
-# plt.title('Training and validation loss')
-# plt.xlabel('Epochs')
-# plt.ylabel('Loss')
-# plt.legend()
-
-# plt.show()
-
-# plt.clf()   # 그림을 초기화합니다
-
-# plt.plot(epochs, acc, 'bo', label='Training acc')
-# plt.plot(epochs, val_acc, 'b', label='Validation acc')
-# plt.title('Training and validation accuracy')
-# plt.xlabel('Epochs')
-# plt.ylabel('Accuracy')
-# plt.legend()
-
-# plt.show()
