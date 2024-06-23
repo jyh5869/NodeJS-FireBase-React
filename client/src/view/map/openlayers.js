@@ -14,10 +14,9 @@ import '../../assets/css/flower.css';
 import '../../assets/css/common.css';
 
 /**
- * @author 꽃 종류 분석 및 분석 정보 표출 컴포넌트
- * @returns 꽃 종류 분석 HTML
+ * @author 오픈레이어스를 이용한 공간데이터 게시판
+ * @returns 공간데이터 게시판
 **/
-const formData = new FormData();//이미지 데이터 저장 Form
 
 function Openlayers() {
 
@@ -25,14 +24,15 @@ function Openlayers() {
     const [actionType , setActionType] = useState();
     const [arrSource  , setArrSource]  = useState(() => { return []});
 
-    const [circleCnt      , setCircleCnt    ] = useState(0);
-    const [polygonCnt     , setPolygonCnt   ] = useState(0);
-    const [pointCnt       , setPointCnt     ] = useState(0);
-    const [lineStringCnt  , setLineStringCnt] = useState(0);
-    const [geodesicCnt    , setGeodesicCnt  ] = useState(0);
-    const [totalCnt       , setTotalCnt     ] = useState(0);
-    const [insertCnt      , setInsertCnt    ] = useState(0);
-    const [updateCnt      , setUpdateCnt    ] = useState(0);
+    const [circleCnt         , setCircleCnt        ] = useState(0);
+    const [polygonCnt        , setPolygonCnt       ] = useState(0);
+    const [pointCnt          , setPointCnt         ] = useState(0);
+    const [lineStringCnt     , setLineStringCnt    ] = useState(0);
+    const [geodesicCnt       , setGeodesicCnt      ] = useState(0);
+    const [totalCnt          , setTotalCnt         ] = useState(0);
+    const [insertCnt         , setInsertCnt        ] = useState(0);
+    const [updateActionCnt   , setUpdateActionCnt  ] = useState(0);
+    const [updateFeatureCnt  , setUpdateFeatureCnt ] = useState(0);
 
     
     const childComponentRef = useRef({"type":"1"});
@@ -211,8 +211,12 @@ function Openlayers() {
         if(status == "Insert"){
             setInsertCnt(insertCnt => insertCnt + 1);
         }
-        else if(status == "Update"){
-            setUpdateCnt(updateCnt => updateCnt + 1);
+        else if(status == "UpdateAction"){
+            setUpdateActionCnt(updateActionCnt => updateActionCnt + 1);
+        }
+        else if(status == "UpdateFeature"){
+            setUpdateActionCnt(updateActionCnt => updateActionCnt + 1);
+            setUpdateFeatureCnt(updateFeatureCnt => updateFeatureCnt + 1);
         }
     }
     
@@ -243,7 +247,8 @@ function Openlayers() {
                 <Col> 
                     <Stack className="float-end" direction="horizontal" gap={2}>
                         <Badge bg="light" text="dark">추가 : {insertCnt}</Badge>
-                        <Badge bg="dark" text="light">변경 : {updateCnt}</Badge>
+                        <Badge bg="dark" text="light">변경(Action) : {updateActionCnt}</Badge>
+                        <Badge bg="dark" text="light">변경(Feature) : {updateFeatureCnt}</Badge>
                     </Stack>
                 </Col>
             </Row>

@@ -149,17 +149,29 @@ export const Map = forwardRef((props, forwardedRef) => {
         });
     }
 
+    //피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달
     const sendRegAndModifyStatus = (status, feature) => {
-        console.log(feature.ol_uid);
-        if(status == "Insert"){
+        console.log("수정될 피쳐아이디 "+ feature.ol_uid, "수정 상태 : " + status);
+        
+        if(status == "Insert"){//추가된 피쳐 갯수 업데이트
             props.setRegAndModifyStatus(status).then(function(){});
         }
-        else if(status == "Update"){
-            
-            props.setRegAndModifyStatus(status).then(function(){});
+        else if(status == "Update"){    
+            if(statusArr.includes(feature.ol_uid)){//1.피쳐 변경 횟수 업데이트
+                props.setRegAndModifyStatus("UpdateAction").then(function(){});
+            }else{//2.피쳐 변경 횟수 + 변경된 피쳐 갯수 업데이트
+                props.setRegAndModifyStatus("UpdateFeature").then(function(){});
+            }
         }
-        setStatusArr(statusArr.push(feature.ol_uid));
 
+        /*  
+            setStatusArr(statusArr.push(feature.ol_uid));
+            위 코드의 경우 statusArr.push(feature.ol_uid)가 배열이 아닌 배열의 길이 ex> 3 을 반환
+            정수를 배열(setStatusArr)에 세팅하려하기 때문에 [statusArr.push is not a function] 오류 발생
+        */
+
+        statusArr.push(feature.ol_uid);//배열에 값 을 추가
+        setStatusArr(statusArr);//배열에 변경이 있음을 React에게 알림
         console.log(statusArr);
     }
 
@@ -281,27 +293,6 @@ export const Map = forwardRef((props, forwardedRef) => {
         });
         
         map.addInteraction(modify);
-
-        /*
-        let draw = new Draw({
-            source: source,
-            type: "Polygon"
-        });
-        setDraw(draw);
-
-
-
-        draw.on('drawstart', function (e) {
-            console.log("그리기 시작");
-        }); 
-
-        draw.on('drawend', function (e) {
-            select.set("drawYn", "N");
-            console.log("그리기 끝");
-            map.removeInteraction(draw);
-        }); 
-*/
-
 
 
         map.on('click', function (evt) {
