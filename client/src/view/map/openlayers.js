@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 
 import { Button, Table, Form, Badge, Stack, Container, Row, Col }   from 'react-bootstrap';
 import axios from 'axios';
@@ -44,9 +44,9 @@ function Openlayers() {
     };
 
     //이거공부하자 ------------------------> https://velog.io/@ahsy92/React-%EB%B6%80%EB%AA%A8%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8%EC%97%90%EC%84%9C-%EC%9E%90%EC%8B%9D%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8-%ED%95%A8%EC%88%98-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0
-    
+/*  주석되있는 1번과 2번의 차이 뭐가더 안정적인지 공부하자.
     const handleClick = async (e, zoomType) => {
-        
+        console.log("줌을 바꾼다!!");
         if(zoomType == 'zoomIn'){
             await setZoomType('zoomIn');
         }
@@ -56,6 +56,21 @@ function Openlayers() {
         }  
         childComponentRef.current.willBeUsedInParentComponent();
     };
+*/
+    const handleClick = async (e, zoomType) => {
+        console.log("줌을 바꾼다!!");
+        if (zoomType === 'zoomIn') {
+            setZoomType('zoomIn');
+        } else if (zoomType === 'zoomOut') {
+            setZoomType('zoomOut');
+        }
+    };
+
+    useEffect(() => {
+        if (zoomType) {
+            childComponentRef.current.willBeUsedInParentComponent();
+        }
+    }, [zoomType]);
 
     const mapControlHandler = async (actionType) => {
         
@@ -205,9 +220,9 @@ function Openlayers() {
     }
 
     
-    /* 공간 데이터 현황 업데이트 (1. 추가, 2. 변경) */
+    /* 공간 데이터 현황 업데이트 (1. 추가, 2. 변경 엑션, 3. 변경된 피쳐) */
     const setRegAndModifyStatus = async (status) => {
-
+        //useCallback 이란 무었인가 공부해보자.
         if(status == "Insert"){
             setInsertCnt(insertCnt => insertCnt + 1);
         }
@@ -219,8 +234,7 @@ function Openlayers() {
             setUpdateFeatureCnt(updateFeatureCnt => updateFeatureCnt + 1);
         }
     }
-    
-    
+
     //이벤트 리스너 페이지 로드
     useEffect(() => {
 

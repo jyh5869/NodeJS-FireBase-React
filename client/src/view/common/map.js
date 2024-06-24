@@ -510,7 +510,6 @@ export const Map = forwardRef((props, forwardedRef) => {
     /* 생성한 피쳐를 맵에 추가 */
     const duration = 3000;
     const  flash = async(feature) => {
-        //console.log("피쳐 추가!22");
 
         const start = Date.now();
         const flashGeom = feature.getGeometry().clone();
@@ -549,7 +548,28 @@ export const Map = forwardRef((props, forwardedRef) => {
         }
             
         removeInteraction("draw");// Draw Interation 종료
+        
+        /*  
+            ※ React에서는 한 컴포넌트가 렌더링 중일 때 다른 컴포넌트의 상태를 업데이트하려는 시도를 금지(오류를 일으킴)합니다. ※
+
+            아래에 await new Promise((resolve) => setTimeout(resolve, 0)); 코드를 넣지 않았을 경우
+
+            1. 해당 컴포넌트에서 mapObj를 랜더링 작업1. -> mapObj.render();    : 지도에 피쳐 추가
+            2. 해당 컴포넌트에서 mapObj를 랜더링 작업2. -> removeInteraction;  : 객체에 Draw인터렉션 제거
+
+            -> 모두 해당 컴포넌트를 재랜더링 하는 과정
+
+            3. 이과정이 이루어지는 도중 부모컴포넌트 openlayers.js의 상태 업데이트 시도 -> sendRegAndModifyStatus("Insert", feature);
+
+            -> 부모와 자식컴포넌트를 동시에 랜더링 하려하므로, 컴포넌트 사이의 랜더링 충돌 오류 발생
+
+            동시에 작업이 처리되지 않도록 openlayers.js 컴포넌트의 처리를 비동기로 하여 순차실행으로 충돌하지 않도록 조치
+        */
+       
+        // 2024-06-24: 생성및 변경 저장 후 다시 피쳐를 불러올 때  sendRegAndModifyStatus를 또 타서 다 추가로 상황판이 업데이트 되는 오류 수정해아함
+        await new Promise((resolve) => setTimeout(resolve, 0));
         sendRegAndModifyStatus("Insert", feature);// 현황판(부모 컴포넌트)에 결과 전달
+        
         select.set("drawYn","N");// Draw Inteeraction 종료 변수 추가
     }
 
