@@ -31,20 +31,20 @@ function Openlayers() {
     const [geodesicCnt       , setGeodesicCnt      ] = useState(0);
     const [totalCnt          , setTotalCnt         ] = useState(0);
     const [insertCnt         , setInsertCnt        ] = useState(0);
+    const [deleteCnt         , setDeleteCnt        ] = useState(0);
     const [updateActionCnt   , setUpdateActionCnt  ] = useState(0);
     const [updateFeatureCnt  , setUpdateFeatureCnt ] = useState(0);
 
-    
     const childComponentRef = useRef({"type":"1"});
-
-    //const [source, setSource] = useState();
   
     const getSource = async source => {
         saveFeature(source);
     };
 
+    
     //이거공부하자 ------------------------> https://velog.io/@ahsy92/React-%EB%B6%80%EB%AA%A8%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8%EC%97%90%EC%84%9C-%EC%9E%90%EC%8B%9D%EC%BB%B4%ED%8F%AC%EB%84%8C%ED%8A%B8-%ED%95%A8%EC%88%98-%ED%98%B8%EC%B6%9C%ED%95%98%EA%B8%B0
-/*  주석되있는 1번과 2번의 차이 뭐가더 안정적인지 공부하자.
+    
+    /*  주석되있는 1번과 2번의 차이 뭐가더 안정적인지 공부하자.
     const handleClick = async (e, zoomType) => {
         console.log("줌을 바꾼다!!");
         if(zoomType == 'zoomIn'){
@@ -56,9 +56,10 @@ function Openlayers() {
         }  
         childComponentRef.current.willBeUsedInParentComponent();
     };
-*/
+    */
+
     const handleClick = async (e, zoomType) => {
-        console.log("줌을 바꾼다!!");
+
         if (zoomType === 'zoomIn') {
             setZoomType('zoomIn');
         } else if (zoomType === 'zoomOut') {
@@ -73,9 +74,14 @@ function Openlayers() {
     }, [zoomType]);
 
     const mapControlHandler = async (actionType) => {
-        
+
         if(actionType == 'clearSource'){
             await setActionType('clearSource');
+            childComponentRef.current.willBeUsedInParentComponent();
+        }
+
+        if(actionType == 'getSource'){
+            await setActionType('getSource');
             childComponentRef.current.willBeUsedInParentComponent();
         }
     };
@@ -103,6 +109,7 @@ function Openlayers() {
 
     /* 저장된 지오메트릭 데이터 불러오기 */
     const callFeature = async (feature) => {
+        console.log("클라우드 DB에 저장된 피쳐를 불러올게요.");
 
         let response = await axios({
             method  : 'get',
@@ -131,7 +138,7 @@ function Openlayers() {
 
             // 원일 경우 Center와 Radius를 이용해 추가.
             if (geomType == 'Circle') {
-                //console.log('--- Set Circle ---');
+
                 let radius = properties.radius;//반지름
                 let center = geometry.getGeometry().getCoordinates();//중심점 좌표
 
@@ -154,6 +161,7 @@ function Openlayers() {
         
         await Promise.all(promises);
         await setArrSource(featureArr);
+        await mapControlHandler("getSource");
     }
     
     const saveFeature = async (vectorLayer) => {
@@ -215,12 +223,20 @@ function Openlayers() {
             console.log("저장완료!!");
 
             await mapControlHandler("clearSource");
+            await setInitStatus();
             await callFeature();
         } 
     }
 
+    /* 공간 데이터 변경 현황핀 초기화 */
+    const setInitStatus = async (status) => {
+
+        setInsertCnt(0);
+        setUpdateActionCnt(0);
+        setUpdateFeatureCnt(0);
+    }
     
-    /* 공간 데이터 현황 업데이트 (1. 추가, 2. 변경 엑션, 3. 변경된 피쳐) */
+    /* 공간 데이터 변경 현황핀 업데이트 (1. 추가, 2. 변경 엑션, 3. 변경된 피쳐) */
     const setRegAndModifyStatus = async (status) => {
         //useCallback 이란 무었인가 공부해보자.
         if(status == "Insert"){
@@ -233,13 +249,16 @@ function Openlayers() {
             setUpdateActionCnt(updateActionCnt => updateActionCnt + 1);
             setUpdateFeatureCnt(updateFeatureCnt => updateFeatureCnt + 1);
         }
+        else if(status == "initFeature"){
+            setInitStatus();
+        }
+        
     }
 
     //이벤트 리스너 페이지 로드
     useEffect(() => {
 
         callFeature();
-        
     }, []);
     
     
@@ -261,6 +280,7 @@ function Openlayers() {
                 <Col> 
                     <Stack className="float-end" direction="horizontal" gap={2}>
                         <Badge bg="light" text="dark">추가 : {insertCnt}</Badge>
+                        <Badge bg="light" text="dark">삭제 : {deleteCnt}</Badge>
                         <Badge bg="dark" text="light">변경(Action) : {updateActionCnt}</Badge>
                         <Badge bg="dark" text="light">변경(Feature) : {updateFeatureCnt}</Badge>
                     </Stack>

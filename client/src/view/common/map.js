@@ -130,10 +130,10 @@ export const Map = forwardRef((props, forwardedRef) => {
         handleClick(props.zoomType);
     }
 
-
+    
     source.addFeatures(props.arrSource);
 
-
+    const [parnetActionType, setParnetActionType] = useState(props.actionType);
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
     const [view, setView] = useState();
@@ -149,30 +149,40 @@ export const Map = forwardRef((props, forwardedRef) => {
         });
     }
 
+    console.log( 'parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판');
     //피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달
     const sendRegAndModifyStatus = (status, feature) => {
-        console.log("수정될 피쳐아이디 "+ feature.ol_uid, "수정 상태 : " + status);
+
+        console.log( 'parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판');
+
+        if(props.actionType == 'getSource' || props.actionType == 'clearSource') {
         
-        if(status == "Insert"){//추가된 피쳐 갯수 업데이트
-            props.setRegAndModifyStatus(status).then(function(){});
+            props.setRegAndModifyStatus("initFeature").then(function(){});
         }
-        else if(status == "Update"){    
-            if(statusArr.includes(feature.ol_uid)){//1.피쳐 변경 횟수 업데이트
-                props.setRegAndModifyStatus("UpdateAction").then(function(){});
-            }else{//2.피쳐 변경 횟수 + 변경된 피쳐 갯수 업데이트
-                props.setRegAndModifyStatus("UpdateFeature").then(function(){});
+        else{
+            console.log("수정될 피쳐아이디 "+ feature.ol_uid, "수정 상태 : " + status);
+        
+            if(status == "Insert"){//추가된 피쳐 갯수 업데이트
+                props.setRegAndModifyStatus(status).then(function(){});
             }
+            else if(status == "Update"){    
+                if(statusArr.includes(feature.ol_uid)){//1.피쳐 변경 횟수 업데이트
+                    props.setRegAndModifyStatus("UpdateAction").then(function(){});
+                }else{//2.피쳐 변경 횟수 + 변경된 피쳐 갯수 업데이트
+                    props.setRegAndModifyStatus("UpdateFeature").then(function(){});
+                }
+            }
+    
+            /*  
+                setStatusArr(statusArr.push(feature.ol_uid));
+                위 코드의 경우 statusArr.push(feature.ol_uid)가 배열이 아닌 배열의 길이 ex> 3 을 반환
+                정수를 배열(setStatusArr)에 세팅하려하기 때문에 [statusArr.push is not a function] 오류 발생
+            */
+    
+            statusArr.push(feature.ol_uid);//배열에 값 을 추가
+            setStatusArr(statusArr);//배열에 변경이 있음을 React에게 알림
+            console.log(statusArr);
         }
-
-        /*  
-            setStatusArr(statusArr.push(feature.ol_uid));
-            위 코드의 경우 statusArr.push(feature.ol_uid)가 배열이 아닌 배열의 길이 ex> 3 을 반환
-            정수를 배열(setStatusArr)에 세팅하려하기 때문에 [statusArr.push is not a function] 오류 발생
-        */
-
-        statusArr.push(feature.ol_uid);//배열에 값 을 추가
-        setStatusArr(statusArr);//배열에 변경이 있음을 React에게 알림
-        console.log(statusArr);
     }
 
 
@@ -567,9 +577,11 @@ export const Map = forwardRef((props, forwardedRef) => {
         */
        
         // 2024-06-24: 생성및 변경 저장 후 다시 피쳐를 불러올 때  sendRegAndModifyStatus를 또 타서 다 추가로 상황판이 업데이트 되는 오류 수정해아함
+        // 2024-07-06: 위의문제 해결하는 과정에서 추가 오류 발생 추가 후 저장시 상황판에 추가업데이트가 안됨 getSource로 넘어와서.. 수정해보자.
+        console.log("레이어에 피쳐를 추가할게");
         await new Promise((resolve) => setTimeout(resolve, 0));
         sendRegAndModifyStatus("Insert", feature);// 현황판(부모 컴포넌트)에 결과 전달
-        
+        await new Promise((resolve) => setTimeout(resolve, 0));
         select.set("drawYn","N");// Draw Inteeraction 종료 변수 추가
     }
 
