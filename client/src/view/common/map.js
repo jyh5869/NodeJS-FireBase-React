@@ -149,8 +149,9 @@ export const Map = forwardRef((props, forwardedRef) => {
         });
     }
 
-    console.log( 'parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판');
-    //피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달
+    /* START 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 START  */
+
+    /* 피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달 */
     const sendRegAndModifyStatus = (status, feature) => {
 
         console.log( 'parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판');
@@ -184,6 +185,7 @@ export const Map = forwardRef((props, forwardedRef) => {
             console.log(statusArr);
         }
     }
+    /* END 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 END */
 
 
     /**
@@ -192,7 +194,8 @@ export const Map = forwardRef((props, forwardedRef) => {
      * 
      */
     useEffect(() => {
-        
+
+        /* START 지도 객체 선언 및 기본 세팅 START */
         const map = new OlMap({
             layers: [
                 tileLayerXYZ,
@@ -211,15 +214,15 @@ export const Map = forwardRef((props, forwardedRef) => {
         const view = map.getView();
         const zoom = view.getZoom();
 
-        setView(view);
-        setZoom(zoom);
-        setMap(map);
-
-        //Set Default Single Click Interaction 
+        setView(view);//컴포넌트 전역 뷰 정보 할당
+        setZoom(zoom);//컴포넌트 전역 줌레벨 할당
+        setMap(map);//컴포넌트 전역 지도 오브젝트 할당
+ 
         map.addInteraction(selectSingleClick);
-        
+        /* END 지도 객체 선언 및 기본 세팅 END */
 
-        //Map 객채에 수정 인터렉션(Interation) 추가
+
+        /* START 수정 인터렉션 세팅 START */
         const defaultStyle = new Modify({source: source})
         .getOverlay()
         .getStyleFunction();
@@ -273,8 +276,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                 return defaultStyle(feature);
             },
         });
-
-
+        
         modify.on('modifystart', function (event) {
             setIsDraw(true);
             console.log("수정 시작" + isDraw);
@@ -301,10 +303,12 @@ export const Map = forwardRef((props, forwardedRef) => {
                 sendRegAndModifyStatus("Update", feature);//현황판(부모 컴포넌트)에 결과 전달
             });
         });
-        
+
         map.addInteraction(modify);
+        /* END 수정 인터렉션 세팅 END */
 
 
+        /* 지도 클릭시 해당 위치의 정보 표출 */
         map.on('click', function (evt) {
             
             if(isDraw == true){ return false}
@@ -369,12 +373,10 @@ export const Map = forwardRef((props, forwardedRef) => {
                 var hit = map.hasFeatureAtPixel(pixel);
             }
         });
-
+        /* END 지도 객체 선언 및 기본 세팅 END */
         return ()=> null
     },  []);
-    
 
-    
 
     /* Feature Draw시 동학하며 마지막 포인트를 없애 이전으로 돌아간다. */
     const removeLastPoint = async () => {
@@ -453,10 +455,7 @@ export const Map = forwardRef((props, forwardedRef) => {
         setIsDraw(true);
         
         select.set("drawYn","Y")
-
-        console.log('isDraw = ' + drawType);
     }
-
 
     /* Map 객채에 특정 인터렉션(Interation)을 제거 */
     function removeInteraction(interactionType){
@@ -536,7 +535,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
             const vectorContext = getVectorContext(event);
             const elapsedRatio = elapsed / duration;
-            // radius will be 5 at start and 30 at end.
+
             const radius = easeOut(elapsedRatio) * 25 + 5;
             const opacity = easeOut(1 - elapsedRatio);
         
@@ -578,7 +577,6 @@ export const Map = forwardRef((props, forwardedRef) => {
        
         // 2024-06-24: 생성및 변경 저장 후 다시 피쳐를 불러올 때  sendRegAndModifyStatus를 또 타서 다 추가로 상황판이 업데이트 되는 오류 수정해아함
         // 2024-07-06: 위의문제 해결하는 과정에서 추가 오류 발생 추가 후 저장시 상황판에 추가업데이트가 안됨 getSource로 넘어와서.. 수정해보자.
-        console.log("레이어에 피쳐를 추가할게");
         await new Promise((resolve) => setTimeout(resolve, 0));
         sendRegAndModifyStatus("Insert", feature);// 현황판(부모 컴포넌트)에 결과 전달
         await new Promise((resolve) => setTimeout(resolve, 0));
@@ -672,19 +670,14 @@ export const Map = forwardRef((props, forwardedRef) => {
 
         if (value == 'singleclick') {
             select = selectSingleClick;
-            //setSelect(selectSingleClick);
         } else if (value == 'click') {
             select = selectClick;
-            //setSelect(selectClick);
         } else if (value == 'pointermove') {
             select = selectPointerMove;
-            //setSelect(selectPointerMove);
         } else if (value == 'altclick') {
             select = selectAltClick;
-            //setSelect(selectAltClick);
         } else {
             select = selectClick;
-            //setSelect(selectClick);
         }
         
         if (select !== null) {

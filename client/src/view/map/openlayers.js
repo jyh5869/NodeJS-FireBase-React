@@ -252,7 +252,6 @@ function Openlayers() {
         else if(status == "initFeature"){
             setInitStatus();
         }
-        
     }
 
     //이벤트 리스너 페이지 로드
