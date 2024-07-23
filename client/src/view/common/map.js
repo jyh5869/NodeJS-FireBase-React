@@ -132,7 +132,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
     
     source.addFeatures(props.arrSource);
-
+    console.log("로드로드 피쳐세팅"+props.actionType);
     const [parnetActionType, setParnetActionType] = useState(props.actionType);
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
@@ -154,8 +154,9 @@ export const Map = forwardRef((props, forwardedRef) => {
     /* 피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달 */
     const sendRegAndModifyStatus = (status, feature) => {
 
-        console.log( 'parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판');
+        console.log( 'parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판 : ' + status);
 
+        //소스를 최초 가져왔을때, 소스를 클리어할때 상황판 초기화
         if(props.actionType == 'getSource' || props.actionType == 'clearSource') {
         
             props.setRegAndModifyStatus("initFeature").then(function(){});

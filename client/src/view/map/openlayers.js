@@ -20,6 +20,8 @@ import '../../assets/css/common.css';
 
 function Openlayers() {
 
+    const [loaded, setLoaded] = useState(false);
+    
     const [zoomType   , setZoomType]   = useState();
     const [actionType , setActionType] = useState();
     const [arrSource  , setArrSource]  = useState(() => { return []});
@@ -161,7 +163,7 @@ function Openlayers() {
         
         await Promise.all(promises);
         await setArrSource(featureArr);
-        await mapControlHandler("getSource");
+        //await mapControlHandler("getSource");
     }
     
     const saveFeature = async (vectorLayer) => {
@@ -240,6 +242,7 @@ function Openlayers() {
     const setRegAndModifyStatus = async (status) => {
         //useCallback 이란 무었인가 공부해보자.
         if(status == "Insert"){
+            console.log("추가추가!!");
             setInsertCnt(insertCnt => insertCnt + 1);
         }
         else if(status == "UpdateAction"){
@@ -256,8 +259,12 @@ function Openlayers() {
 
     //이벤트 리스너 페이지 로드
     useEffect(() => {
-
-        callFeature();
+        if(loaded == false){
+            console.log("하위하위하위");
+            callFeature();
+            setLoaded(true);
+        }
+        
     }, []);
     
     
