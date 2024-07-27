@@ -130,10 +130,11 @@ export const Map = forwardRef((props, forwardedRef) => {
         handleClick(props.zoomType);
     }
 
+    source.addFeatures(props.arrSource)= () => {
+        setParnetActionType('ddd');
+    };
     
-    source.addFeatures(props.arrSource);
-    console.log("로드로드 피쳐세팅"+props.actionType);
-    const [parnetActionType, setParnetActionType] = useState(props.actionType);
+    const [parnetActionType, setParnetActionType] = useState(props.actionType || 'null');
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
     const [view, setView] = useState();
@@ -153,8 +154,9 @@ export const Map = forwardRef((props, forwardedRef) => {
 
     /* 피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달 */
     const sendRegAndModifyStatus = (status, feature) => {
+        
 
-        console.log( 'parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판 : ' + status);
+        console.log( parnetActionType + ' == parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판 : ' + status);
 
         //소스를 최초 가져왔을때, 소스를 클리어할때 상황판 초기화
         if(props.actionType == 'getSource' || props.actionType == 'clearSource') {
@@ -162,9 +164,9 @@ export const Map = forwardRef((props, forwardedRef) => {
             props.setRegAndModifyStatus("initFeature").then(function(){});
         }
         else{
-            console.log("수정될 피쳐아이디 "+ feature.ol_uid, "수정 상태 : " + status);
-        
-            if(status == "Insert"){//추가된 피쳐 갯수 업데이트
+            //console.log("수정될 피쳐아이디 "+ feature.ol_uid, "수정 상태 : " + status);
+            console.log(statusArr);
+            if(status == "Insert" && statusArr.includes(feature.ol_uid) == false ){//추가된 피쳐 갯수 업데이트
                 props.setRegAndModifyStatus(status).then(function(){});
             }
             else if(status == "Update"){    
@@ -180,10 +182,12 @@ export const Map = forwardRef((props, forwardedRef) => {
                 위 코드의 경우 statusArr.push(feature.ol_uid)가 배열이 아닌 배열의 길이 ex> 3 을 반환
                 정수를 배열(setStatusArr)에 세팅하려하기 때문에 [statusArr.push is not a function] 오류 발생
             */
-    
-            statusArr.push(feature.ol_uid);//배열에 값 을 추가
-            setStatusArr(statusArr);//배열에 변경이 있음을 React에게 알림
-            console.log(statusArr);
+            
+            if(statusArr.includes(feature.ol_uid) == false){
+                statusArr.push(feature.ol_uid);//수정 리스트 배열에 값이 없을경우 추가
+                setStatusArr(statusArr);//배열에 변경이 있음을 React에게 알림
+                
+            }
         }
     }
     /* END 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 END */
@@ -277,7 +281,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                 return defaultStyle(feature);
             },
         });
-        
+
         modify.on('modifystart', function (event) {
             setIsDraw(true);
             console.log("수정 시작" + isDraw);
@@ -289,7 +293,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                 }
             });
         });
-    
+
         modify.on('modifyend', function (event) {
             setIsDraw(false);
             console.log("수정 종료" + isDraw);
@@ -307,7 +311,6 @@ export const Map = forwardRef((props, forwardedRef) => {
 
         map.addInteraction(modify);
         /* END 수정 인터렉션 세팅 END */
-
 
         /* 지도 클릭시 해당 위치의 정보 표출 */
         map.on('click', function (evt) {
@@ -454,7 +457,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
         drawType = e.target.value;
         setIsDraw(true);
-        
+
         select.set("drawYn","Y")
     }
 
@@ -488,7 +491,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
     let drawType;
     source.on('addfeature', function (e) {
-        
+
         //피쳐 추가시 Type Propertiy 세팅
         if(drawType == 'Geodesic'){ 
             console.log("피쳐추가 Geodesic");

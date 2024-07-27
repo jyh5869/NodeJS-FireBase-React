@@ -23,7 +23,7 @@ function Openlayers() {
     const [loaded, setLoaded] = useState(false);
     
     const [zoomType   , setZoomType]   = useState();
-    const [actionType , setActionType] = useState();
+    const [actionType , setActionType] = useState('getSource');
     const [arrSource  , setArrSource]  = useState(() => { return []});
 
     const [circleCnt         , setCircleCnt        ] = useState(0);
@@ -71,6 +71,7 @@ function Openlayers() {
 
     useEffect(() => {
         if (zoomType) {
+            
             childComponentRef.current.willBeUsedInParentComponent();
         }
     }, [zoomType]);
@@ -123,7 +124,7 @@ function Openlayers() {
                 'Content-Type' : 'multipart/form-data'
             },
         })
-            
+
         var datas =  response.data.rows;
         var array = Object.values(datas)
 
@@ -149,7 +150,7 @@ function Openlayers() {
                     geometry: new Circle(center, radius),
                 });                
             }
-
+            
             feature.setId(value.id);//ID값 세팅
             feature.setProperties(properties);//프로퍼티 값 세팅
 
@@ -160,10 +161,9 @@ function Openlayers() {
             
             
         });
-        
+        await mapControlHandler("getSource");
         await Promise.all(promises);
         await setArrSource(featureArr);
-        //await mapControlHandler("getSource");
     }
     
     const saveFeature = async (vectorLayer) => {
@@ -242,7 +242,6 @@ function Openlayers() {
     const setRegAndModifyStatus = async (status) => {
         //useCallback 이란 무었인가 공부해보자.
         if(status == "Insert"){
-            console.log("추가추가!!");
             setInsertCnt(insertCnt => insertCnt + 1);
         }
         else if(status == "UpdateAction"){
@@ -260,7 +259,6 @@ function Openlayers() {
     //이벤트 리스너 페이지 로드
     useEffect(() => {
         if(loaded == false){
-            console.log("하위하위하위");
             callFeature();
             setLoaded(true);
         }
