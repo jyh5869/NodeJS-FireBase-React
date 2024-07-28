@@ -155,22 +155,9 @@ export const Map = forwardRef((props, forwardedRef) => {
         });
     }
 
+    source.addFeatures(props.arrSource);        
+    console.log("지도컴포넌트 호출!");
     
-    if(props.actionType == 'getSource'){
-        
-        source.addFeatures(props.arrSource);        
-        if(loaded == false){
-            setTimeout(() => {
-                console.log("피쳐 콜 된것 세팅!");
-                setParnetActionType('getSource');
-
-                loaded = true;
-
-                props.setRegAndModifyStatus("initFeature").then(function(){});
-            }, 100);
-        }
-    }
-
     /* START 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 START  */
 
     /* 피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달 */
@@ -180,15 +167,7 @@ export const Map = forwardRef((props, forwardedRef) => {
         console.log( parnetActionType + ' == parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판 : ' + status + "   loaded : " + loaded );
 
         //소스를 최초 가져왔을때, 소스를 클리어할때 상황판 초기화
-        
-        //if(loaded == false || loaded== undefined){
-
-        //console.log("하우히위");
-        //if(parnetActionType != 'null' &&  props.actionType == 'getSource') {
-        //if(props.actionType == 'clearSource' ) {
-        if(parnetActionType == 'getSource' || parnetActionType == 'clearSource'  ) {
-            //if(props.actionType == 'getSource' || props.actionType == 'clearSource' ) {
-            //if((props.actionType == 'getSource' && parnetActionType != 'null') || (props.actionType == 'clearSource' && parnetActionType != 'null')) {
+        if(props.actionType == 'getSource' || props.actionType == 'clearSource' ) {
         
             props.setRegAndModifyStatus("initFeature").then(function(){});
         }

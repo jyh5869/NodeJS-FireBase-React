@@ -24,7 +24,7 @@ function Openlayers() {
     const [loaded, setLoaded] = useState(false);
     
     const [zoomType   , setZoomType]   = useState();
-    const [actionType , setActionType] = useState('getSource');
+    const [actionType , setActionType] = useState('null');
     const [arrSource  , setArrSource]  = useState(() => { return []});
 
     const [circleCnt         , setCircleCnt        ] = useState(0);
@@ -170,8 +170,7 @@ function Openlayers() {
         //await mapControlHandler("getSource");
         await Promise.all(promises);
         await setArrSource(featureArr);
-        //await new Promise((resolve) => setTimeout(resolve, 0));
-        //await mapControlHandler("null");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     
     const saveFeature = async (vectorLayer) => {
@@ -229,14 +228,16 @@ function Openlayers() {
             }, 
         })
         if(response.status == 200){
-            console.log(response.status);
-            console.log("저장완료!!");
 
-            //await setLoaded(false)
-            await mapControlHandler("clearSource");
-            await setInitStatus();
+            console.log("저장완료!! Code : " + response.status);
+
+            //await mapControlHandler("clearSource");
+            await setLoaded(true);
             await callFeature();
-        } 
+            await setInitStatus();
+
+        }
+        
     }
 
     /* 공간 데이터 변경 현황핀 초기화 */
@@ -268,11 +269,9 @@ function Openlayers() {
 
     //이벤트 리스너 페이지 로드
     useEffect(() => {
-        if(loaded == false){
+
             callFeature();
-            setLoaded(true);
-        }
-        
+
     }, []);
     
     
@@ -302,7 +301,7 @@ function Openlayers() {
             </Row>
 
             <div className="my-3">
-                <Map zoomType={zoomType} arrSource={arrSource} actionType={actionType} loaded={loaded} ref={childComponentRef} getSource={getSource} setRegAndModifyStatus={setRegAndModifyStatus}  />
+                <Map zoomType={zoomType} arrSource={arrSource} actionType={actionType} ref={childComponentRef} getSource={getSource} setRegAndModifyStatus={setRegAndModifyStatus}  />
             </div>  
 
             <Row>
