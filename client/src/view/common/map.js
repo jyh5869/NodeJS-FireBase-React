@@ -130,10 +130,15 @@ export const Map = forwardRef((props, forwardedRef) => {
         handleClick(props.zoomType);
     }
 
-    source.addFeatures(props.arrSource)= () => {
-        setParnetActionType('ddd');
-    };
+    // setTimeout(() => {
+    //     //console.log("Features added, performing action.");
+    //     setParnetActionType('getSource');
+    //     // 여기에 원하는 동작을 추가하세요.
+    // }, 0);
     
+
+    //const [loaded, setLoaded] = useState();
+    let loaded = false;
     const [parnetActionType, setParnetActionType] = useState(props.actionType || 'null');
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
@@ -150,16 +155,40 @@ export const Map = forwardRef((props, forwardedRef) => {
         });
     }
 
+    
+    if(props.actionType == 'getSource'){
+        
+        source.addFeatures(props.arrSource);        
+        if(loaded == false){
+            setTimeout(() => {
+                console.log("피쳐 콜 된것 세팅!");
+                setParnetActionType('getSource');
+
+                loaded = true;
+
+                props.setRegAndModifyStatus("initFeature").then(function(){});
+            }, 100);
+        }
+    }
+
     /* START 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 START  */
 
     /* 피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달 */
     const sendRegAndModifyStatus = (status, feature) => {
         
 
-        console.log( parnetActionType + ' == parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판 : ' + status);
+        console.log( parnetActionType + ' == parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판 : ' + status + "   loaded : " + loaded );
 
         //소스를 최초 가져왔을때, 소스를 클리어할때 상황판 초기화
-        if(props.actionType == 'getSource' || props.actionType == 'clearSource') {
+        
+        //if(loaded == false || loaded== undefined){
+
+        //console.log("하우히위");
+        //if(parnetActionType != 'null' &&  props.actionType == 'getSource') {
+        //if(props.actionType == 'clearSource' ) {
+        if(parnetActionType == 'getSource' || parnetActionType == 'clearSource'  ) {
+            //if(props.actionType == 'getSource' || props.actionType == 'clearSource' ) {
+            //if((props.actionType == 'getSource' && parnetActionType != 'null') || (props.actionType == 'clearSource' && parnetActionType != 'null')) {
         
             props.setRegAndModifyStatus("initFeature").then(function(){});
         }
@@ -581,10 +610,12 @@ export const Map = forwardRef((props, forwardedRef) => {
        
         // 2024-06-24: 생성및 변경 저장 후 다시 피쳐를 불러올 때  sendRegAndModifyStatus를 또 타서 다 추가로 상황판이 업데이트 되는 오류 수정해아함
         // 2024-07-06: 위의문제 해결하는 과정에서 추가 오류 발생 추가 후 저장시 상황판에 추가업데이트가 안됨 getSource로 넘어와서.. 수정해보자.
+        setParnetActionType('getSource');
         await new Promise((resolve) => setTimeout(resolve, 0));
         sendRegAndModifyStatus("Insert", feature);// 현황판(부모 컴포넌트)에 결과 전달
         await new Promise((resolve) => setTimeout(resolve, 0));
         select.set("drawYn","N");// Draw Inteeraction 종료 변수 추가
+        setParnetActionType('null');
     }
 
 

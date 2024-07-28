@@ -12,6 +12,7 @@ import {GeometryCollection, Point, Polygon, Circle, LineString} from 'ol/geom.js
 
 import '../../assets/css/flower.css';
 import '../../assets/css/common.css';
+import { NodeJSKernelBackend } from "@tensorflow/tfjs-node/dist/nodejs_kernel_backend";
 
 /**
  * @author 오픈레이어스를 이용한 공간데이터 게시판
@@ -85,6 +86,11 @@ function Openlayers() {
 
         if(actionType == 'getSource'){
             await setActionType('getSource');
+            childComponentRef.current.willBeUsedInParentComponent();
+        }
+
+        if(actionType == 'null'){
+            await setActionType('null');
             childComponentRef.current.willBeUsedInParentComponent();
         }
     };
@@ -161,9 +167,11 @@ function Openlayers() {
             
             
         });
-        await mapControlHandler("getSource");
+        //await mapControlHandler("getSource");
         await Promise.all(promises);
         await setArrSource(featureArr);
+        //await new Promise((resolve) => setTimeout(resolve, 0));
+        //await mapControlHandler("null");
     }
     
     const saveFeature = async (vectorLayer) => {
@@ -224,6 +232,7 @@ function Openlayers() {
             console.log(response.status);
             console.log("저장완료!!");
 
+            //await setLoaded(false)
             await mapControlHandler("clearSource");
             await setInitStatus();
             await callFeature();
@@ -241,6 +250,7 @@ function Openlayers() {
     /* 공간 데이터 변경 현황핀 업데이트 (1. 추가, 2. 변경 엑션, 3. 변경된 피쳐) */
     const setRegAndModifyStatus = async (status) => {
         //useCallback 이란 무었인가 공부해보자.
+        console.log(status);
         if(status == "Insert"){
             setInsertCnt(insertCnt => insertCnt + 1);
         }
@@ -292,7 +302,7 @@ function Openlayers() {
             </Row>
 
             <div className="my-3">
-                <Map zoomType={zoomType} arrSource={arrSource} actionType={actionType} ref={childComponentRef} getSource={getSource} setRegAndModifyStatus={setRegAndModifyStatus}  />
+                <Map zoomType={zoomType} arrSource={arrSource} actionType={actionType} loaded={loaded} ref={childComponentRef} getSource={getSource} setRegAndModifyStatus={setRegAndModifyStatus}  />
             </div>  
 
             <Row>
