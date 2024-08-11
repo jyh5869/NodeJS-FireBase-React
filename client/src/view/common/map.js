@@ -385,6 +385,40 @@ export const Map = forwardRef((props, forwardedRef) => {
                 var hit = map.hasFeatureAtPixel(pixel);
             }
         });
+        
+
+
+        // 클릭 이벤트 처리
+        map.on('singleclick', function (evt) {
+            map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+                const coordinates = feature.getGeometry().getCoordinates();
+                showOverlay(map, coordinates);
+            });
+        });
+
+        const overlayContainerElement = document.getElementById('overlay');
+        const overlay = new Overlay({
+            element: overlayContainerElement,
+            autoPan: true,
+            autoPanAnimation: {
+                duration: 250,
+            },
+        });
+
+        map.addOverlay(overlay);
+
+        function showOverlay(map, coordinates) {
+            overlay.setPosition(coordinates);
+            overlayContainerElement.style.display = 'block';
+        }
+
+        // 닫기 버튼 클릭 이벤트 처리
+        document.getElementById('overlay-closer').onclick = function () {
+            overlayContainerElement.style.display = 'none';
+            overlay.setPosition(undefined);
+            return false;
+        };
+
         /* END 지도 객체 선언 및 기본 세팅 END */
         return ()=> null
     },  []);
@@ -826,7 +860,29 @@ export const Map = forwardRef((props, forwardedRef) => {
             <Row>
                 <div id="map" value={mapObj} style={{height:'50rem'}}></div> 
             </Row>
-            
+
+            <div id="overlay" style={{
+                position: 'absolute',
+                backgroundColor: 'white',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
+                padding: '15px',
+                borderRadius: '5px',
+                bottom: '12px',
+                left: '-50%',
+                transform: 'translateX(50%)',
+                display: 'none'
+            }}>
+                <button id="overlay-closer" style={{
+                    position: 'absolute',
+                    top: '2px',
+                    right: '8px',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '16px'
+                }}>X</button>
+            </div>
+
             <Row className='my-3'>
                 <Col className="text-center" id="status" >{featureInfo}</Col>
             </Row>
