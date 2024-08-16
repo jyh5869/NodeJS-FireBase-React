@@ -139,6 +139,8 @@ export const Map = forwardRef((props, forwardedRef) => {
 
     //const [loaded, setLoaded] = useState();
     let loaded = false;
+
+    const [bboxLayer, setBboxLayer] = useState(null);//BBOX 레이어
     const [parnetActionType, setParnetActionType] = useState(props.actionType || 'null');
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
@@ -790,7 +792,10 @@ export const Map = forwardRef((props, forwardedRef) => {
                         //팝오버 표출
                         popoverFeature.show();
                     });
-                }      
+                }
+                else{
+                    /* 피쳐가 없음 */
+                }     
             });
         }
     };
