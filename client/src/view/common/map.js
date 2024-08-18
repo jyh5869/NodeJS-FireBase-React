@@ -388,7 +388,7 @@ export const Map = forwardRef((props, forwardedRef) => {
             }
         });
         
-
+/*
 
         // 클릭 이벤트 처리
         map.on('singleclick', function (evt) {
@@ -420,7 +420,7 @@ export const Map = forwardRef((props, forwardedRef) => {
             overlay.setPosition(undefined);
             return false;
         };
-
+*/
         /* END 지도 객체 선언 및 기본 세팅 END */
         return ()=> null
     },  []);
@@ -691,20 +691,52 @@ export const Map = forwardRef((props, forwardedRef) => {
                     popoverFeature.dispose();
                 }
                 
+                // 팝오버 내용에 삭제 버튼 추가
+                const contentHtml = `
+                    <p>클릭한 위치의 피쳐 정보222</p>
+                    <code>${center}</code>
+                    <div class="popover-footer d-flex justify-content-end gap-2 mt-2">
+                        <a id="popover-delete-btn" class="btn btn-danger btn-sm">삭제하기</a>
+                        <a id="popover-close-btn" class="btn btn-warning btn-sm">팝업닫기</a>
+                    </div>
+                `;
+                
+
                 popoverFeature = new Popover(elementFeature, {
                     animation: false,
                     container: elementFeature,
-                    content: '<p>클릭한 위치의 피쳐 정보:</p><code>' + center + '</code>',
+                    content: contentHtml,
                     html: true,
                     placement: 'top',
                     title: 'Welcome to OpenLayers',
                 });
                 
+
                 //팝오버 표출
                 popoverFeature.show();
+
+                // 닫기 버튼 클릭 이벤트 추가
+                document.getElementById('popover-close-btn').addEventListener('click', function () {
+                    alert("팝업 창을 닫을게요.");
+                    popoverFeature.hide();
+                });
+
+                // 닫기 버튼 클릭 이벤트 추가
+                document.getElementById('popover-delete-btn').addEventListener('click', function () {
+                    alert("피쳐를 삭제 할까요?");
+                });
+
             });
         }      
     });
+
+    
+    /**
+     * 지도 클릭시 피쳐가 없는 부분에 팝업 띄우기
+     */
+    const deleteSelectFeautre = function () {
+        alert("피쳐삭제");
+    }
 
 
     /**
@@ -780,10 +812,18 @@ export const Map = forwardRef((props, forwardedRef) => {
                             popoverFeature.dispose();
                         }
                         
+                        // 팝오버 내용에 삭제 버튼 추가
+                            const contentHtml = `
+                            <p>클릭한 위치의 피쳐 정보 111</p>
+                            <code>${center}</code>
+                            <br>
+                            <button id="popover-close-btn" class="btn btn-danger btn-sm" >삭제</button>
+                        `;
+
                         popoverFeature = new Popover(elementFeature, {
                             animation: false,
                             container: elementFeature,
-                            content: '<p>클릭한 위치의 피쳐 정보:</p><code>' + center + '</code>',
+                            content: contentHtml,
                             html: true,
                             placement: 'top',
                             title: 'Welcome to OpenLayers',
