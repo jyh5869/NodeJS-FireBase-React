@@ -695,6 +695,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                 const contentHtml = `
                     <p>클릭한 위치의 피쳐 정보222</p>
                     <code>${center}</code>
+                    <code>${feature.getProperties()}</code>
                     <div class="popover-footer d-flex justify-content-end gap-2 mt-2">
                         <a id="popover-delete-btn" class="btn btn-danger btn-sm">삭제하기</a>
                         <a id="popover-close-btn" class="btn btn-warning btn-sm">팝업닫기</a>
@@ -723,7 +724,46 @@ export const Map = forwardRef((props, forwardedRef) => {
 
                 // 닫기 버튼 클릭 이벤트 추가
                 document.getElementById('popover-delete-btn').addEventListener('click', function () {
-                    alert("피쳐를 삭제 할까요?");
+                    
+                    // eslint-disable-next-line no-restricted-globals
+                    const userConfirmed = confirm("피쳐를 삭제 할까요?");
+                    
+                    if(userConfirmed){
+                   
+
+                        let featureIdToDelete = feature.getId();
+
+                        const source = vectorLayer.getSource();
+
+                        // 소스에서 특정 ID와 일치하는 피쳐 찾기
+                        const featureToDelete = source.getFeatures().find(f => f.getId() === featureIdToDelete);
+                        
+                    
+                        if (featureToDelete) {
+                            //팝업 닫기
+                            popoverFeature.hide();
+                            
+                            // 프로퍼티 변경
+                            featureToDelete.setProperties({'state': 'delete'});
+                            
+                            // 피쳐를 벡터 레이어에서 제거
+                            //source.removeFeature(featureToDelete);
+
+                            // 피쳐의 스타일 변경하여 숨기기
+                            featureToDelete.setStyle(new Style({
+                                 display: 'none' // 스타일로 숨기기 (개별 스타일 설정 필요)
+                            }));
+
+                            featureToDelete.setStyle(new Style({
+                                fill: new Fill({ color: 'black' }), // 투명한 채우기
+                                stroke: new Stroke({ color: 'rgba(255, 255, 255, 0)', width: 0 }) // 투명한 테두리
+                            }));
+
+                            console.log(`피쳐 ID ${featureIdToDelete}가 삭제되었습니다.`);
+                        } else {
+                            console.log(`피쳐 ID ${featureIdToDelete}를 찾을 수 없습니다.`);
+                        }
+                    }
                 });
 
             });

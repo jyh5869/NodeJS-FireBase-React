@@ -207,6 +207,12 @@ function Openlayers() {
 
                 cloneFeature.setProperties({"state" : "insert"});
             }
+            else if(cloneFeature.getProperties().state == "delete" ){//신규 등록
+                //console.log("ID : " + cloneFeature.getId()  + "/  인서트!" );
+
+                cloneFeature.setProperties({"state" : "delete"});
+                alert(cloneFeature.getId());
+            }
             else{//업데이트
                 //console.log("ID : "+ cloneFeature.getId()  + "/  업데이트!" );
                 cloneFeature.setProperties({"state" : "update"});
@@ -216,7 +222,7 @@ function Openlayers() {
         });
 
         var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
-
+/*
         let response = await axios({
             method  : 'get',
             url     : '/api/geomboardSave',
@@ -237,7 +243,7 @@ function Openlayers() {
             await setInitStatus();
 
         }
-        
+*/ 
     }
 
     /* 공간 데이터 변경 현황핀 초기화 */
