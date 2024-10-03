@@ -325,6 +325,8 @@ export const Map = forwardRef((props, forwardedRef) => {
         /* 지도 클릭시 해당 위치의 정보 표출 */
         map.on('click', function (evt) {
             
+            updateStyles();
+
             if(isDraw == true){ return false}
 
             console.log("지도 클릭시 위치정보 Overlay : " + evt.pixel);
@@ -431,6 +433,28 @@ export const Map = forwardRef((props, forwardedRef) => {
         draw.removeLastPoint();
     };
     
+    // 이번트 리스너 동작시 피쳐의 State Type 별 스타일 
+    const updateStyles = () => {
+        const features = vectorLayer.getSource().getFeatures();
+        
+        features.forEach(feature => {
+            const state = feature.getProperties().state;
+
+            if (state === 'delete') {
+                feature.setStyle(new Style({
+                    fill: new Fill({ color: 'rgba(0, 0, 0, 0)' }),
+                    stroke: new Stroke({ color: 'rgba(0, 0, 0, 0)', width: 0 })
+                }));
+            } else {
+                /*
+                feature.setStyle(new Style({
+                    fill: new Fill({ color: 'rgba(255, 255, 255, 0.6)' }),
+                    stroke: new Stroke({ color: '#319FD3', width: 1 })
+                }));
+                */
+            }
+        });
+    };
 
     /* 셀렉트박스 이벤트 헨들러 */
     const handleClick = async (zoomType) => {
@@ -755,8 +779,8 @@ export const Map = forwardRef((props, forwardedRef) => {
                             }));
 
                             featureToDelete.setStyle(new Style({
-                                fill: new Fill({ color: 'black' }), // 투명한 채우기
-                                stroke: new Stroke({ color: 'rgba(255, 255, 255, 0)', width: 0 }) // 투명한 테두리
+                                fill: new Fill({ color: 'rgba(0, 0, 0, 0)' }), // 투명한 채우기
+                                stroke: new Stroke({ color: 'rgba(0, 0, 0, 0)', width: 0 }) // 투명한 테두리
                             }));
 
                             console.log(`피쳐 ID ${featureIdToDelete}가 삭제되었습니다.`);
