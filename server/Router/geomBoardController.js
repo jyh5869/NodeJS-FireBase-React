@@ -23,11 +23,9 @@ let saveModelUrl  = commonUtil.getModelInfo("saveModelUrl");
 **/
 router.get("/geomboardSave", async (req, res) => {
 
-    console.log("진입완료!!!!!!");
+    console.log("공간 데이터 저장 컨트롤러 진입");
     
     var geom = JSON.parse(req.query.geom).features;
-    //console.log(geom);
-    
 
     geom.forEach((doc) => {
         console.log(doc.type);
@@ -62,8 +60,13 @@ router.get("/geomboardSave", async (req, res) => {
             };
             modelClassDoc.set(postData);
         }
+        else if(state == "delete"){
+            var modelClassDoc = db.collection("geom_board_list").doc(doc.id);
+            
+            modelClassDoc.delete();
+        }
     });
-    res.send({rows: "등록완료"});
+    res.send({rows: "저장완료"});
 });
 
 /**
@@ -71,7 +74,7 @@ router.get("/geomboardSave", async (req, res) => {
 **/
 router.get("/geomboardList", async (req, res) => {
 
-    console.log("진입완료!!!!!!");
+    console.log("공간데이터 게시판 리스트 조회 진입완료");
 
     commonUtil.getFirebaseDB().collection('geom_board_list').orderBy('reg_dt', "desc").get()
         .then((snapshot) => {

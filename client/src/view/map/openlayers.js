@@ -222,7 +222,7 @@ function Openlayers() {
         });
 
         var geoJsonClone = new GeoJSON().writeFeatures(featureArr);
-/*
+
         let response = await axios({
             method  : 'get',
             url     : '/api/geomboardSave',
@@ -243,7 +243,7 @@ function Openlayers() {
             await setInitStatus();
 
         }
-*/ 
+ 
     }
 
     /* 공간 데이터 변경 현황핀 초기화 */
