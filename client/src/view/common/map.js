@@ -1,41 +1,41 @@
-import React,  { useEffect, useRef ,useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 
-import { Button, Table, Form, Badge, Stack, Container, Row, Col }   from 'react-bootstrap';
+import { Button, Table, Form, Badge, Stack, Container, Row, Col, Popover as ReactBootstrapPopover } from 'react-bootstrap';
 
 import axios from 'axios';
 
 import '../../assets/css/map.css';
 import 'ol/ol.css';
-import {Map as OlMap} from 'ol';
+import { Map as OlMap } from 'ol';
 import GeoJSON from 'ol/format/GeoJSON.js';
 import View from 'ol/View.js';
 import XYZ from 'ol/source/XYZ';
 
-import {Draw, Modify, Snap} from 'ol/interaction.js';
-import {GeometryCollection, Point, Polygon, Circle, LineString} from 'ol/geom.js';
-import {circular} from 'ol/geom/Polygon.js';
-import {getDistance} from 'ol/sphere.js';
-import {transform} from 'ol/proj.js';
-import {getCenter} from 'ol/extent';
-import {Circle as CircleStyle, Stroke, Style, Fill} from 'ol/style.js';
+import { Draw, Modify, Snap } from 'ol/interaction.js';
+import { GeometryCollection, Point, Polygon, Circle, LineString } from 'ol/geom.js';
+import { circular } from 'ol/geom/Polygon.js';
+import { getDistance } from 'ol/sphere.js';
+import { transform } from 'ol/proj.js';
+import { getCenter } from 'ol/extent';
+import { Circle as CircleStyle, Stroke, Style, Fill } from 'ol/style.js';
 
 import Feature from 'ol/Feature.js';
-import {easeOut} from 'ol/easing.js';
-import {fromLonLat, toLonLat} from 'ol/proj.js';
-import {getVectorContext} from 'ol/render.js';
-import {unByKey} from 'ol/Observable.js';
+import { easeOut } from 'ol/easing.js';
+import { fromLonLat, toLonLat } from 'ol/proj.js';
+import { getVectorContext } from 'ol/render.js';
+import { unByKey } from 'ol/Observable.js';
 import Overlay from 'ol/Overlay.js';
 
 import Select from 'ol/interaction/Select.js';
-import {altKeyOnly, click, pointerMove, singleClick} from 'ol/events/condition.js';
+import { altKeyOnly, click, pointerMove, singleClick } from 'ol/events/condition.js';
 
-import {get as getProjection } from 'ol/proj.js'; //위경도
+import { get as getProjection } from 'ol/proj.js'; //위경도
 
 
-import {OSM, Vector as VectorSource} from 'ol/source.js';
-import {Tile as TileLayer, Vector as VectorLayer} from 'ol/layer.js';
-import {toStringHDMS} from 'ol/coordinate.js';
-import {Popover} from 'bootstrap';
+import { OSM, Vector as VectorSource } from 'ol/source.js';
+import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
+import { toStringHDMS } from 'ol/coordinate.js';
+import { Popover } from 'bootstrap';
 
 import GeojsonTest from '../../openLayers/examples/data/geojson/switzerland.geojson';
 
@@ -89,18 +89,18 @@ function selectStyle(feature) {
     selected.getFill().setColor(color);
     return selected;
 }
-  
+
 // Single Click 이벤트
 const selectSingleClick = new Select({
     style: selectStyle
 });
- 
+
 // Click 이벤트
 const selectClick = new Select({
     condition: click,
     style: selectStyle,
-}); 
- 
+});
+
 // Hover 이벤트
 const selectPointerMove = new Select({
     condition: pointerMove,
@@ -116,30 +116,18 @@ const selectAltClick = new Select({
 });
 /* END - 셀렉트 객체및 이벤트 생성 */
 
-
 export const Map = forwardRef((props, forwardedRef) => {
 
     useImperativeHandle(forwardedRef, () => ({
-        // 부모에서 사용하고 싶었던 함수
+        //부모에서 사용하고 싶었던 함수
         willBeUsedInParentComponent,
     }));
-    
 
     function willBeUsedInParentComponent() {
-
         handleClick(props.zoomType);
     }
 
-    // setTimeout(() => {
-    //     //console.log("Features added, performing action.");
-    //     setParnetActionType('getSource');
-    //     // 여기에 원하는 동작을 추가하세요.
-    // }, 0);
-    
-
-    //const [loaded, setLoaded] = useState();
-    let loaded = false;
-
+    const [loaded, setLoaded] = useState();
     const [bboxLayer, setBboxLayer] = useState(null);//BBOX 레이어
     const [parnetActionType, setParnetActionType] = useState(props.actionType || 'null');
     const [mapObj, setMap] = useState();
@@ -149,65 +137,52 @@ export const Map = forwardRef((props, forwardedRef) => {
     const [featureInfo, setFeatureInfo] = useState(" 선택된 공간데이터가 없습니다. ");
     const [popoverFeature, setPopoverFeature] = useState();
     const [popoverMap, setPopoverMap] = useState();
-    const [statusArr , setStatusArr] = useState([]);//신규, 변경 현황을 표출하기위한 배열
+    const [statusArr, setStatusArr] = useState([]);//신규, 변경 현황을 표출하기위한 배열
 
     const sendSourceToParents = () => {
-        props.getSource(vectorLayer).then(function(){
+        props.getSource(vectorLayer).then(function () {
             source.clear();
         });
     }
 
-    source.addFeatures(props.arrSource);        
+    source.addFeatures(props.arrSource);
     console.log("지도컴포넌트 호출!");
-    
-    /* START 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 START  */
 
+    /* START 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 START  */
     /* 피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달 */
     const sendRegAndModifyStatus = (status, feature) => {
         
-
-        console.log( parnetActionType + ' == parnetActionType : ' + props.actionType  + ' 부모 컴포넌트의 상황판 : ' + status + "   loaded : " + loaded );
+        console.log(parnetActionType + ' == parnetActionType : ' + props.actionType + ' 부모 컴포넌트의 상황판 : ' + status + "   loaded : " + loaded);
 
         //소스를 최초 가져왔을때, 소스를 클리어할때 상황판 초기화
-        if(props.actionType == 'getSource' || props.actionType == 'clearSource' ) {
-        
-            props.setRegAndModifyStatus("initFeature").then(function(){});
+        if (props.actionType == 'getSource' || props.actionType == 'clearSource') {
+            props.setRegAndModifyStatus("initFeature").then(function () { });
         }
-        else{
-            //console.log("수정될 피쳐아이디 "+ feature.ol_uid, "수정 상태 : " + status);
-            console.log(statusArr);
-            if(status == "Insert" && statusArr.includes(feature.ol_uid) == false ){//추가된 피쳐 갯수 업데이트
-                props.setRegAndModifyStatus(status).then(function(){});
+        else {
+            if (status == "Insert" && statusArr.includes(feature.ol_uid) == false) {//추가된 공간데이터 현황 업데이트
+                props.setRegAndModifyStatus("InsertFeature").then(function () { });
             }
-            else if(status == "Update"){    
-                if(statusArr.includes(feature.ol_uid)){//1.피쳐 변경 횟수 업데이트
-                    props.setRegAndModifyStatus("UpdateAction").then(function(){});
-                }else{//2.피쳐 변경 횟수 + 변경된 피쳐 갯수 업데이트
-                    props.setRegAndModifyStatus("UpdateFeature").then(function(){});
+            else if (status == "Update") {//변경된 공간데이터 현황 업데이트
+                if (statusArr.includes(feature.ol_uid)) {//1.피쳐 변경 횟수 업데이트
+                    props.setRegAndModifyStatus("UpdateAction").then(function () { });
+                } else {//2.피쳐 변경 횟수 + 변경된 피쳐 갯수 업데이트
+                    props.setRegAndModifyStatus("UpdateFeature").then(function () { });
                 }
             }
-    
-            /*  
-                setStatusArr(statusArr.push(feature.ol_uid));
-                위 코드의 경우 statusArr.push(feature.ol_uid)가 배열이 아닌 배열의 길이 ex> 3 을 반환
-                정수를 배열(setStatusArr)에 세팅하려하기 때문에 [statusArr.push is not a function] 오류 발생
-            */
-            
-            if(statusArr.includes(feature.ol_uid) == false){
+            else if (status == "Delete") {//삭제된 공간데이터 현황 업데이트
+                props.setRegAndModifyStatus("DeleteFeature").then(function () { });
+            }
+
+            //변경 삭제된 공간데이터를 배열에 추가 
+            if (statusArr.includes(feature.ol_uid) == false) {
                 statusArr.push(feature.ol_uid);//수정 리스트 배열에 값이 없을경우 추가
-                setStatusArr(statusArr);//배열에 변경이 있음을 React에게 알림
-                
+                setStatusArr(statusArr);//배열에 변경이 있음을 React에게 알림  
             }
         }
     }
     /* END 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 END */
 
-
-    /**
-     * 
-     * USER EFECT 이벤트 리스너
-     * 
-     */
+    /* USER EFECT 이벤트 리스너 */
     useEffect(() => {
 
         /* START 지도 객체 선언 및 기본 세팅 START */
@@ -216,12 +191,12 @@ export const Map = forwardRef((props, forwardedRef) => {
                 tileLayerXYZ,
                 vectorLayer
             ],
-            target: 'map', 
+            target: 'map',
             view: new View({
                 //projection: getProjection('EPSG:3857'),
                 //center: fromLonLat([126.752, 37.4713], getProjection('EPSG:3857')),
-                center: [ 126.97659953, 37.579220423 ], //포인트의 좌표를 리턴함
-                projection : 'EPSG:4326',//경위도 좌표계 WGS84
+                center: [126.97659953, 37.579220423], //포인트의 좌표를 리턴함
+                projection: 'EPSG:4326',//경위도 좌표계 WGS84
                 zoom: 6
             })
         });
@@ -232,15 +207,14 @@ export const Map = forwardRef((props, forwardedRef) => {
         setView(view);//컴포넌트 전역 뷰 정보 할당
         setZoom(zoom);//컴포넌트 전역 줌레벨 할당
         setMap(map);//컴포넌트 전역 지도 오브젝트 할당
- 
+
         map.addInteraction(selectSingleClick);
         /* END 지도 객체 선언 및 기본 세팅 END */
 
-
         /* START 수정 인터렉션 세팅 START */
-        const defaultStyle = new Modify({source: source})
-        .getOverlay()
-        .getStyleFunction();
+        const defaultStyle = new Modify({ source: source })
+            .getOverlay()
+            .getStyleFunction();
 
         let modify = new Modify({
             source: source,
@@ -295,7 +269,7 @@ export const Map = forwardRef((props, forwardedRef) => {
         modify.on('modifystart', function (event) {
             setIsDraw(true);
             console.log("수정 시작" + isDraw);
-            
+
             event.features.forEach(function (feature) {
                 const geometry = feature.getGeometry();
                 if (geometry.getType() === 'GeometryCollection') {
@@ -324,10 +298,10 @@ export const Map = forwardRef((props, forwardedRef) => {
 
         /* 지도 클릭시 해당 위치의 정보 표출 */
         map.on('click', function (evt) {
-            
+
             updateStyles();
 
-            if(isDraw == true){ return false}
+            if (isDraw == true) { return false }
 
             console.log("지도 클릭시 위치정보 Overlay : " + evt.pixel);
             let popupMap = new Overlay({
@@ -340,18 +314,18 @@ export const Map = forwardRef((props, forwardedRef) => {
             let coordinate = evt.coordinate;
 
             let hdms = toStringHDMS(toLonLat(coordinate));
-            let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {return feature;});//피쳐가 있을시 피쳐를 반환
-            
+            let feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) { return feature; });//피쳐가 있을시 피쳐를 반환
+
             if (feature == undefined) {
-                
+
                 selectFeatureInfoBox(evt, "MAP");
-    
+
                 popupMap.setPosition(coordinate);
-             
+
                 if (popoverMap) {
                     popoverMap.dispose();
                 }
-                
+
                 popoverMap = new Popover(elementMap, {
                     animation: false,
                     container: elementMap,
@@ -360,7 +334,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                     placement: 'top',
                     title: 'Welcome to OpenLayers',
                 });
-    
+
                 //지도클릭 팝오버 표출 및 피쳐 팝오버 비활성화
                 popoverMap.show();
 
@@ -373,15 +347,14 @@ export const Map = forwardRef((props, forwardedRef) => {
                 let popoverFeature = Popover.getInstance(elementFeature);//팝오버 객체 생성
 
             }
-            else{
+            else {
                 //팝오버 존재시 숨기기
-                if(popoverMap != null){
+                if (popoverMap != null) {
                     popoverMap.hide();
                 }
             }
         });
 
-        
         /* 지도 포인트 이동시 이벤트 */
         map.on('pointermove', function (e) {
             if (!e.dragging) {
@@ -389,54 +362,21 @@ export const Map = forwardRef((props, forwardedRef) => {
                 var hit = map.hasFeatureAtPixel(pixel);
             }
         });
-        
-/*
 
-        // 클릭 이벤트 처리
-        map.on('singleclick', function (evt) {
-            map.forEachFeatureAtPixel(evt.pixel, function (feature) {
-                const coordinates = feature.getGeometry().getCoordinates();
-                showOverlay(map, coordinates);
-            });
-        });
-
-        const overlayContainerElement = document.getElementById('overlay');
-        const overlay = new Overlay({
-            element: overlayContainerElement,
-            autoPan: true,
-            autoPanAnimation: {
-                duration: 250,
-            },
-        });
-
-        map.addOverlay(overlay);
-
-        function showOverlay(map, coordinates) {
-            overlay.setPosition(coordinates);
-            overlayContainerElement.style.display = 'block';
-        }
-
-        // 닫기 버튼 클릭 이벤트 처리
-        document.getElementById('overlay-closer').onclick = function () {
-            overlayContainerElement.style.display = 'none';
-            overlay.setPosition(undefined);
-            return false;
-        };
-*/
         /* END 지도 객체 선언 및 기본 세팅 END */
-        return ()=> null
-    },  []);
+        return () => null
+    }, []);
 
 
     /* Feature Draw시 동학하며 마지막 포인트를 없애 이전으로 돌아간다. */
     const removeLastPoint = async () => {
         draw.removeLastPoint();
     };
-    
+
     // 이번트 리스너 동작시 피쳐의 State Type 별 스타일 
     const updateStyles = () => {
         const features = vectorLayer.getSource().getFeatures();
-        
+
         features.forEach(feature => {
             const state = feature.getProperties().state;
 
@@ -458,27 +398,24 @@ export const Map = forwardRef((props, forwardedRef) => {
 
     /* 셀렉트박스 이벤트 헨들러 */
     const handleClick = async (zoomType) => {
-        console.log("줌조정");
         let currentZoom = view.getZoom();
 
-        if(zoomType == 'zoomIn'){
-          view.setZoom(currentZoom + 1);
+        if (zoomType == 'zoomIn') {
+            view.setZoom(currentZoom + 1);
         }
-        else if(zoomType == 'zoomOut'){
-          view.setZoom(currentZoom - 1);
+        else if (zoomType == 'zoomOut') {
+            view.setZoom(currentZoom - 1);
         }
     };
 
-
     //지도 초기화
     const initMap = async (e) => {
-        
+
         mapObj.removeInteraction(draw);
         mapObj.removeInteraction(snap);
 
         addInteractions(e)
     };
-
 
     let snap; let draw;
     const addInteractions = async (e) => {
@@ -494,8 +431,8 @@ export const Map = forwardRef((props, forwardedRef) => {
 
                 if (!geometry) {
                     geometry = new GeometryCollection([
-                    new Polygon([]),
-                    new Point(coordinates[0]),
+                        new Polygon([]),
+                        new Point(coordinates[0]),
                     ]);
                 }
 
@@ -518,41 +455,41 @@ export const Map = forwardRef((props, forwardedRef) => {
             type: value,
             geometryFunction: geometryFunction,
         });
-        snap = new Snap({source: source});
-        
+        snap = new Snap({ source: source });
+
         mapObj.addInteraction(draw);
         mapObj.addInteraction(snap);
 
         drawType = e.target.value;
         setIsDraw(true);
 
-        select.set("drawYn","Y")
+        select.set("drawYn", "Y")
     }
 
     /* Map 객채에 특정 인터렉션(Interation)을 제거 */
-    function removeInteraction(interactionType){
+    function removeInteraction(interactionType) {
 
-        if(interactionType == "draw"){
-            console.log("인터렉션 제거! : draw" );
+        if (interactionType == "draw") {
+            console.log("인터렉션 제거! : draw");
             mapObj.removeInteraction(draw);
             setIsDraw(false);
         }
-        else if(interactionType == "snap"){
+        else if (interactionType == "snap") {
             mapObj.removeInteraction(snap);
         }
     }
 
     /* Select 이벤트 발생시 해당 이벤트의 정보 */
-    const selectFeatureInfoBox = async(event, selectType) => {
+    const selectFeatureInfoBox = async (event, selectType) => {
 
-        if(selectType == "FEATURE"){
+        if (selectType == "FEATURE") {
 
             document.getElementById('status').innerHTML =
-            event.target.getFeatures().getLength() +'개의 공간데이터가 선택되었습니다. (마지막 작업에서 ' +
-            event.selected.length +'개가 선택되었고 ' +
-            event.deselected.length +'개가 선택 취소 되었습니다.)';
+                event.target.getFeatures().getLength() + '개의 공간데이터가 선택되었습니다. (마지막 작업에서 ' +
+                event.selected.length + '개가 선택되었고 ' +
+                event.deselected.length + '개가 선택 취소 되었습니다.)';
         }
-        else{
+        else {
             document.getElementById('status').innerHTML = "지도 클릭 선택된 피쳐가 없습니다."
         }
     };
@@ -561,45 +498,45 @@ export const Map = forwardRef((props, forwardedRef) => {
     source.on('addfeature', function (e) {
 
         //피쳐 추가시 Type Propertiy 세팅
-        if(drawType == 'Geodesic'){ 
+        if (drawType == 'Geodesic') {
             console.log("피쳐추가 Geodesic");
             e.feature.set('realType', 'GeometryCollection');
-            e.feature.set('type'    , 'Geodesic');
+            e.feature.set('type', 'Geodesic');
         }
-        else if(drawType == 'Circle'){
+        else if (drawType == 'Circle') {
             console.log("피쳐추가 Circle");
-            e.feature.setProperties({'realType':'Circle', 'type':'Circle'})
+            e.feature.setProperties({ 'realType': 'Circle', 'type': 'Circle' })
         }
-        else if(drawType == 'Polygon'){
+        else if (drawType == 'Polygon') {
             console.log("피쳐추가 Polygon");
-            e.feature.setProperties({'realType':'Polygon', 'type':'Polygon'})
+            e.feature.setProperties({ 'realType': 'Polygon', 'type': 'Polygon' })
         }
-        else if(drawType == 'LineString'){
+        else if (drawType == 'LineString') {
             console.log("피쳐추가 LineString");
-            e.feature.setProperties({'realType':'LineString', 'type':'LineString'})
+            e.feature.setProperties({ 'realType': 'LineString', 'type': 'LineString' })
         }
-        else if(drawType == 'Point'){
+        else if (drawType == 'Point') {
             console.log("피쳐추가 Point");
-            e.feature.setProperties({'realType':'Point', 'type':'Point'})
+            e.feature.setProperties({ 'realType': 'Point', 'type': 'Point' })
         }
 
-        if(drawType != undefined){
+        if (drawType != undefined) {
             flash(e.feature);
-        } 
+        }
     });
-    
+
     /* 생성한 피쳐를 맵에 추가 */
     const duration = 3000;
-    const  flash = async(feature) => {
+    const flash = async (feature) => {
 
         const start = Date.now();
         const flashGeom = feature.getGeometry().clone();
         const listenerKey = tileLayerXYZ.on('postrender', animate);
-        
+
         function animate(event) {
             const frameState = event.frameState;
             const elapsed = frameState.time - start;
-            
+
             if (elapsed >= duration) {
                 unByKey(listenerKey);
                 return;
@@ -610,26 +547,26 @@ export const Map = forwardRef((props, forwardedRef) => {
 
             const radius = easeOut(elapsedRatio) * 25 + 5;
             const opacity = easeOut(1 - elapsedRatio);
-        
+
             const style = new Style({
                 image: new CircleStyle({
                     radius: radius,
                     stroke: new Stroke({
-                    color: 'rgba(255, 0, 0, ' + opacity + ')',
-                    width: 0.25 + opacity,
+                        color: 'rgba(255, 0, 0, ' + opacity + ')',
+                        width: 0.25 + opacity,
                     }),
                 }),
             });
-        
+
             vectorContext.setStyle(style);
             vectorContext.drawGeometry(flashGeom);
 
             // tell OpenLayers to continue postrender animation
             mapObj.render();
         }
-            
+
         removeInteraction("draw");// Draw Interation 종료
-        
+
         /*  
             ※ React에서는 한 컴포넌트가 렌더링 중일 때 다른 컴포넌트의 상태를 업데이트하려는 시도를 금지(오류를 일으킴)합니다. ※
 
@@ -646,57 +583,54 @@ export const Map = forwardRef((props, forwardedRef) => {
 
             동시에 작업이 처리되지 않도록 openlayers.js 컴포넌트의 처리를 비동기로 하여 순차실행으로 충돌하지 않도록 조치
         */
-       
-        // 2024-06-24: 생성및 변경 저장 후 다시 피쳐를 불러올 때  sendRegAndModifyStatus를 또 타서 다 추가로 상황판이 업데이트 되는 오류 수정해아함
-        // 2024-07-06: 위의문제 해결하는 과정에서 추가 오류 발생 추가 후 저장시 상황판에 추가업데이트가 안됨 getSource로 넘어와서.. 수정해보자.
+
         setParnetActionType('getSource');
         await new Promise((resolve) => setTimeout(resolve, 0));
         sendRegAndModifyStatus("Insert", feature);// 현황판(부모 컴포넌트)에 결과 전달
         await new Promise((resolve) => setTimeout(resolve, 0));
-        select.set("drawYn","N");// Draw Inteeraction 종료 변수 추가
+        select.set("drawYn", "N");// Draw Inteeraction 종료 변수 추가
         setParnetActionType('null');
     }
-
 
     /**
      * 지도 클릭시 피쳐가 있을경우 해당 피쳐의 정보 표출
      */
     let select = selectSingleClick;
     select.on('select', function (e) {
-        
-        if(e.target.getFeatures().getLength() != 0){
+
+        if (e.target.getFeatures().getLength() != 0) {
             //셀렉트 이벤트시 피쳐가 있을때 정보표출
             selectFeatureInfoBox(e, "FEATURE");
 
-            e.target.getFeatures().forEach(function(feature, idx){
+            e.target.getFeatures().forEach(function (feature, idx) {
 
                 let geomType = feature.getProperties().type;
                 let center;
 
                 //피쳐 추가시 Type Propertiy 세팅
-                if(geomType == 'Geodesic'){ 
+                if (geomType == 'Geodesic') {
                     console.log('Geodesic');
                     center = getCenter(feature.getGeometry().getExtent());
                 }
-                else if(geomType == 'Circle'){
+                else if (geomType == 'Circle') {
                     console.log('Circle');
                     center = feature.getGeometry().getCenter();
                 }
-                else if(geomType == 'Polygon'){
+                else if (geomType == 'Polygon') {
                     console.log('Polygon');
                     center = getCenter(feature.getGeometry().getExtent());
                 }
-                else if(geomType == 'LineString'){
+                else if (geomType == 'LineString') {
                     console.log('LineString');
                     center = getCenter(feature.getGeometry().getExtent());
                 }
-                else if(geomType == 'Point'){
+                else if (geomType == 'Point') {
                     console.log('Point');
                     center = feature.getGeometry().getCoordinates();
                 }
 
                 //if(popupFeature == undefined){return false}
-                if(mapObj == undefined){return false}
+                if (mapObj == undefined) { return false }
 
                 const popupFeature = new Overlay({
                     element: document.getElementById('popup'),
@@ -708,16 +642,16 @@ export const Map = forwardRef((props, forwardedRef) => {
 
                 //popup.setPosition(coordinate);
                 popupFeature.setPosition(center);
-                
+
                 setPopoverFeature(popoverFeature);
 
                 if (popoverFeature) {
                     popoverFeature.dispose();
                 }
-                
+
                 // 팝오버 내용에 삭제 버튼 추가
                 const contentHtml = `
-                    <p>클릭한 위치의 피쳐 정보222</p>
+                    <p>클릭한 위치의 피쳐 정보111</p>
                     <code>${center}</code>
                     <code>${feature.getProperties()}</code>
                     <div class="popover-footer d-flex justify-content-end gap-2 mt-2">
@@ -725,7 +659,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                         <a id="popover-close-btn" class="btn btn-warning btn-sm">팝업닫기</a>
                     </div>
                 `;
-                
+
 
                 popoverFeature = new Popover(elementFeature, {
                     animation: false,
@@ -735,25 +669,24 @@ export const Map = forwardRef((props, forwardedRef) => {
                     placement: 'top',
                     title: 'Welcome to OpenLayers',
                 });
-                
 
                 //팝오버 표출
                 popoverFeature.show();
 
                 // 닫기 버튼 클릭 이벤트 추가
                 document.getElementById('popover-close-btn').addEventListener('click', function () {
-                    alert("팝업 창을 닫을게요.");
+                    //alert("팝업 창을 닫을게요.");
                     popoverFeature.hide();
                 });
 
                 // 닫기 버튼 클릭 이벤트 추가
                 document.getElementById('popover-delete-btn').addEventListener('click', function () {
-                    
+
                     // eslint-disable-next-line no-restricted-globals
                     const userConfirmed = confirm("피쳐를 삭제 할까요?");
-                    
-                    if(userConfirmed){
-                   
+
+                    if (userConfirmed) {
+
 
                         let featureIdToDelete = feature.getId();
 
@@ -761,27 +694,29 @@ export const Map = forwardRef((props, forwardedRef) => {
 
                         // 소스에서 특정 ID와 일치하는 피쳐 찾기
                         const featureToDelete = source.getFeatures().find(f => f.getId() === featureIdToDelete);
-                        
-                    
+
+
                         if (featureToDelete) {
                             //팝업 닫기
                             popoverFeature.hide();
-                            
+
                             // 프로퍼티 변경
-                            featureToDelete.setProperties({'state': 'delete'});
-                            
+                            featureToDelete.setProperties({ 'state': 'delete' });
+
                             // 피쳐를 벡터 레이어에서 제거
                             //source.removeFeature(featureToDelete);
 
                             // 피쳐의 스타일 변경하여 숨기기
                             featureToDelete.setStyle(new Style({
-                                 display: 'none' // 스타일로 숨기기 (개별 스타일 설정 필요)
+                                display: 'none' // 스타일로 숨기기 (개별 스타일 설정 필요)
                             }));
 
                             featureToDelete.setStyle(new Style({
                                 fill: new Fill({ color: 'rgba(0, 0, 0, 0)' }), // 투명한 채우기
                                 stroke: new Stroke({ color: 'rgba(0, 0, 0, 0)', width: 0 }) // 투명한 테두리
                             }));
+
+                            sendRegAndModifyStatus("Delete", feature);//현황판(부모 컴포넌트)에 결과 전달
 
                             console.log(`피쳐 ID ${featureIdToDelete}가 삭제되었습니다.`);
                         } else {
@@ -791,10 +726,10 @@ export const Map = forwardRef((props, forwardedRef) => {
                 });
 
             });
-        }      
+        }
     });
 
-    
+
     /**
      * 지도 클릭시 피쳐가 없는 부분에 팝업 띄우기
      */
@@ -825,44 +760,44 @@ export const Map = forwardRef((props, forwardedRef) => {
         } else {
             select = selectClick;
         }
-        
+
         if (select !== null) {
 
             mapObj.addInteraction(select);
 
             select.on('select', function (e) {
-                
-                if(e.target.getFeatures().getLength() != 0){
+
+                if (e.target.getFeatures().getLength() != 0) {
                     //셀렉트 이벤트시 피쳐가 있을때 정보표출
                     selectFeatureInfoBox(e, "MAP");
 
-                    e.target.getFeatures().forEach(function(feature, idx){
-        
+                    e.target.getFeatures().forEach(function (feature, idx) {
+
                         let geomType = feature.getProperties().type;
                         let center;
-        
+
                         //피쳐 추가시 Type Propertiy 세팅
-                        if(geomType == 'Geodesic'){ 
+                        if (geomType == 'Geodesic') {
                             console.log('Geodesic');
                             center = getCenter(feature.getGeometry().getExtent());
                         }
-                        else if(geomType == 'Circle'){
+                        else if (geomType == 'Circle') {
                             console.log('Circle');
                             center = feature.getGeometry().getCenter();
                         }
-                        else if(geomType == 'Polygon'){
+                        else if (geomType == 'Polygon') {
                             console.log('Polygon');
                             center = getCenter(feature.getGeometry().getExtent());
                         }
-                        else if(geomType == 'LineString'){
+                        else if (geomType == 'LineString') {
                             console.log('LineString');
                             center = getCenter(feature.getGeometry().getExtent());
                         }
-                        else if(geomType == 'Point'){
+                        else if (geomType == 'Point') {
                             console.log('Point');
                             center = feature.getGeometry().getCoordinates();
                         }
-                        
+
                         const popupFeature = new Overlay({
                             element: document.getElementById('popup'),
                         });
@@ -871,14 +806,14 @@ export const Map = forwardRef((props, forwardedRef) => {
                         let popoverFeature = Popover.getInstance(elementFeature);//팝오버 객체 생성
 
                         popupFeature.setPosition(center);
-                        
+
                         if (popoverFeature) {
                             popoverFeature.dispose();
                         }
-                        
+
                         // 팝오버 내용에 삭제 버튼 추가
-                            const contentHtml = `
-                            <p>클릭한 위치의 피쳐 정보 111</p>
+                        const contentHtml = `
+                            <p>클릭한 위치의 피쳐 정보 222</p>
                             <code>${center}</code>
                             <br>
                             <button id="popover-close-btn" class="btn btn-danger btn-sm" >삭제</button>
@@ -892,40 +827,40 @@ export const Map = forwardRef((props, forwardedRef) => {
                             placement: 'top',
                             title: 'Welcome to OpenLayers',
                         });
-            
+
                         //팝오버 표출
                         popoverFeature.show();
                     });
                 }
-                else{
+                else {
                     /* 피쳐가 없음 */
-                }     
+                }
             });
         }
     };
 
     source.on('selectfeature', function (e) {
 
-        select.set("drawYn","N");
+        select.set("drawYn", "N");
         flash(e.feature);
     });
 
-    
+
     /* ※미사용※ 저장된 지오메트릭 데이터 불러오기 (부모 컴포넌트로 이동시킴) */
     const callFeature = async (feature) => {
 
         let response = await axios({
-            method  : 'get',
-            url     : '/api/geomboardList',
-            params  : {
-                id : "Fature Call!"
+            method: 'get',
+            url: '/api/geomboardList',
+            params: {
+                id: "Fature Call!"
             },
-            headers : {
-                'Content-Type' : 'multipart/form-data'
+            headers: {
+                'Content-Type': 'multipart/form-data'
             },
         })
-            
-        var datas =  response.data.rows;
+
+        var datas = response.data.rows;
         var array = Object.values(datas)
 
         /* 피쳐보이기 부터 해보자 */
@@ -948,7 +883,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                 feature = new Feature({
                     type: 'Feature',
                     geometry: new Circle(center, radius),
-                });                
+                });
             }
 
             feature.setId(value.id);//ID값 세팅
@@ -956,9 +891,9 @@ export const Map = forwardRef((props, forwardedRef) => {
 
             featureArr.push(feature);
         });
-        
+
         await Promise.all(promises);
-        
+
         source.addFeatures(featureArr);
     }
 
@@ -967,30 +902,8 @@ export const Map = forwardRef((props, forwardedRef) => {
     return (
         <>
             <Row>
-                <div id="map" value={mapObj} style={{height:'50rem'}}></div> 
+                <div id="map" value={mapObj} style={{ height: '50rem' }}></div>
             </Row>
-
-            <div id="overlay" style={{
-                position: 'absolute',
-                backgroundColor: 'white',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                padding: '15px',
-                borderRadius: '5px',
-                bottom: '12px',
-                left: '-50%',
-                transform: 'translateX(50%)',
-                display: 'none'
-            }}>
-                <button id="overlay-closer" style={{
-                    position: 'absolute',
-                    top: '2px',
-                    right: '8px',
-                    background: 'none',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '16px'
-                }}>X</button>
-            </div>
 
             <Row className='my-3'>
                 <Col className="text-center" id="status" >{featureInfo}</Col>
@@ -998,7 +911,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
             <Row className='mb-3'>
                 <Col>
-                    <Button variant="outline-success" className="btn_type1" onClick={sendSourceToParents}>저장하기</Button>   
+                    <Button variant="outline-success" className="btn_type1" onClick={sendSourceToParents}>저장하기</Button>
                 </Col>
             </Row>
 
@@ -1006,22 +919,22 @@ export const Map = forwardRef((props, forwardedRef) => {
                 <Col>
                     <div className="input-group">
                         <label className="input-group-text" htmlFor="type">Geometry type</label>
-                        <Form.Select id="type" onChange={(e) => { initMap(e);} } value={drawType}>
+                        <Form.Select id="type" onChange={(e) => { initMap(e); }} value={drawType}>
                             <option key={0} value="" >선택하세요</option>
                             <option key={1} value="Point" >Point</option>
                             <option key={2} value="LineString">LineString</option>
                             <option key={3} value="Polygon">Polygon</option>
                             <option key={4} value="Circle">Circle Geometry</option>
-                            <option key={5} value="Geodesic">Geodesic Circle</option> 
+                            <option key={5} value="Geodesic">Geodesic Circle</option>
                         </Form.Select>
-                        <Button variant="outline-primary" onClick={(e) => { removeLastPoint();}}>이전으로</Button>
+                        <Button variant="outline-primary" onClick={(e) => { removeLastPoint(); }}>이전으로</Button>
                     </div>
                 </Col>
                 <Col>
                     <div className="input-group">
                         <label className="input-group-text" htmlFor="type2">Action type &nbsp;</label>
 
-                        <Form.Select id="type2" onChange={(e) => { changeInteraction(e.target.value);}} defaultValue={"none"}>
+                        <Form.Select id="type2" onChange={(e) => { changeInteraction(e.target.value); }} defaultValue={"none"}>
                             <option key={1} value="click">Click</option>
                             <option key={2} value="singleclick">Single-click</option>
                             <option key={3} value="pointermove">Hover</option>
@@ -1032,12 +945,21 @@ export const Map = forwardRef((props, forwardedRef) => {
                 </Col>
             </Row>
 
+            {/* 
+            <ReactBootstrapPopover id="popover-basic">
+                <ReactBootstrapPopover.Header as="h3">Popover Header</ReactBootstrapPopover.Header>
+                <ReactBootstrapPopover.Body>
+                    This is the popover content. You can put anything here!
+                </ReactBootstrapPopover.Body>
+            </ReactBootstrapPopover> 
+            */}
+            
             <div id="popup"></div>
             <div id="popupMap"></div>
             <div id="selectPopup"></div>
         </>
     );
 });
-  
+
 export default Map;
 
