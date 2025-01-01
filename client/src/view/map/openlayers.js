@@ -21,8 +21,6 @@ import { NodeJSKernelBackend } from "@tensorflow/tfjs-node/dist/nodejs_kernel_ba
 
 function Openlayers() {
 
-    const [loaded, setLoaded] = useState(false);
-
     const [zoomType, setZoomType] = useState();
     const [actionType, setActionType] = useState('null');
     const [arrSource, setArrSource] = useState(() => { return [] });
@@ -77,31 +75,53 @@ function Openlayers() {
         }
     };
 
-    const cntOfFeatureType = async (featureType, idx) => {
-        //console.log(props);
-        setTotalCnt(totalCnt => totalCnt + 1);
+    const cntOfFeatureType = async (featureType, actionType) => {
+        if(actionType == "insert"){
 
-        if (featureType == 'Geodesic') {
-            setGeodesicCnt(geodesicCnt => geodesicCnt + 1);
+            setTotalCnt(totalCnt => totalCnt + 1);
+
+            if (featureType == 'Geodesic') {
+                setGeodesicCnt(geodesicCnt => geodesicCnt + 1);
+            }
+            else if (featureType == 'Circle') {
+                setCircleCnt(circleCnt => circleCnt + 1);
+            }
+            else if (featureType == 'Polygon') {
+                setPolygonCnt(polygonCnt => polygonCnt + 1);
+            }
+            else if (featureType == 'LineString') {
+                setLineStringCnt(lineStringCnt => lineStringCnt + 1);
+            }
+            else if (featureType == 'Point') {
+                setPointCnt(pointCnt => pointCnt + 1);
+            }
         }
-        else if (featureType == 'Circle') {
-            setCircleCnt(circleCnt => circleCnt + 1);
-        }
-        else if (featureType == 'Polygon') {
-            setPolygonCnt(polygonCnt => polygonCnt + 1);
-        }
-        else if (featureType == 'LineString') {
-            setLineStringCnt(lineStringCnt => lineStringCnt + 1);
-        }
-        else if (featureType == 'Point') {
-            setPointCnt(pointCnt => pointCnt + 1);
+        else if(actionType == "delete"){
+
+            setTotalCnt(totalCnt => totalCnt - 1);
+
+            if (featureType == 'Geodesic') {
+                setGeodesicCnt(geodesicCnt => geodesicCnt - 1);
+            }
+            else if (featureType == 'Circle') {
+                setCircleCnt(circleCnt => circleCnt - 1);
+            }
+            else if (featureType == 'Polygon') {
+                setPolygonCnt(polygonCnt => polygonCnt - 1);
+            }
+            else if (featureType == 'LineString') {
+                setLineStringCnt(lineStringCnt => lineStringCnt - 1);
+            }
+            else if (featureType == 'Point') {
+                setPointCnt(pointCnt => pointCnt - 1);
+            }
         }
     }
 
     /* 저장된 지오메트릭 데이터 불러오기 */
     const callFeature = async (feature) => {
         console.log("FIREBASE 클라우드 DB에 저장된 피쳐를 불러올게요.");
-
+        
         let response = await axios({
             method: 'get',
             url: '/api/geomboardList',
@@ -142,7 +162,7 @@ function Openlayers() {
             featureArr.push(feature);
 
             //지오메트릭 타입별로 카운팅 
-            cntOfFeatureType(geomType, index);
+            cntOfFeatureType(geomType, "insert");
         });
 
         await Promise.all(promises);
@@ -151,7 +171,8 @@ function Openlayers() {
     }
 
     const saveFeature = async (vectorLayer) => {
-        console.log("데이터를 저장 합니다.");
+        console.log("FIREBASE 클라우드 DB에 피쳐 데이터를 저장할게요");
+
         const featureArr = [];
 
         vectorLayer.getSource().forEachFeature(function (feature) {
@@ -180,7 +201,7 @@ function Openlayers() {
                 //console.log("ID : " + cloneFeature.getId()  + "/  INSERT" );
                 cloneFeature.setProperties({ "state": "insert" });
             }
-            else if (cloneFeature.getProperties().state == "delete") {//신규 등록
+            else if (cloneFeature.getProperties().state == "delete") {//삭제
                 //console.log("ID : " + cloneFeature.getId()  + "/  DELETE!" );
                 cloneFeature.setProperties({ "state": "delete" });
             }
@@ -206,30 +227,34 @@ function Openlayers() {
         })
 
         if (response.status == 200) {
-
             console.log("저장완료 Code : " + response.status);
-
-            await setLoaded(true);
-            await callFeature();
             await setInitStatus();
-
+            await callFeature();
         }
     }
 
-    /* 공간 데이터 변경 현황핀 초기화 */
+    /* 공간 데이터 변경 현황판 초기화 */
     const setInitStatus = async (status) => {
 
         setInsertFeatureCnt(0);
         setUpdateActionCnt(0);
         setUpdateFeatureCnt(0);
         setDeleteFeatureCnt(0);
+
+        setCircleCnt(0);
+        setPolygonCnt(0);
+        setPointCnt(0);
+        setLineStringCnt(0);
+        setGeodesicCnt(0);
+        setTotalCnt(0);
     }
 
     /* 공간 데이터 변경 현황핀 업데이트 (1. 추가, 2. 변경 엑션, 3. 변경된 피쳐) */
-    const setRegAndModifyStatus = async (status) => {
+    const setRegAndModifyStatus = async (status, geomType) => {
 
         if (status == "InsertFeature") {
             setInsertFeatureCnt(insertFeatureCnt => insertFeatureCnt + 1);
+            cntOfFeatureType(geomType, "insert");
         }
         else if (status == "UpdateAction") {
             setUpdateActionCnt(updateActionCnt => updateActionCnt + 1);
@@ -240,6 +265,7 @@ function Openlayers() {
         }
         else if (status == "DeleteFeature") {
             setDeleteFeatureCnt(deleteFeatureCnt => deleteFeatureCnt + 1);
+            cntOfFeatureType(geomType, "delete");
         }
         else if (status == "initFeature") {
             setInitStatus();

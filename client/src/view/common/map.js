@@ -72,7 +72,7 @@ const vectorLayer = new VectorLayer({
 
 
 /* START - 셀렉트 객체및 이벤트 생성 */
-// Select 객체 생성
+//Select 객체 생성
 const selected = new Style({
     fill: new Fill({
         color: 'rgba(255, 255, 255, 0.6)'
@@ -83,31 +83,31 @@ const selected = new Style({
     }),
 });
 
-// Select 스타일
+//Select 스타일
 function selectStyle(feature) {
     const color = feature.get('COLOR') || 'rgba(255, 255, 255, 0.6)';
     selected.getFill().setColor(color);
     return selected;
 }
 
-// Single Click 이벤트
+//Single Click 이벤트
 const selectSingleClick = new Select({
     style: selectStyle
 });
 
-// Click 이벤트
+//Click 이벤트
 const selectClick = new Select({
     condition: click,
     style: selectStyle,
 });
 
-// Hover 이벤트
+//Hover 이벤트
 const selectPointerMove = new Select({
     condition: pointerMove,
     style: selectStyle,
 });
 
-// Alt + Click 이벤트
+//Alt + Click 이벤트
 const selectAltClick = new Select({
     style: selectStyle,
     condition: function (mapBrowserEvent) {
@@ -129,7 +129,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
     const [loaded, setLoaded] = useState();
     const [bboxLayer, setBboxLayer] = useState(null);//BBOX 레이어
-    const [parnetActionType, setParnetActionType] = useState(props.actionType || 'null');
+    const [parnetActionType, setParnetActionType] = useState(props.actionType);
     const [mapObj, setMap] = useState();
     const [isDraw, setIsDraw] = useState(false);
     const [view, setView] = useState();
@@ -151,8 +151,9 @@ export const Map = forwardRef((props, forwardedRef) => {
     /* START 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 START  */
     /* 피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달 */
     const sendRegAndModifyStatus = (status, feature) => {
-        
-        console.log(parnetActionType + ' == parnetActionType : ' + props.actionType + ' 부모 컴포넌트의 상황판 : ' + status + "   loaded : " + loaded);
+
+        console.log(parnetActionType + ' == parnetActionType : ' + feature.ol_uid+ ' 부모 컴포넌트의 상황판 : ' + status + "   geomType : " + geomType);
+        let geomType = feature.getProperties().type;//지오메트릭 타입
 
         //소스를 최초 가져왔을때, 소스를 클리어할때 상황판 초기화
         if (props.actionType == 'getSource' || props.actionType == 'clearSource') {
@@ -160,23 +161,23 @@ export const Map = forwardRef((props, forwardedRef) => {
         }
         else {
             if (status == "Insert" && statusArr.includes(feature.ol_uid) == false) {//추가된 공간데이터 현황 업데이트
-                props.setRegAndModifyStatus("InsertFeature").then(function () { });
+                props.setRegAndModifyStatus("InsertFeature", geomType).then(function () { });
             }
             else if (status == "Update") {//변경된 공간데이터 현황 업데이트
                 if (statusArr.includes(feature.ol_uid)) {//1.피쳐 변경 횟수 업데이트
-                    props.setRegAndModifyStatus("UpdateAction").then(function () { });
+                    props.setRegAndModifyStatus("UpdateAction", geomType).then(function () { });
                 } else {//2.피쳐 변경 횟수 + 변경된 피쳐 갯수 업데이트
-                    props.setRegAndModifyStatus("UpdateFeature").then(function () { });
+                    props.setRegAndModifyStatus("UpdateFeature", geomType).then(function () { });
                 }
             }
             else if (status == "Delete") {//삭제된 공간데이터 현황 업데이트
-                props.setRegAndModifyStatus("DeleteFeature").then(function () { });
+                props.setRegAndModifyStatus("DeleteFeature", geomType).then(function () { });
             }
 
-            //변경 삭제된 공간데이터를 배열에 추가 
+            //추가, 변경, 삭제된 공간데이터를 배열에 추가(동일한 피쳐에 대해 중복처리하지 않기위함)
             if (statusArr.includes(feature.ol_uid) == false) {
                 statusArr.push(feature.ol_uid);//수정 리스트 배열에 값이 없을경우 추가
-                setStatusArr(statusArr);//배열에 변경이 있음을 React에게 알림  
+                setStatusArr(statusArr);//배열에 변경이 있음을 React에게 알림
             }
         }
     }
@@ -687,7 +688,6 @@ export const Map = forwardRef((props, forwardedRef) => {
 
                     if (userConfirmed) {
 
-
                         let featureIdToDelete = feature.getId();
 
                         const source = vectorLayer.getSource();
@@ -702,7 +702,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
                             // 프로퍼티 변경
                             featureToDelete.setProperties({ 'state': 'delete' });
-
+                            
                             // 피쳐를 벡터 레이어에서 제거
                             //source.removeFeature(featureToDelete);
 
@@ -902,7 +902,7 @@ export const Map = forwardRef((props, forwardedRef) => {
     return (
         <>
             <Row>
-                <div id="map" value={mapObj} style={{ height: '50rem' }}></div>
+                <div id="map" value={mapObj}></div>
             </Row>
 
             <Row className='my-3'>
@@ -953,7 +953,7 @@ export const Map = forwardRef((props, forwardedRef) => {
                 </ReactBootstrapPopover.Body>
             </ReactBootstrapPopover> 
             */}
-            
+
             <div id="popup"></div>
             <div id="popupMap"></div>
             <div id="selectPopup"></div>
