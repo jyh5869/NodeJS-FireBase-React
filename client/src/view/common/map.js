@@ -127,7 +127,6 @@ export const Map = forwardRef((props, forwardedRef) => {
         handleClick(props.zoomType);
     }
 
-    const [loaded, setLoaded] = useState();
     const [bboxLayer, setBboxLayer] = useState(null);//BBOX 레이어
     const [parnetActionType, setParnetActionType] = useState(props.actionType);
     const [mapObj, setMap] = useState();
@@ -144,9 +143,6 @@ export const Map = forwardRef((props, forwardedRef) => {
             source.clear();
         });
     }
-
-    source.addFeatures(props.arrSource);
-    console.log("지도컴포넌트 호출!");
 
     /* START 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 START  */
     /* 피쳐의 추가나 변경이 발생시 부모 컴포넌트의 상황판에 정보 전달 */
@@ -182,6 +178,15 @@ export const Map = forwardRef((props, forwardedRef) => {
         }
     }
     /* END 자식 컴포넌트에서 부모 컴포넌트로 데이터 전달 END */
+
+    /* USER EFECT 이벤트 리스너 */
+    useEffect(() => {
+        source.addFeatures(props.arrSource);
+        console.log("불러온 피쳐를 세팅합니다.");
+
+        return () => { source.clear(); }//CLEAN-UP
+    }, [props.arrSource]);
+/* USER EFECT 이벤트 리스너 */
 
     /* USER EFECT 이벤트 리스너 */
     useEffect(() => {
@@ -463,7 +468,7 @@ export const Map = forwardRef((props, forwardedRef) => {
 
         drawType = e.target.value;
         setIsDraw(true);
-
+        
         select.set("drawYn", "Y")
     }
 
@@ -500,24 +505,24 @@ export const Map = forwardRef((props, forwardedRef) => {
 
         //피쳐 추가시 Type Propertiy 세팅
         if (drawType == 'Geodesic') {
-            console.log("피쳐추가 Geodesic");
+            //console.log("피쳐추가 Geodesic");
             e.feature.set('realType', 'GeometryCollection');
             e.feature.set('type', 'Geodesic');
         }
         else if (drawType == 'Circle') {
-            console.log("피쳐추가 Circle");
+            //console.log("피쳐추가 Circle");
             e.feature.setProperties({ 'realType': 'Circle', 'type': 'Circle' })
         }
         else if (drawType == 'Polygon') {
-            console.log("피쳐추가 Polygon");
+            //console.log("피쳐추가 Polygon");
             e.feature.setProperties({ 'realType': 'Polygon', 'type': 'Polygon' })
         }
         else if (drawType == 'LineString') {
-            console.log("피쳐추가 LineString");
+            //console.log("피쳐추가 LineString");
             e.feature.setProperties({ 'realType': 'LineString', 'type': 'LineString' })
         }
         else if (drawType == 'Point') {
-            console.log("피쳐추가 Point");
+            //console.log("피쳐추가 Point");
             e.feature.setProperties({ 'realType': 'Point', 'type': 'Point' })
         }
 
@@ -566,7 +571,14 @@ export const Map = forwardRef((props, forwardedRef) => {
             mapObj.render();
         }
 
-        removeInteraction("draw");// Draw Interation 종료
+        /* 20250115 - 할것 : drawType을  react 변수화 시키자
+            1. 피쳐 그리기   -> 그린 후 Draw 인터렉션 제거
+            2. 피쳐 불러오기 -> Draw 인터렉션 초기화 X
+        */
+        if(!drawType == ""){
+            removeInteraction("draw");// Draw Interation 종료
+            drawType = "";
+        }
 
         /*  
             ※ React에서는 한 컴포넌트가 렌더링 중일 때 다른 컴포넌트의 상태를 업데이트하려는 시도를 금지(오류를 일으킴)합니다. ※
